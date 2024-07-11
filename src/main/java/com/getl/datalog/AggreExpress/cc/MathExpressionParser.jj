@@ -1,0 +1,228 @@
+ /**
+ *分析计算公式
+ * Saber
+ */
+ options
+ {
+   IGNORE_CASE=true;//忽略大小写
+   STATIC =false;
+ }
+ 
+PARSER_BEGIN(AggreExpressionParser)
+package com.getl.datalog.math.cc;
+import java.util.ArrayList;
+    public class AggreExpressionParser{
+
+}
+ 
+PARSER_END(AggreExpressionParser)
+ 
+SKIP:
+{
+    <WHITESPACE: (" " | "\t" | "\n" | "\r")+ >
+}
+ 
+TOKEN :
+{
+    //数字
+    < DIGITS : (["0"-"9"])+ > |
+    < NUMBER : <DIGITS> | <DIGITS> "." <DIGITS> | <DIGITS>"." | "."<DIGITS> > |
+    //运算符
+     < PLUS    : "+" > |
+     < MINUS   : "-" > |
+     < MULTIPLIE   : "*" > |
+     < DIVIDE  : "/" >|
+    < OPEN_PAR : "(" > |
+    < CLOSE_PAR: ")" > |
+    < POW_PAR  : "^" > |
+   //函数
+    < MIN    : "min" > |
+    < MAX    : "max" > |
+    < SUM    : "sum" > |
+    //变量
+    <VAR_NAME: ["A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*>|
+    <COMMA: ",">
+ }
+/** 解析表达式 */
+ double parse(Map bindings) :
+{
+  Token t;
+  double  result=0;
+  double  i=0;
+}
+{
+  result = multiplieAndDivide(bindings)
+  (
+    < PLUS >
+    i = multiplieAndDivide(bindings)
+    {
+      result += i;
+    }
+|
+    < MINUS >
+    i = multiplieAndDivide(bindings)
+    {
+      result -= i;
+    }
+  )*
+
+  {
+    return result;
+  }
+}
+
+/**基本运算单元**/
+double primary(Map bindings):
+{
+  Token t;
+  double d;
+  List calList;
+}
+{
+     d=doNumber(bindings)
+     {
+     return d;
+    }
+|
+    calList=calculatorPar(binings)
+    {
+     return calList.get(0);
+    }
+|
+    < MINUS >
+    d=primary(bindings)
+    {
+    return d;
+    }
+| d=doFunction(binings)
+{
+return d;
+}
+}
+
+/**读取数字 乘除算**/
+double  multiplieAndDivide(Map bindings):
+{
+ double  result=0;
+ double   i=0;
+}
+{
+ result=primary(bindings)
+ (
+    < MULTIPLIE >
+    i=primary(bindings)
+    {
+     result*=i;
+    }
+|
+    < DIVIDE >
+    i=primary(bindings)
+       {
+        result/=i;
+       }
+    )*
+     {
+       return result;
+     }
+
+}
+/**函数计算**/
+double doFunction(Map binings):
+{
+  List args;
+  double var = 0;
+}
+{
+  < MAX>  args=calculatorPar(binings)
+  {
+   var = Double.MIN_VALUE;
+    for(double arg : args){
+        var = Math.max(var,arg);
+    }
+    return var;
+}
+| < MIN> args=calculatorPar(binings)
+  {
+   var = Double.MAX_VALUE;
+    for(double arg : args){
+        var = Math.min(var,arg);
+    }
+    return var;
+  }
+| < SUM> args=calculatorPar(binings)
+  {
+   var = 0;
+    for(double arg : args){
+        var+=arg;
+    }
+    return var;
+  }
+}
+
+double doNumber(Map binings):
+{
+  Token t;
+  double d;
+  List calList;
+  double result;
+}
+{
+  result= getNumber(binings)
+  (
+   calList=calculatorPar(binings)
+   {
+    d = calList.get(0);
+    result=d*result;
+   }
+ | d=doFunction(binings)
+ {
+  result=d*result;
+ }
+   )*
+   {
+    return result;
+
+   return result;
+}
+}
+/**
+ * 如果是数字则直接返回数字，否则，是变量则返回变量的次方
+**/
+double getNumber(Map binings):
+{
+      Token t;
+      double result = 1;
+      double var;
+}
+{
+       t = < NUMBER >
+      {
+       result= Double.parseDouble(t.image);
+       return result;
+      }
+ |
+(
+     t = < VAR_NAME>
+     {
+        var = binings.get(t.image);
+        result*=var;
+     }
+)*
+ {return result;}
+}
+
+/*计算圆弧内的表达式*/
+List calculatorPar(Map binings):
+{
+    List ans = new ArrayList();
+    double d;
+}
+{
+    "("
+        d = parse(binings) { ans.add(d); }
+    (
+        <COMMA> d = parse(binings) { ans.add(d); }
+    )*
+    ")"
+    {return ans;}
+}

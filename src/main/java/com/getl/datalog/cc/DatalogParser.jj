@@ -1,0 +1,321 @@
+options{
+
+    STATIC = false;
+    LOOKAHEAD = 2;
+    DEBUG_PARSER = false;
+    ERROR_REPORTING = true;
+}
+
+PARSER_BEGIN(DatalogParser)
+
+package com.getl.datalog.cc;
+
+import com.graph.datalog.DatalogComponent.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+
+public class DatalogParser {
+
+    // additional fields and methods can be added here
+
+    // Sets the source of Variable (and constants) in the rule head for sql 'SELECT' statement
+    static void setVariableSource(Head head, Body body) {
+        List terms = head.expression.terms;
+        for (int i = 0; i < terms.size(); i++) {
+            Term term = (Term)terms.get(i);
+            if (term instanceof Variable) {
+                for (int j = 0; j < body.expressions.size(); j++) {
+                    Expression expression = (Expression)body.expressions.get(j);
+                    boolean variableMatched = false;
+                    for (int k = 0; k < expression.terms.size(); k++) {
+                        Term other = (Term)expression.terms.get(k);
+                        if (other instanceof Variable && other.name.equals(term.name)) {
+                            variableMatched = true;
+                            term.source = expression.alias;
+                            term.index = other.index;
+                            break;
+                        }
+                    }
+                    if (variableMatched) {
+                        break;
+                    }
+                }
+            }else term.source = "'" + term.name + "'";
+        }
+    }
+    // Checks that facts do not contain Variables, else throws error.
+    static boolean factSafetyCheck(Fact fact){
+        for(Term term : fact.expression.terms){
+            if (term instanceof Variable){
+                throw new Error("PARSER ERROR: Fact Safety: Facts CANNOT CONTAIN VARIABLES in the terms of its predicate.");
+            }
+        }
+        return true;
+    }
+
+
+    // Checks that all rule head variable are also present in body
+    static boolean checkSafety(Rule rule) {
+        Set bodyVariables = new HashSet();
+        boolean isGremlin = false;
+        for (int i = 0; i < rule.body.expressions.size(); i++) {
+            for (int j = 0; j < rule.body.expressions.get(i).terms.size(); j++) {
+
+                Term term = rule.body.expressions.get(i).terms.get(j);
+                if (term instanceof Variable) {
+                    bodyVariables.add(term.name);
+                }else if(rule.body.expressions instanceof GremlinBlock){
+                    isGremlin = true;
+                }
+                else {
+                    throw new Error("PARSER ERROR: This implementation DOES NOT SUPPORT CONSTANTS in the body of a rule.");
+                }
+            }
+
+        }
+        for (int i = 0; i < rule.head.expression.terms.size(); i++) {
+
+            Term term = rule.head.expression.terms.get(i);
+            if (term instanceof Variable && !bodyVariables.contains(term.name) && !isGremlin) {
+                System.out.println("Unsafe: Variable " + term.name + " in Rule " + rule.head.expression.predicate);
+                // TODO Make unsafe rule throw fatal error to stop parsing and end engine
+                throw new Error("PARSER ERROR: UnSafe Rule : Head Variable must occur in body of rule."); // Variable in head not found in body
+            }
+            else if (term instanceof Constant){
+                throw new Error("PARSER ERROR: This implementation DOES NOT SUPPORT CONSTANTS in the head of a rule.");
+            }
+        }
+    return true;
+    }
+
+    // Identifies lists all join condition (and constant values) for the 'WHERE' clause of rule sql statement.
+    List identifyJoinConditions(List expressions) {
+        Map variableToExpression = new HashMap();
+        List joinConditions = new ArrayList();
+
+        for (int i = 0; i < expressions.size(); i++) {
+            Expression expression = (Expression)expressions.get(i);
+            for (int j = 0; j < expression.terms.size(); j++) {
+                Term term = expression.terms.get(j);
+
+                if(term instanceof Variable){
+                    List expressionList = variableToExpression.get(term.name);
+                    if (expressionList == null) {
+                        expressionList = new ArrayList();
+                        variableToExpression.put(term.name, expressionList);
+                    }
+                    expressionList.add(new Tuple(expression, j + 1)); // +1 because SQL is 1-indexed
+                }
+                else if(term instanceof Constant){
+                    joinConditions.add(new JoinCondition(term.name, new Tuple(expression, j + 1)));
+                }
+            }
+        }
+
+        for (String variableName : variableToExpression.keySet()) {
+            if (((List)variableToExpression.get(variableName)).size() > 1) {
+                joinConditions.add(new JoinCondition(variableName, variableToExpression.get(variableName)));
+            }
+        }
+
+        return joinConditions;
+    }}}}}}
+
+PARSER_END(DatalogParser)
+
+SKIP:
+{
+    <WHITESPACE: (" " | "\t" | "\n" | "\r")+ >
+}
+
+// Tokens
+TOKEN :
+{
+    <VAR_NAME: ["A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*> |
+    <GREMLIN: "gremlin"> |
+    <PRED_CONST_NAME: ["a"-"z"](["a"-"z","A"-"Z","0"-"9","_"])*> |
+    <GREMLIN_BLOCK: "{"(["a"-"z","A"-"Z","0"-"9",".",",","(",")","_"])*"}"> |
+    <PERIOD: "."> |
+    <COMMA: ",">
+}
+
+Program Program() :
+{
+    List rules = new ArrayList();
+    List facts = new ArrayList();
+    Statement statement;
+}
+{
+    ( statement = Statement()
+        {
+            if (statement instanceof Rule) rules.add((Rule) statement);
+            else if (statement instanceof Fact) facts.add((Fact) statement);
+        }
+    )*
+    { return new Program(rules, facts); }
+}
+
+Statement Statement() :
+{
+    Rule rule;
+    Fact fact;
+}
+{
+    LOOKAHEAD(Expression() ":-" ) rule = Rule() { return rule; }
+    |
+    fact = Fact() { return fact; }
+}
+
+
+Rule Rule() :
+{
+    Head head;
+    Body body;
+    Rule rule = new Rule();
+}
+{
+    head = Head() ":-" body = Body(rule)
+    {
+        rule.head = head;
+        rule.body = body;
+    }
+    <PERIOD>
+    {
+    checkSafety(rule);
+
+    // The 'source' of a head variable is used in SQL SELECT as (predicate.alias).ai
+    //  Where 'alias' is the distinct table name in which the variable first appears
+    // in the body of the rule (e.g table AS table1) and ai is the columnName (a + index) in the SQL table.
+
+    setVariableSource(head, body);
+
+    rule.body.joinConditions = identifyJoinConditions(rule.body.expressions);
+}
+    { return rule; }
+}
+
+Fact Fact() :
+{
+    Expression expression;
+    Fact fact;
+}
+{
+    expression = Expression(null) // No rule for a fact
+    <PERIOD>
+    {
+        fact = new Fact(expression);
+        factSafetyCheck(fact);
+        return fact;
+    }
+}
+
+Head Head() :
+{
+    Expression expression;
+}
+{
+    expression = Expression(null) // No rule for a head
+    { return new Head(expression); }
+}
+
+Body Body(Rule rule) :
+{
+    List expressions = new ArrayList();
+    Expression expression;
+}
+{
+        expression = Expression(rule)
+        { expressions.add(expression); }
+
+    (
+        <COMMA> expression = Expression(rule)
+        { expressions.add(expression); }
+    )*
+
+    { return new Body(expressions); }
+}
+Expression Expression(Rule rule) :
+{
+    Token token;
+    String predicate;
+    List terms = new ArrayList();
+    Token block;
+    Term term;
+    String alias = null;
+}
+{
+    token = <PRED_CONST_NAME>
+    {
+        predicate = token.image;
+        int count = rule != null ? rule.bodyPredicateCounts.getOrDefault(predicate, 0) + 1 : 1;
+        if (rule != null) rule.bodyPredicateCounts.put(predicate, count);
+        alias = predicate + count;
+    }
+    "("
+        term = Term() { term.source = alias; term.index = terms.size() + 1; terms.add(term); }
+    (
+        <COMMA> term = Term() { term.source = alias; term.index = terms.size() + 1; terms.add(term); }
+    )*
+    ")"
+    { return new Expression(predicate, terms, alias); }
+|
+     token = <GREMLIN>
+      { // 新增处理GREMLIN谓词的分支
+         predicate = "gremlin";
+         int count = rule != null ? rule.bodyPredicateCounts.getOrDefault(predicate, 0) + 1 : 1;
+         if (rule != null) rule.bodyPredicateCounts.put(predicate, count);
+         alias = predicate + count;
+         }
+         block = <GREMLIN_BLOCK> {
+         String gremlinBlock = block.image.substring(1,block.image.length()-1);
+         terms.add(term);
+         }
+         "("
+                 term = Term() { term.source = alias; term.index = terms.size() + 1; terms.add(term); }
+             (
+                 <COMMA> term = Term() { term.source = alias; term.index = terms.size() + 1; terms.add(term); }
+             )*
+         ")"
+         {return new GremlinBlock(gremlinBlock, terms, alias);}
+}
+Term Term() :
+{
+    Variable variable;
+    Constant constant;
+}
+{
+    variable = Variable() { return variable; }
+    |
+    constant = Constant() { return constant; }
+}
+Variable Variable() :
+{
+    Token token;
+    String name;
+}
+{
+    token = <VAR_NAME>
+    {
+        name = token.image;
+        return new Variable(name, null, 0); // Source and index to be set later
+    }
+}
+
+Constant Constant() :
+{
+    Token token;
+    String value;
+}
+{
+    token = <PRED_CONST_NAME>
+    {
+        value = token.image;
+        return new Constant(value);
+    }
+}
+
+
