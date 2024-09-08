@@ -2,6 +2,7 @@ package com.getl.io;
 
 import com.getl.converter.TinkerPopConverter;
 import com.getl.converter.async.AsyncPG2UMG;
+import com.getl.model.ug.UnifiedGraph;
 import lombok.Data;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -10,10 +11,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.apache.tinkerpop.gremlin.structure.T;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
 import java.io.FileReader;
@@ -22,9 +20,8 @@ import java.io.Reader;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CountDownLatch;
 
 import static org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.set;
@@ -42,7 +39,7 @@ public class LPGParser {
     }
 
     public void waitAll() throws InterruptedException {
-        latch.wait();
+        latch.await();
     }
 
     public LPGParser() {
@@ -114,7 +111,9 @@ public class LPGParser {
         }).start();
     }
 
-    public void loadVertex(String fileName, String vertexLabel, String... pops) {
+    private List<Element> elementCache = new ArrayList<>(2048);
+
+    public LPGParser loadVertex(String fileName, String vertexLabel, String... pops) {
         System.out.println("READING " + fileName);
         System.out.println(System.currentTimeMillis());
         Map<String, String> popMap = popMap(pops);
@@ -124,6 +123,7 @@ public class LPGParser {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return this;
     }
 
     public void loadVertex(Iterable<CSVRecord> records, String vertexLabel, Map<String, String> popMap) throws IOException {
@@ -150,6 +150,7 @@ public class LPGParser {
                     addV.property(T.id, label + ":" + id);
                 }
                 vertex = addV.next();
+                elementCache.add(vertex);
             }
             for (Map.Entry<String, String> entry : pop.entrySet()) {
                 if (idTitle.equals(entry.getKey()) || "id".equals(entry.getKey())) {
@@ -160,10 +161,19 @@ public class LPGParser {
                     vertex.property(set, entry.getKey(), parseValue(entry.getValue(), type));
                 }
             }
-            if (asyncPG2UMG != null) {
-                asyncPG2UMG.addVertex(vertex);
-            }
+            //if (asyncPG2UMG != null) {
+
+         //   }
         }
+    }
+
+    public void commit2Converter() {
+        List<Element> cache = elementCache;
+        this.elementCache = new ArrayList<>(2048);
+        new Thread(() -> {
+            cache.forEach(asyncPG2UMG::addElement);
+            latch.countDown();
+        }).start();
     }
 
     public void asyncLoadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
@@ -172,7 +182,7 @@ public class LPGParser {
         }).start();
     }
 
-    public void loadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
+    public LPGParser loadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
         System.out.println("READING " + fileName);
         System.out.println(System.currentTimeMillis());
         Map<String, String> popMap = popMap(pops);
@@ -182,6 +192,7 @@ public class LPGParser {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return this;
     }
 
     public void loadEdge(Iterable<CSVRecord> records, String edgeLabel, String from, String to, Map<String, String> popMap) throws IOException {
@@ -190,7 +201,6 @@ public class LPGParser {
         from = fromLabel + ".id";
         to = toLabel + ".id";
         GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
-        int i = 0;
         for (CSVRecord record : records) {
 //            if (i++ >= 3000){break;}
             Map<String, String> pop = record.toMap();
@@ -226,9 +236,9 @@ public class LPGParser {
                 }
             }
             Edge next = addE.next();
-            if (asyncPG2UMG != null) {
-                asyncPG2UMG.addEdge(next);
-            }
+          //  if (asyncPG2UMG != null) {
+                elementCache.add(next);
+          //  }
         }
     }
 }

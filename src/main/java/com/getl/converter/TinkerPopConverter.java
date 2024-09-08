@@ -111,8 +111,7 @@ public class TinkerPopConverter {
     }
 
     Map<Object, Pair> vertexes = new HashMap<>();
-    public void handleElement(AsyncPG2UMG.ElementReference elementReference) {
-        Element element = elementReference.getElement();
+    public void handleElement(Element element) {
         transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes,element);
     }
 }

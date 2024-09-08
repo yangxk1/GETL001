@@ -6,6 +6,7 @@ import com.getl.constant.IRINamespace;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
+import com.getl.util.DebugUtil;
 
 public class PG2UGTest {
 
@@ -28,7 +29,6 @@ public class PG2UGTest {
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "creationDate", LPGParser.DATE, "length", LPGParser.INT);
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_email_emailaddress_0_0.csv", "Person");
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_speaks_language_0_0.csv", "Person");
-
         //EDGE
         lpgParser.loadEdge(BASE_URL_STATIC + "organisation_isLocatedIn_place_0_0.csv", "organisation_isLocatedIn_place", "Organisation", "Place");
         lpgParser.loadEdge(BASE_URL_STATIC + "place_isPartOf_place_0_0.csv", "place_isPartOf_place", "Place", "Place");
@@ -57,9 +57,11 @@ public class PG2UGTest {
 
         System.out.println("load pg end " + (System.currentTimeMillis() - begin));
         System.out.println(System.currentTimeMillis());
-        begin = System.currentTimeMillis();
+//        begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createKVGraphFromTinkerPopGraph();
-//        //GC
+        DebugUtil.DebugInfo("2 UGM end " + (System.currentTimeMillis() - begin));
+        System.out.println(unifiedGraph.getCache().size());
+        //        //GC
 //        lpgParser.setGraph(null);
 //        lpgParser = null;
 //        System.out.println("PG2UGM end " + (System.currentTimeMillis() - begin));
