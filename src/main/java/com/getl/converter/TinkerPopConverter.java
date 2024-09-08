@@ -1,5 +1,6 @@
 package com.getl.converter;
 
+import com.getl.converter.async.AsyncPG2UMG;
 import com.getl.model.ug.*;
 import com.getl.model.RDF.LiteralConverter;
 import com.getl.model.ug.IRI;
@@ -44,12 +45,12 @@ public class TinkerPopConverter {
         //element id -> IRI
         Map<Object, Pair> vertexes = new HashMap<>();
         // Adds statements for the vertices
-        lpgGraph.vertices().forEachRemaining(vertex -> transElementToKVGraphIRI(this.unifiedGraph, this.lpgGraph, vertexes, vertex));
-        lpgGraph.edges().forEachRemaining(edge -> transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, edge));
+        lpgGraph.vertices().forEachRemaining(vertex -> transElementToUGMIRI(this.unifiedGraph, this.lpgGraph, vertexes, vertex));
+        lpgGraph.edges().forEachRemaining(edge -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge));
         return unifiedGraph;
     }
 
-    private Pair transElementToKVGraphIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Element element) {
+    private Pair transElementToUGMIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Element element) {
         if (vertexes.containsKey(element.id())) {
             return vertexes.get(element.id());
         }
@@ -94,10 +95,10 @@ public class TinkerPopConverter {
             Pair outV = vertexes.get(lpgEdge.outVertex().id());
             Pair inV = vertexes.get(lpgEdge.inVertex().id());
             if (outV == null) {
-                outV = transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.outVertex());
+                outV = transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.outVertex());
             }
             if (inV == null) {
-                inV = transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.inVertex());
+                inV = transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.inVertex());
             }
             String label = lpgEdge.label();
             PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
@@ -107,5 +108,11 @@ public class TinkerPopConverter {
             vertexes.put(lpgEdge.id(), pair);
         }
         return pair;
+    }
+
+    Map<Object, Pair> vertexes = new HashMap<>();
+    public void handleElement(AsyncPG2UMG.ElementReference elementReference) {
+        Element element = elementReference.getElement();
+        transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes,element);
     }
 }

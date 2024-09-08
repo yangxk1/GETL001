@@ -1,5 +1,7 @@
 package com.getl.io;
 
+import com.getl.converter.TinkerPopConverter;
+import com.getl.converter.async.AsyncPG2UMG;
 import lombok.Data;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -23,15 +25,33 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.set;
+import static org.javacc.parser.JavaCCGlobals.fileName;
 
 @Data
 public class LPGParser {
     private Graph graph;
+    private AsyncPG2UMG asyncPG2UMG;
+
+    private CountDownLatch latch;
+
+    public void latchSize(int size) {
+        latch = new CountDownLatch(size);
+    }
+
+    public void waitAll() throws InterruptedException {
+        latch.wait();
+    }
 
     public LPGParser() {
         graph = TinkerGraph.open();
+    }
+
+    public LPGParser(TinkerPopConverter tinkerPopConverter) {
+        this();
+        asyncPG2UMG = new AsyncPG2UMG(tinkerPopConverter);
     }
 
     public LPGParser(Graph graph) {
@@ -88,6 +108,12 @@ public class LPGParser {
         }
     }
 
+    public void asyncLoadVertex(String fileName, String vertexLabel, String... pops) {
+        new Thread(() -> {
+            loadVertex(fileName, vertexLabel, pops);
+        }).start();
+    }
+
     public void loadVertex(String fileName, String vertexLabel, String... pops) {
         System.out.println("READING " + fileName);
         System.out.println(System.currentTimeMillis());
@@ -134,7 +160,16 @@ public class LPGParser {
                     vertex.property(set, entry.getKey(), parseValue(entry.getValue(), type));
                 }
             }
+            if (asyncPG2UMG != null) {
+                asyncPG2UMG.addVertex(vertex);
+            }
         }
+    }
+
+    public void asyncLoadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
+        new Thread(() -> {
+            loadEdge(fileName, edgeLabel, from, to, pops);
+        }).start();
     }
 
     public void loadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
@@ -190,7 +225,10 @@ public class LPGParser {
                     addE.property(entry.getKey(), parseValue(entry.getValue(), type));
                 }
             }
-            addE.next();
+            Edge next = addE.next();
+            if (asyncPG2UMG != null) {
+                asyncPG2UMG.addEdge(next);
+            }
         }
     }
 }

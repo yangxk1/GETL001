@@ -1,22 +1,22 @@
-package com.getl.example;
+package com.getl.example.async;
 
-import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
-import com.getl.constant.IRINamespace;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
+import com.getl.util.DebugUtil;
 
-public class PG2UGTest {
+public class AsyncPG2UGTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         System.out.println("BEGIN TO TEST PG2UGM");
         System.out.println(System.currentTimeMillis());
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
-        LPGParser lpgParser = new LPGParser();
+        LPGParser lpgParser = new LPGParser(new TinkerPopConverter(new UnifiedGraph(), null));
         long begin = System.currentTimeMillis();
         String BASE_URL_STATIC = BASE_URL + "static/";
         String BASE_URL_DYNAMIC = BASE_URL + "dynamic/";
+        lpgParser.latchSize(10);
         lpgParser.loadVertex(BASE_URL_STATIC + "organisation_0_0.csv", "Organisation");
         lpgParser.loadVertex(BASE_URL_STATIC + "place_0_0.csv", "Place");
         lpgParser.loadVertex(BASE_URL_STATIC + "tag_0_0.csv", "Tag");
@@ -28,8 +28,9 @@ public class PG2UGTest {
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "creationDate", LPGParser.DATE, "length", LPGParser.INT);
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_email_emailaddress_0_0.csv", "Person");
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_speaks_language_0_0.csv", "Person");
-
+//        lpgParser.waitAll();
         //EDGE
+        lpgParser.latchSize(23);
         lpgParser.loadEdge(BASE_URL_STATIC + "organisation_isLocatedIn_place_0_0.csv", "organisation_isLocatedIn_place", "Organisation", "Place");
         lpgParser.loadEdge(BASE_URL_STATIC + "place_isPartOf_place_0_0.csv", "place_isPartOf_place", "Place", "Place");
         lpgParser.loadEdge(BASE_URL_STATIC + "tag_hasType_tagclass_0_0.csv", "tag_hasType_tagclass", "Tag", "TagClass");
@@ -54,26 +55,10 @@ public class PG2UGTest {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasCreator_person_0_0.csv", "post_hasCreator_person", "Post", "Person");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
+//        lpgParser.waitAll();
+        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        lpgParser.getAsyncPG2UMG().shutdown();
+        DebugUtil.DebugInfo("convert to ugm end" + (System.currentTimeMillis() - begin));
 
-        System.out.println("load pg end " + (System.currentTimeMillis() - begin));
-        System.out.println(System.currentTimeMillis());
-        begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createKVGraphFromTinkerPopGraph();
-//        //GC
-//        lpgParser.setGraph(null);
-//        lpgParser = null;
-//        System.out.println("PG2UGM end " + (System.currentTimeMillis() - begin));
-//        System.out.println(System.currentTimeMillis());
-//        begin = System.currentTimeMillis();
-//        GraphAPI graphAPI = GraphAPI.open();
-//        graphAPI.addKVPairs(unifiedGraph);
-//        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
-//        graphAPI.refreshLPG();
-//        System.out.println("UGM2PG END" + (System.currentTimeMillis() - begin));
-//        System.out.println(System.currentTimeMillis());
-//        System.out.println("Vertex size : " + graphAPI.getGraph().getLpgGraph().getVertices().size());
-//        System.out.println(System.currentTimeMillis());
-//        System.out.println("Edge size : " + graphAPI.getGraph().getLpgGraph().getEdges().size());
-//        System.out.println(System.currentTimeMillis());
     }
 }
