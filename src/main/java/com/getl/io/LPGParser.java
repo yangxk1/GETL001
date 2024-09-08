@@ -31,7 +31,7 @@ import static org.javacc.parser.JavaCCGlobals.fileName;
 public class LPGParser {
     private Graph graph;
     private AsyncPG2UMG asyncPG2UMG;
-
+    private static final int ARRAY_SIZE = 1024 * 4;
     private CountDownLatch latch;
 
     public void latchSize(int size) {
@@ -111,7 +111,7 @@ public class LPGParser {
         }).start();
     }
 
-    private List<Element> elementCache = new ArrayList<>(2048);
+    private List<Element> elementCache = new ArrayList<>(ARRAY_SIZE);
 
     public LPGParser loadVertex(String fileName, String vertexLabel, String... pops) {
         System.out.println("READING " + fileName);
@@ -163,16 +163,19 @@ public class LPGParser {
             }
             //if (asyncPG2UMG != null) {
 
-         //   }
+            //   }
         }
     }
 
     public void commit2Converter() {
         List<Element> cache = elementCache;
-        this.elementCache = new ArrayList<>(2048);
+        this.elementCache = new ArrayList<>(ARRAY_SIZE);
         new Thread(() -> {
-            cache.forEach(asyncPG2UMG::addElement);
-            latch.countDown();
+            try {
+                cache.forEach(asyncPG2UMG::addElement);
+            } finally {
+                latch.countDown();
+            }
         }).start();
     }
 
@@ -236,9 +239,9 @@ public class LPGParser {
                 }
             }
             Edge next = addE.next();
-          //  if (asyncPG2UMG != null) {
-                elementCache.add(next);
-          //  }
+            //  if (asyncPG2UMG != null) {
+            elementCache.add(next);
+            //  }
         }
     }
 }

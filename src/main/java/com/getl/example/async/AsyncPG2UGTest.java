@@ -59,9 +59,9 @@ public class AsyncPG2UGTest {
 //        System.out.println(lpgParser.ids.size());
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        Thread.sleep(1000);
+        DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
-        DebugUtil.DebugInfo("convert to ugm end" + (System.currentTimeMillis() - begin));
+        DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
         System.out.println(lpgParser.getAsyncPG2UMG().getUnifiedGraph().getCache().size());
     }
 }
