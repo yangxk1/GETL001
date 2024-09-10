@@ -4,13 +4,14 @@ import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 public class RMGraph {
     //the schemas of the table
     private Map<String, Schema> schemas = new HashMap<>();
     //id(Primary key) -> line
-    private Map<String, Line> lines = new HashMap<>();
+    private Map<String, Line> lines = new ConcurrentHashMap<>();
     private Schema defaultSchema = new Schema("default_table");
 
     public RMGraph() {

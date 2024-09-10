@@ -18,6 +18,8 @@
 package com.getl.model.RM;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MysqlSessions {
 
@@ -35,7 +37,7 @@ public class MysqlSessions {
         return this.database;
     }
 
-    public ResultSet select(String sql) throws SQLException {
+    public ResultSet select(String sql, ArrayList<Line> lines) throws SQLException {
         System.out.println(sql);
         Statement statement = this.conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         try {
@@ -43,12 +45,19 @@ public class MysqlSessions {
             resultSet.last();//move to last line
             int count = resultSet.getRow();
             resultSet.beforeFirst();//move to start line
+            if (lines != null) {
+                lines.ensureCapacity(count);
+            }
             System.out.println("RESULT COUNT: " + count);
             return resultSet;
         } catch (SQLException e) {
             statement.close();
             throw e;
         }
+    }
+
+    public ResultSet select(String sql) throws SQLException {
+        return select(sql, null);
     }
 
     public void execute(String sql) throws SQLException {

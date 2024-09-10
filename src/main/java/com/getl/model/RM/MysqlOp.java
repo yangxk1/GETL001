@@ -3,6 +3,7 @@ package com.getl.model.RM;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.json.JSONUtil;
+import com.getl.converter.async.AsyncRM2UMG;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.getl.model.ug.UnifiedGraph;
@@ -16,6 +17,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class MysqlOp {
+
+    public static AsyncRM2UMG asyncRM2UMG;
 
     public static void createSchema(MysqlSessions session) {
 
@@ -117,7 +120,7 @@ public class MysqlOp {
         for (String label : multimap.keySet()) {
             Collection<Line> lines = multimap.get(label);
             Schema schema = graph.getSchemas().get(label);
-            if (schema == null){
+            if (schema == null) {
                 continue;
             }
             StringBuilder sqlHead = new StringBuilder();
@@ -256,9 +259,10 @@ public class MysqlOp {
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT * FROM `");
             sql.append(entry.getKey()).append("`");
-//            sql.append("Limit 5000");
+            sql.append("Limit 15000");
             String select = sql.toString();
-            ResultSet resultSet = session.select(select);
+            ArrayList<Line> lines = new ArrayList<>();
+            ResultSet resultSet = session.select(select, lines);
             Schema schema = entry.getValue();
             while (resultSet.next()) {
                 Line line = new Line();
@@ -310,7 +314,17 @@ public class MysqlOp {
                 }
                 line.setValues(values);
                 graph.getLines().put(id, line);
+                lines.add(line);
             }
+            new Thread(() -> {
+                try {
+                    System.out.println(Thread.currentThread().getName() + " " + schema.getTableName() + " " + (schema.isNode() ? "node" : "edge"));
+                    List<Line> cache = lines;
+                    cache.forEach(asyncRM2UMG::addLine);
+                } finally {
+//                    latch.countDown();
+                }
+            }).start();
         }
     }
 

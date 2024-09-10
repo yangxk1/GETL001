@@ -39,27 +39,31 @@ public class RMConverter {
         this.unifiedGraph = new UnifiedGraph();
     }
 
+    private Map<String, Pair> idToPair = new HashMap<>();
+    public void handleLine(Line line){
+        String label = line.getTableName();
+        Schema schema = rmGraph.getSchemas().get(label);
+        Pair pair = trans2Pair(idToPair, line, schema);
+        for (Map.Entry<String, Object> pop : line.getValues().entrySet()) {
+            if (!schema.isNode() && (schema.getIn().equals(pop.getKey()) || schema.getOut().equals(pop.getKey()))) {
+                continue;
+            }
+            if (pop.getKey() == null || pop.getValue() == null) {
+                continue;
+            }
+            ConstantPair constantPair = LiteralConverter.convertToKVGraphLiteral(pop.getValue());
+            IRI popName = unifiedGraph.getOrRegisterPopIRI(pop.getKey());
+            unifiedGraph.add(popName, pair, constantPair);
+        }
+    }
+
 
     /**
      * Adds Relation mode data to the current UG dataset
      */
     public void addRMModelToKVGraph() {
-        Map<String, Pair> idToPair = new HashMap<>();
         for (Line line : rmGraph.getLines().values()) {
-            String label = line.getTableName();
-            Schema schema = rmGraph.getSchemas().get(label);
-            Pair pair = trans2Pair(idToPair, line, schema);
-            for (Map.Entry<String, Object> pop : line.getValues().entrySet()) {
-                if (!schema.isNode() && (schema.getIn().equals(pop.getKey()) || schema.getOut().equals(pop.getKey()))) {
-                    continue;
-                }
-                if (pop.getKey() == null || pop.getValue() == null) {
-                    continue;
-                }
-                ConstantPair constantPair = LiteralConverter.convertToKVGraphLiteral(pop.getValue());
-                IRI popName = unifiedGraph.getOrRegisterPopIRI(pop.getKey());
-                unifiedGraph.add(popName, pair, constantPair);
-            }
+            handleLine(line);
         }
     }
 
