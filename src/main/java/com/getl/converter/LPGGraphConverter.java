@@ -106,7 +106,7 @@ public class LPGGraphConverter {
             valueIRI = LiteralConverter.convertToKVGraphLiteral(value);
         }
         IRI pop = propertiesGraphConfig.getPop(unifiedGraph, element.name);
-        return unifiedGraph.add(pop, elementIRI, valueIRI);
+        return unifiedGraph.add(pop, (BasePair) elementIRI, valueIRI);
     }
 
     private Pair transEdgeToKVGraphIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGEdge lpgEdge) throws ConverterException {
@@ -132,7 +132,7 @@ public class LPGGraphConverter {
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
         String edgeLabel = propertiesGraphConfig.getEdge(lpgEdge.label);
         IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edgeLabel);
-        return unifiedGraph.add(edge, lpgEdge.getId(), outV, inV);
+        return unifiedGraph.add(edge, lpgEdge.getId(), (BasePair) outV, inV);
     }
 
     /**

@@ -36,4 +36,5 @@ public class IRI implements CharSequence {
     public CharSequence subSequence(int start, int end) {
         return (nameSpace + localName).subSequence(start, end);
     }
+
 }

@@ -104,7 +104,7 @@ public class TinkerPopConverter {
             PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
             String edge1 = propertiesGraphConfig.getEdge(label);
             IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edge1);
-            pair = unifiedGraph.add(edge, lpgEdge.id(), outV, inV);
+            pair = unifiedGraph.add(edge, lpgEdge.id(), outV, inV).from();
             vertexes.put(lpgEdge.id(), pair);
         }
         return pair;

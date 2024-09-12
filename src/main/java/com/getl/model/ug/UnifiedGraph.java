@@ -1,15 +1,24 @@
 package com.getl.model.ug;
 
 import com.getl.constant.IRINamespace;
+import com.getl.converter.PropertiesGraphConfig;
 import lombok.Data;
+import org.apache.commons.configuration.Configuration;
+import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Transaction;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Data
-public class UnifiedGraph {
+public class UnifiedGraph implements Graph {
+    public Map<String, PropertiesGraphConfig> lpgConfigs;
     private static volatile AtomicInteger idIncrementer = new AtomicInteger(100);
     private Map<IRI, BasePair> IRIs = new ConcurrentHashMap<>();
     private List<NestedPair> cache = new ArrayList<>();
@@ -39,7 +48,7 @@ public class UnifiedGraph {
         return s2IRI.computeIfAbsent(iri, i -> new IRI(IRINamespace.PROPERTIES_NAMESPACE, iri));
     }
 
-    public IRI getOrRegisterBaseIRI(String namespace,String localName){
+    public IRI getOrRegisterBaseIRI(String namespace, String localName) {
         String url = namespace + localName;
         return s2IRI.computeIfAbsent(url, i -> new IRI(namespace, localName));
     }
@@ -84,7 +93,7 @@ public class UnifiedGraph {
         return pair;
     }
 
-    public NestedPair add(BasePair field, Pair key, Pair value) {
+    public NestedPair add(BasePair field, BasePair key, Pair value) {
         NestedPair pair = new NestedPair(field, key, value);
         addStatement(pair);
         return pair;
@@ -116,5 +125,51 @@ public class UnifiedGraph {
 
     public void write(PrintWriter pw) {
 
+    }
+
+    @Override
+    public Vertex addVertex(Object... keyValues) {
+        return null;
+    }
+
+    @Override
+    public <C extends GraphComputer> C compute(Class<C> graphComputerClass) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override
+    public GraphComputer compute() throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override
+    public Iterator<Vertex> vertices(Object... vertexIds) {
+        Iterator basePairIterator = this.IRIs.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getNameSpace).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
+        return basePairIterator;
+    }
+
+    @Override
+    public Iterator<Edge> edges(Object... edgeIds) {
+        return null;
+    }
+
+    @Override
+    public Transaction tx() {
+        return null;
+    }
+
+    @Override
+    public void close() throws Exception {
+
+    }
+
+    @Override
+    public Variables variables() {
+        return null;
+    }
+
+    @Override
+    public Configuration configuration() {
+        return null;
     }
 }

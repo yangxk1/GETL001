@@ -17,21 +17,48 @@ public class NestedPair implements Pair {
     private final BasePair predicate;
     private final RelationPair relationPair;
 
+
+    @Override
+    public String toString() {
+        return "NestedPair{" +
+                "predicate=" + predicate +
+                ", relationPair=" + relationPair +
+                "}\n";
+    }
+
     public NestedPair(BasePair predicate, Pair key, Pair value) {
+        this(predicate, (BasePair) key, value);
+    }
+
+    public NestedPair(BasePair predicate, BasePair key, Pair value) {
         this.relationPair = new RelationPair(key, value);
         this.predicate = predicate;
+        key.getRelations().add(this);
+        predicate.setContent(this);
     }
 
     public NestedPair(IRI predicateLabel, Pair key, Pair value) {
+        this(predicateLabel, (BasePair) key, value);
+    }
+
+    public NestedPair(IRI predicateLabel, BasePair key, Pair value) {
         this.relationPair = new RelationPair(key, value);
         IRI iri = new IRI(IRINamespace.IRI_NAMESPACE, "AUTO:" + getNextID());
         this.predicate = new BasePair(Set.of(predicateLabel), iri);
+        key.getRelations().add(this);
+        predicate.setContent(this);
     }
 
     public NestedPair(IRI predicateLabel, Object id, Pair key, Pair value) {
+        this(predicateLabel, id, (BasePair) key, value);
+    }
+
+    public NestedPair(IRI predicateLabel, Object id, BasePair key, Pair value) {
         this.relationPair = new RelationPair(key, value);
         IRI iri = new IRI(IRINamespace.IRI_NAMESPACE, id.toString());
         this.predicate = new BasePair(Set.of(predicateLabel), iri);
+        key.getRelations().add(this);
+        predicate.setContent(this);
     }
 
     @Override
@@ -56,10 +83,10 @@ public class NestedPair implements Pair {
 
     public static class RelationPair implements Pair {
 
-        private final Pair from;
+        private final BasePair from;
         private final Pair to;
 
-        public RelationPair(Pair from, Pair to) {
+        public RelationPair(BasePair from, Pair to) {
             this.from = from;
             this.to = to;
         }
