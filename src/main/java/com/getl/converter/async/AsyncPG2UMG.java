@@ -1,6 +1,7 @@
 package com.getl.converter.async;
 
 import com.getl.converter.TinkerPopConverter;
+import com.getl.model.LPG.LPGVertex;
 import com.getl.model.ug.UnifiedGraph;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
@@ -12,10 +13,42 @@ import lombok.Data;
 import lombok.Getter;
 import org.apache.tinkerpop.gremlin.structure.*;
 
+import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class AsyncPG2UMG {
+    class EventElement implements Element {
+        @Override
+        public Object id() {
+            return null;
+        }
+
+        @Override
+        public String label() {
+            return "";
+        }
+
+        @Override
+        public Graph graph() {
+            return null;
+        }
+
+        @Override
+        public <V> Property<V> property(String key, V value) {
+            return null;
+        }
+
+        @Override
+        public void remove() {
+
+        }
+
+        @Override
+        public <V> Iterator<? extends Property<V>> properties(String... propertyKeys) {
+            return null;
+        }
+    }
     @Data
     public class ElementReference {
         private Element element;
@@ -28,7 +61,13 @@ public class AsyncPG2UMG {
     @Getter
     private TinkerPopConverter tinkerPopConverter;
 
+    private volatile boolean stopped;
+
     public void shutdown() {
+        addElement(new EventElement());
+        while (!stopped) {
+            Thread.onSpinWait();
+        }
         disruptor.shutdown();
     }
 
@@ -38,7 +77,12 @@ public class AsyncPG2UMG {
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         EventFactory<ElementReference> factory = ElementReference::new;
         EventHandler<ElementReference> handler = (element, sequence, endOfBatch) -> {
-            tinkerPopConverter.handleElement(element.element);
+            Element element1 = element.element;
+            if (element1 instanceof EventElement) {
+                this.stopped = true;
+                return;
+            }
+            tinkerPopConverter.handleElement(element1);
         };
         BlockingWaitStrategy strategy = new BlockingWaitStrategy();
         int bufferSize = 1024 * 1024;

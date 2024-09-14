@@ -3,9 +3,9 @@ package com.getl.model.ug;
 public class IRI implements CharSequence {
 
     private final String nameSpace;
-    private final String localName;
+    private final Object localName;
 
-    public IRI(String nameSpace, String localName) {
+    public IRI(String nameSpace, Object localName) {
         this.nameSpace = nameSpace;
         this.localName = localName;
     }
@@ -15,8 +15,9 @@ public class IRI implements CharSequence {
     }
 
     public String getLocalName() {
-        return localName;
+        return localName.toString();
     }
+    public Object getLocalID() {return this.localName;}
 
     public String toString() {
         return nameSpace + localName;
@@ -24,7 +25,7 @@ public class IRI implements CharSequence {
 
     @Override
     public int length() {
-        return nameSpace.length() + localName.length();
+        return nameSpace.length() + localName.toString().length();
     }
 
     @Override

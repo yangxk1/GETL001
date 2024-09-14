@@ -97,7 +97,7 @@ public class NestedPair implements Pair {
         }
 
         @Override
-        public Pair from() {
+        public BasePair from() {
             return this.from;
         }
 

@@ -1,10 +1,21 @@
 package com.getl.example.async;
 
 import com.getl.constant.CommonConstant;
+import com.getl.constant.IRINamespace;
+import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.io.LPGParser;
+import com.getl.model.LPG.LPGGraph;
+import com.getl.model.ug.BasePair;
+import com.getl.model.ug.IRI;
+import com.getl.model.ug.NestedPair;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
+import org.apache.tinkerpop.gremlin.structure.T;
+
+import java.util.HashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AsyncPG2UGTest {
 
@@ -60,9 +71,29 @@ public class AsyncPG2UGTest {
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
         DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        System.out.println("pg count:" + lpgParser.getGraph().traversal().V().count().next());
+        System.out.println(lpgParser.getGraph().traversal().E().count().next());
+        Set<Object> set1 = lpgParser.getGraph().traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
+        System.out.println(set1.size());
         lpgParser.getAsyncPG2UMG().shutdown();
         DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
-        System.out.println(lpgParser.getAsyncPG2UMG().getUnifiedGraph().getCache().size());
-        System.out.println(lpgParser.getAsyncPG2UMG().getUnifiedGraph().traversal().V().outE().outV().outE().limit(100).toList());
+        UnifiedGraph unifiedGraph = lpgParser.getAsyncPG2UMG().getUnifiedGraph();
+        System.out.println("ugm edge count:" + unifiedGraph.getCache().stream().map(NestedPair::from).filter(basePair -> basePair.getLabels().stream().findFirst().map(IRI::getNameSpace).orElse("").equals(IRINamespace.EDGE_NAMESPACE)).map(BasePair::getValueIRI).map(IRI::getLocalName).collect(Collectors.toSet()).size());
+        lpgParser.setGraph(null);
+        lpgParser.setAsyncPG2UMG(null);
+        lpgParser = null;
+        Runtime.getRuntime().gc();
+        System.out.println("pg count:" + unifiedGraph.traversal().V().count().next());
+        System.out.println(unifiedGraph.getCache().size());
+        System.out.println(unifiedGraph.traversal().V().outE().outV().outE().dedup().limit(100).toList());
+        LPGGraph lpgGraphByKVGraph = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByKVGraph();
+        System.out.println(lpgGraphByKVGraph.getVertices().size());
+        System.out.println(lpgGraphByKVGraph.getEdges().size());
+        Set<String> set2 = lpgGraphByKVGraph.traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
+        set1.removeAll(set2);
+        System.out.println(set1);
+        System.out.println();
+
+
     }
 }

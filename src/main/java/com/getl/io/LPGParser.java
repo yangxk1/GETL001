@@ -4,6 +4,7 @@ import com.getl.converter.TinkerPopConverter;
 import com.getl.converter.async.AsyncPG2UMG;
 import com.getl.model.ug.UnifiedGraph;
 import lombok.Data;
+import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +30,7 @@ import static org.javacc.parser.JavaCCGlobals.fileName;
 
 @Data
 public class LPGParser {
+    @Setter
     private Graph graph;
     private AsyncPG2UMG asyncPG2UMG;
     private static final int ARRAY_SIZE = 1024 * 4;

@@ -155,26 +155,16 @@ public class LPGGraphConverter {
         LPGElement out = null;
         Object in = null;
         //relation out -> in
-        //outV is node
-        if (nestedPair.to().from() instanceof BasePair) {
-            out = handleVertex((BasePair) nestedPair.to().from());
-        }
-        //outV is edge or property
-        else if (nestedPair.to().from() instanceof NestedPair) {
-            out = handlePair((NestedPair) nestedPair.to().from());
-        }
+        //outV is node ro edge
+        out = handleElement(nestedPair.to().from());
         //inV is constant
         if (nestedPair.to().to() instanceof ConstantPair) {
             ConstantPair inL = (ConstantPair) nestedPair.to().to();
             in = inL.to();
         }
-        //inV is node
+        //inV is node or edge
         else if (nestedPair.to().to() instanceof BasePair) {
-            in = handleVertex((BasePair) nestedPair.to().to());
-        }
-        //inV is edge
-        else if (nestedPair.to().to() instanceof NestedPair) {
-            in = handlePair((NestedPair) nestedPair.to().to());
+            in = handleElement((BasePair) nestedPair.to().to());
         }
         BasePair predicate = nestedPair.from();
         //edges and properties only have one label
@@ -225,19 +215,23 @@ public class LPGGraphConverter {
         }
     }
 
-    public LPGElement handleVertex(BasePair labelPair) {
-        LPGElement element = elementCache.get(labelPair.to().getLocalName());
+    public LPGElement handleElement(BasePair basePair) {
+        if (basePair.getContent() != null) {
+            //edge or property
+            return handlePair(basePair.getContent());
+        }
+        LPGElement element = elementCache.get(basePair.to().getLocalName());
         if (element == null) {
             LPGVertex vertex = new LPGVertex(lpgGraph);
             element = vertex;
-            for (IRI label : labelPair.from()) {
+            for (IRI label : basePair.from()) {
                 String labelStr = label.getLocalName();
                 PropertiesGraphConfig propertiesGraphConfig = Optional.of(labelStr).map(lpgConfigs::get).orElse(defaultConfig);
                 vertex.addLabel(propertiesGraphConfig.mapLabel(label));
             }
-            element.setId(labelPair.to().getLocalName());
+            element.setId(basePair.to().getLocalName());
             lpgGraph.addVertex(vertex);
-            elementCache.put(labelPair.to().getLocalName(), element);
+            elementCache.put(basePair.to().getLocalName(), element);
         }
         return element;
     }
