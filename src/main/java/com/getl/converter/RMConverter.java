@@ -40,7 +40,8 @@ public class RMConverter {
     }
 
     private Map<String, Pair> idToPair = new HashMap<>();
-    public void handleLine(Line line){
+
+    public void handleLine(Line line) {
         String label = line.getTableName();
         Schema schema = rmGraph.getSchemas().get(label);
         Pair pair = trans2Pair(idToPair, line, schema);
@@ -106,22 +107,51 @@ public class RMConverter {
             Pair outIRI = trans2Pair(idToPair, out, outSM);
             Pair inIRI = trans2Pair(idToPair, in, inSM);
             pair = unifiedGraph.add(edgeLabel, line.getId(), outIRI, inIRI);
+            pair = ((NestedPair) pair).from();
         }
         idToPair.put(line.getId(), pair);
         return pair;
     }
 
     public void addKVGraphToRMModel() {
+        for (BasePair basePair : unifiedGraph.getIRIs().values()) {
+            handleBasePair(basePair);
+        }
         for (NestedPair nestedPair : unifiedGraph.getPairs()) {
             handleLine(nestedPair);
         }
     }
 
-    private Line handleLine(NestedPair nestedPair) {
+    private Line handleBasePair(BasePair basePair) {
         Line line = null;
+        if (basePair.getContent() == null) {
+            line = rmGraph.getLines().get(basePair.to().getLocalName());
+            if (line == null) {
+                line = new Line();
+                line.setId(basePair.to().getLocalName());
+                Iterator<IRI> iterator = basePair.from().iterator();
+                String tableName = iterator.hasNext() ? iterator.next().getLocalName() : "default_table";
+                line.setTableName(tableName);
+                rmGraph.getLines().put(line.getId(), line);
+            }
+        }
+        //subject is nestedPair
+        else {
+            line = handleLine(basePair.getContent());
+        }
+        return line;
+    }
+
+    private Line handleLine(NestedPair nestedPair) {
+        Line line = rmGraph.getLines().get(nestedPair.getID());
+        if (line != null) {
+            return line;
+        }
+        //subject is node
         String label = nestedPair.from().from().iterator().next().getLocalName();
         Pair inPair = nestedPair.to().to();
-        Pair outPair = nestedPair.to().from();
+        BasePair outPair = nestedPair.to().from();
+        Line out = handleBasePair(outPair);
         //edge
         if (rmGraph.getSchemas().containsKey(label)) {
             Schema schema = rmGraph.getSchemas().get(label);
@@ -135,14 +165,11 @@ public class RMConverter {
                 line.setTableName(label);
                 rmGraph.getLines().put(line.getId(), line);
             }
-            String out = outPair instanceof NestedPair ? ((NestedPair) outPair).getID()
-                    : ((BasePair) outPair).to().getLocalName();
-            line.addValue(schema.getOut(), out);
+            String outID = out.getId();
+            line.addValue(schema.getOut(), outID);
             Object in = null;
-            if (inPair instanceof NestedPair) {
-                in = ((NestedPair) inPair).getID();
-            } else if (inPair instanceof BasePair) {
-                in = ((BasePair) inPair).to().getLocalName();
+            if (inPair instanceof BasePair) {
+                in = handleBasePair((BasePair) inPair);
             } else {
                 //ConstantPair
                 in = inPair.to();
@@ -151,33 +178,14 @@ public class RMConverter {
             return line;
         }
         //property
-        //subject is node
-        if (outPair instanceof BasePair) {
-            BasePair basePair = (BasePair) outPair;
-            line = rmGraph.getLines().get(basePair.to().getLocalName());
-            if (line == null) {
-                line = new Line();
-                line.setId(basePair.to().getLocalName());
-                Iterator<IRI> iterator = basePair.from().iterator();
-                String tableName = iterator.hasNext() ? iterator.next().getLocalName() : "default_table";
-                line.setTableName(tableName);
-                rmGraph.getLines().put(line.getId(), line);
-            }
-        }
-        //subject is nestedPair
-        if (outPair instanceof NestedPair) {
-            line = handleLine((NestedPair) outPair);
-        }
         Object value = null;
         if (inPair instanceof ConstantPair) {
             ConstantPair in = (ConstantPair) inPair;
             value = in.to();
         } else if (inPair instanceof BasePair) {
-            value = ((BasePair) inPair).to().getLocalName();
-        } else if (inPair instanceof NestedPair) {
-            value = ((NestedPair) inPair).getID();
+            value = handleBasePair((BasePair) inPair).getId();
         }
-        line.addValue(label, value);
-        return line;
+        out.addValue(label, value);
+        return out;
     }
 }

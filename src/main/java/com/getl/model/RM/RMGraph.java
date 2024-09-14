@@ -17,8 +17,9 @@ public class RMGraph {
     public RMGraph() {
     }
 
-    public void setSchemas(Map<String, Schema> schemas) {
+    public RMGraph setSchemas(Map<String, Schema> schemas) {
         this.schemas.putAll(schemas);
+        return this;
     }
 
     public void addSchema(Schema schema) {

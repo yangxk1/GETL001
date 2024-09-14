@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class AsyncRM2UMG {
+    class EventLine extends Line{}
     @Data
     public class LineReference {
         private Line line;
@@ -29,8 +30,13 @@ public class AsyncRM2UMG {
     private final Disruptor<LineReference> disruptor;
     @Getter
     private RMConverter rmConverter;
+    private volatile boolean stop;
 
     public void shutdown() {
+        addLine(new EventLine());
+        while (!stop) {
+            Thread.onSpinWait();
+        }
         disruptor.shutdown();
     }
 
@@ -40,7 +46,12 @@ public class AsyncRM2UMG {
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         EventFactory<LineReference> factory = LineReference::new;
         EventHandler<LineReference> handler = (lineReference, sequence, endOfBatch) -> {
-            rmConverter.handleLine(lineReference.line);
+            Line line = lineReference.line;
+            if (line instanceof EventLine) {
+                stop = true;
+                return;
+            }
+            rmConverter.handleLine(line);
         };
         BlockingWaitStrategy strategy = new BlockingWaitStrategy();
         int bufferSize = 1024 * 1024;
