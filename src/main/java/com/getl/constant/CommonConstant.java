@@ -6,5 +6,5 @@ public class CommonConstant {
     public static final String JDBC_USERNAME = "root";
     public static final String JDBC_PASSWORD = "hbulis123!";
     public static final String LPG_FILES_BASE_URL = "/usr/local/graphdata/social_network-csv_basic-sf0.1/";
-    public static final String RDF_FILES_BASE_URL = "";
+    public static final String RDF_FILES_BASE_URL = "/usr/local/graphdata/mapping_en_cp.ttl";
 }

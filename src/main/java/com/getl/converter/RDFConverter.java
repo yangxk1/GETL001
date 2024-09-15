@@ -56,21 +56,18 @@ public class RDFConverter {
 
         Map<Statement, NestedPair> rdfToOGStatement = new HashMap<>();
 
-        // Iterate over all RDF statements, create either property or relationship statements in OG.
         for (Statement rdfStatement : rdfData) {
-            // Create a copy of the statement without its context/graph.
             Statement rdfStatementNoCTX = SimpleValueFactory.getInstance().createStatement(rdfStatement.getSubject(),
                     rdfStatement.getPredicate(), rdfStatement.getObject());
 
-            // Either obtain an existing OG statement or create a new one.
-            NestedPair ogStatement = rdfToOGStatement.get(rdfStatementNoCTX);
-            if (ogStatement == null) {
-                ogStatement = this.createPairFromRDFStatement(rdfStatementNoCTX);
-                if (ogStatement == null) {
+            NestedPair nestedPair = rdfToOGStatement.get(rdfStatementNoCTX);
+            if (nestedPair == null) {
+                nestedPair = this.createPairFromRDFStatement(rdfStatementNoCTX);
+                if (nestedPair == null) {
                     continue;
                 }
-                this.unifiedGraph.addStatement(ogStatement);
-                rdfToOGStatement.put(rdfStatementNoCTX, ogStatement);
+//                this.unifiedGraph.addStatement(nestedPair);
+                rdfToOGStatement.put(rdfStatementNoCTX, nestedPair);
             }
         }
     }
@@ -88,7 +85,7 @@ public class RDFConverter {
             com.getl.model.ug.IRI objectSN;
             assert subject instanceof IRI && object instanceof IRI;
             subjectSN = this.createOrObtainSimpleNode(subject);
-            objectSN = this.createOrObtainLabelNode(object);
+            objectSN = this.createOrObtainLabelNode((IRI) object);
             this.unifiedGraph.addLabel(subjectSN, objectSN);
             return null;
         }
@@ -179,13 +176,12 @@ public class RDFConverter {
         com.getl.model.ug.IRI field = fields.iterator().next();
         predicate = Optional.of(SimpleValueFactory.getInstance().createIRI(field.getNameSpace(), field.getLocalName()));
         //subject
-        Pair key = nestedPair.to().from();
-        if (key instanceof NestedPair) {
-            subject = Optional.of(createStatementIRI((NestedPair) key, rdf, resolvedStatement));
+        BasePair key = nestedPair.to().from();
+        if (key.getContent() != null) {
+            subject = Optional.of(createStatementIRI(key.getContent(), rdf, resolvedStatement));
         } else {
-            BasePair basePair = (BasePair) key;
-            addType(rdf, basePair);
-            subject = createNode(basePair);
+            addType(rdf, key);
+            subject = createNode(key);
         }
         //object
         Pair value = nestedPair.to().to();
@@ -199,13 +195,14 @@ public class RDFConverter {
             statement = createRDFStatement(subject.get(), predicate.get(), LiteralObject);
             resolvedStatement.put(nestedPair.getID(), statement);
             return Optional.of(statement);
-        }
-        if (value instanceof NestedPair) {
-            object = Optional.of(createStatementIRI((NestedPair) value, rdf, resolvedStatement));
         } else {
             BasePair basePair = (BasePair) value;
-            addType(rdf, basePair);
-            object = createNode(basePair);
+            if (basePair.getContent() != null) {
+                object = Optional.of(createStatementIRI(basePair.getContent(), rdf, resolvedStatement));
+            } else {
+                addType(rdf, basePair);
+                object = createNode(basePair);
+            }
         }
         if (subject.isEmpty() || object.isEmpty()) {
             return Optional.empty();
@@ -247,7 +244,7 @@ public class RDFConverter {
         return unifiedGraph.getOrRegisterBasePair(predicate.stringValue());
     }
 
-    public com.getl.model.ug.IRI createOrObtainLabelNode(Value object) {
-        return unifiedGraph.getOrRegisterLabel(object.stringValue());
+    public com.getl.model.ug.IRI createOrObtainLabelNode(IRI object) {
+        return unifiedGraph.getOrRegisterLabel(object.getNamespace(),object.getLocalName());
     }
 }

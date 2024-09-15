@@ -61,7 +61,7 @@ public class PG2UGTest {
         UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("2 UGM end " + (System.currentTimeMillis() - begin));
         System.out.println(unifiedGraph.getCache().size());
-                //GC
+        //GC
         lpgParser.setGraph(null);
         lpgParser = null;
         System.out.println("PG2UGM end " + (System.currentTimeMillis() - begin));

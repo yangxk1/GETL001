@@ -9,6 +9,9 @@ import com.getl.util.DebugUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class RDF2UGTest {
@@ -28,6 +31,7 @@ public class RDF2UGTest {
             throw new RuntimeException(e);
         }
         DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        System.out.println(graph.getRdfModel().size());
         begin = System.currentTimeMillis();
         graph.handleRDFModel();
         DebugUtil.DebugInfo("RDF 2 URG END " + (System.currentTimeMillis() - begin));
