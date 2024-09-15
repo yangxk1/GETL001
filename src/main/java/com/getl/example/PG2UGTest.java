@@ -58,24 +58,24 @@ public class PG2UGTest {
         System.out.println("load pg end " + (System.currentTimeMillis() - begin));
         System.out.println(System.currentTimeMillis());
 //        begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createKVGraphFromTinkerPopGraph();
+        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("2 UGM end " + (System.currentTimeMillis() - begin));
         System.out.println(unifiedGraph.getCache().size());
-        //        //GC
-//        lpgParser.setGraph(null);
-//        lpgParser = null;
-//        System.out.println("PG2UGM end " + (System.currentTimeMillis() - begin));
-//        System.out.println(System.currentTimeMillis());
-//        begin = System.currentTimeMillis();
-//        GraphAPI graphAPI = GraphAPI.open();
-//        graphAPI.addKVPairs(unifiedGraph);
-//        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
-//        graphAPI.refreshLPG();
-//        System.out.println("UGM2PG END" + (System.currentTimeMillis() - begin));
-//        System.out.println(System.currentTimeMillis());
-//        System.out.println("Vertex size : " + graphAPI.getGraph().getLpgGraph().getVertices().size());
-//        System.out.println(System.currentTimeMillis());
-//        System.out.println("Edge size : " + graphAPI.getGraph().getLpgGraph().getEdges().size());
-//        System.out.println(System.currentTimeMillis());
+                //GC
+        lpgParser.setGraph(null);
+        lpgParser = null;
+        System.out.println("PG2UGM end " + (System.currentTimeMillis() - begin));
+        System.out.println(System.currentTimeMillis());
+        begin = System.currentTimeMillis();
+        GraphAPI graphAPI = GraphAPI.open();
+        graphAPI.addUGMPairs(unifiedGraph);
+        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+        graphAPI.refreshLPG();
+        System.out.println("UGM2PG END" + (System.currentTimeMillis() - begin));
+        System.out.println(System.currentTimeMillis());
+        System.out.println("Vertex size : " + graphAPI.getGraph().getLpgGraph().getVertices().size());
+        System.out.println(System.currentTimeMillis());
+        System.out.println("Edge size : " + graphAPI.getGraph().getLpgGraph().getEdges().size());
+        System.out.println(System.currentTimeMillis());
     }
 }

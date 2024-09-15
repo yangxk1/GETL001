@@ -97,7 +97,7 @@ public class RDFConverter {
 
         if (object instanceof Literal) {
             Literal objLit = (Literal) object;
-            return this.unifiedGraph.add(predicateSN, subjectSN, LiteralConverter.convertToKVLiteral(objLit));
+            return this.unifiedGraph.add(predicateSN, subjectSN, LiteralConverter.convertToUGMLiteral(objLit));
         }
         Pair objectSN;
         if (object instanceof IRI) {

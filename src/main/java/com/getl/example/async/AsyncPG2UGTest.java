@@ -11,7 +11,6 @@ import com.getl.model.ug.IRI;
 import com.getl.model.ug.NestedPair;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
-import org.apache.tinkerpop.gremlin.structure.T;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -86,10 +85,10 @@ public class AsyncPG2UGTest {
         System.out.println("pg count:" + unifiedGraph.traversal().V().count().next());
         System.out.println(unifiedGraph.getCache().size());
         System.out.println(unifiedGraph.traversal().V().outE().outV().outE().dedup().limit(100).toList());
-        LPGGraph lpgGraphByKVGraph = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByKVGraph();
-        System.out.println(lpgGraphByKVGraph.getVertices().size());
-        System.out.println(lpgGraphByKVGraph.getEdges().size());
-        Set<String> set2 = lpgGraphByKVGraph.traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
+        LPGGraph lpgGraphByUGM = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByUGM();
+        System.out.println(lpgGraphByUGM.getVertices().size());
+        System.out.println(lpgGraphByUGM.getEdges().size());
+        Set<String> set2 = lpgGraphByUGM.traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
         set1.removeAll(set2);
         System.out.println(set1);
         System.out.println();

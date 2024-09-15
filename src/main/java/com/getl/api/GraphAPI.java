@@ -83,12 +83,12 @@ public class GraphAPI {
         return LPGSuperVertexBuilder.getLPGSuperVertexBuilder(graph);
     }
 
-    public void addKVPairs(UnifiedGraph sourceUnifiedGraph) {
+    public void addUGMPairs(UnifiedGraph sourceUnifiedGraph) {
         UnifiedGraph targetUnifiedGraph = graph.getUnifiedGraph();
         targetUnifiedGraph.merge(sourceUnifiedGraph);
     }
 
-    public void setKvGraph(UnifiedGraph unifiedGraph) {
+    public void setUGMGraph(UnifiedGraph unifiedGraph) {
         this.graph.setUnifiedGraph(unifiedGraph);
     }
 }

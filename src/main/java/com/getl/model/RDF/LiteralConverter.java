@@ -48,7 +48,7 @@ public class LiteralConverter {
      * @param o The Object to create a literal for.
      * @return the created literal.
      */
-    public static ConstantPair convertToKVGraphLiteral(Object o) {
+    public static ConstantPair convertToUGMLiteral(Object o) {
         if (o instanceof ConstantPair) {
             return (ConstantPair) o;
         } else if (o instanceof Byte) {
@@ -76,7 +76,7 @@ public class LiteralConverter {
      * @param l The literal to convert, language tag is ignored.
      * @return Object: (Byte, Short, Integer, Long, Float, Double, Date or String)
      */
-    public static ConstantPair convertToKVLiteral(Literal l) {
+    public static ConstantPair convertToUGMLiteral(Literal l) {
         if (l.getDatatype().equals(XMLSchema.BYTE)) {
             return getOrCreateConstantPair(ConstantPair.LiteralType.BYTE.getType(), l.byteValue());
         } else if (l.getDatatype().equals(XMLSchema.SHORT)) {

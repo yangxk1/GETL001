@@ -25,17 +25,17 @@ public class RM2UGTest {
         System.out.println("Line Size" + rmGraph.getLines().size());
         UnifiedGraph unifiedGraph = new UnifiedGraph();
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addRMModelToKVGraph();
+        rmConverter.addRMModelToUGM();
         long t2 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
-        System.out.println("==========RM 2 kv END [" + t2 + "]=========");
+        System.out.println("==========RM 2 ugm END [" + t2 + "]=========");
         //GC
         Map<String, Schema> schemas = rmGraph.getSchemas();
         rmGraph = new RMGraph();
         rmGraph.setSchemas(schemas);
         unifiedGraph.gc();
         rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addKVGraphToRMModel();
+        rmConverter.addUGMToRMModel();
         long t3 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
         System.out.println("==========Convert to RM END [" + t3 + "]=========");

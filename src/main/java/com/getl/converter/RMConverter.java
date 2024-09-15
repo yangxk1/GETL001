@@ -52,7 +52,7 @@ public class RMConverter {
             if (pop.getKey() == null || pop.getValue() == null) {
                 continue;
             }
-            ConstantPair constantPair = LiteralConverter.convertToKVGraphLiteral(pop.getValue());
+            ConstantPair constantPair = LiteralConverter.convertToUGMLiteral(pop.getValue());
             IRI popName = unifiedGraph.getOrRegisterPopIRI(pop.getKey());
             unifiedGraph.add(popName, pair, constantPair);
         }
@@ -62,7 +62,7 @@ public class RMConverter {
     /**
      * Adds Relation mode data to the current UG dataset
      */
-    public void addRMModelToKVGraph() {
+    public void addRMModelToUGM() {
         for (Line line : rmGraph.getLines().values()) {
             handleLine(line);
         }
@@ -113,7 +113,7 @@ public class RMConverter {
         return pair;
     }
 
-    public void addKVGraphToRMModel() {
+    public void addUGMToRMModel() {
         for (BasePair basePair : unifiedGraph.getIRIs().values()) {
             handleBasePair(basePair);
         }
@@ -169,7 +169,7 @@ public class RMConverter {
             line.addValue(schema.getOut(), outID);
             Object in = null;
             if (inPair instanceof BasePair) {
-                in = handleBasePair((BasePair) inPair);
+                in = handleBasePair((BasePair) inPair).getId();
             } else {
                 //ConstantPair
                 in = inPair.to();

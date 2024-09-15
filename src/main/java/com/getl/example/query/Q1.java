@@ -23,10 +23,10 @@ public class Q1 {
         begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = new UnifiedGraph();
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addRMModelToKVGraph();
+        rmConverter.addRMModelToUGM();
         unifiedGraph = rmConverter.unifiedGraph;
         DebugUtil.DebugInfo("RM2UGM " + (System.currentTimeMillis() - begin));
-        System.out.println("kvPairs: " + unifiedGraph.getCache().size());
+        System.out.println("Pairs: " + unifiedGraph.getCache().size());
         begin = System.currentTimeMillis();
         rmGraph = null;
         rmConverter = null;

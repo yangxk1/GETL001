@@ -1,6 +1,5 @@
 package com.getl.converter;
 
-import com.getl.converter.async.AsyncPG2UMG;
 import com.getl.model.ug.*;
 import com.getl.model.RDF.LiteralConverter;
 import com.getl.model.ug.IRI;
@@ -32,15 +31,15 @@ public class TinkerPopConverter {
         this.defaultConfig = new PropertiesGraphConfig();
     }
 
-    public UnifiedGraph createKVGraphFromTinkerPopGraph() {
+    public UnifiedGraph createUGMFromTinkerPopGraph() {
         assert this.lpgGraph != null;
         UnifiedGraph unifiedGraph = new UnifiedGraph();
         this.unifiedGraph = unifiedGraph;
-        addKVGraphFromTinkerPopGraph();
+        addUGMFromTinkerPopGraph();
         return unifiedGraph;
     }
 
-    private UnifiedGraph addKVGraphFromTinkerPopGraph() {
+    private UnifiedGraph addUGMFromTinkerPopGraph() {
         assert this.lpgGraph != null;
         //element id -> IRI
         Map<Object, Pair> vertexes = new HashMap<>();
@@ -58,24 +57,23 @@ public class TinkerPopConverter {
         Pair result = null;
         if (element instanceof Vertex) {
             Vertex vertex = (Vertex) element;
-            result = transVerticesToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, vertex);
+            result = transVerticesToUGMIRI(unifiedGraph, lpgGraph, vertexes, vertex);
             vertexes.put(element.id(), result);
-//            vertex.edges(Direction.OUT).forEachRemaining(edge -> transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, edge));
         } else if (element instanceof Edge) {
-            result = transEdgeToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, (Edge) element);
+            result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (Edge) element);
             vertexes.put(element.id(), result);
         }
         Iterator<? extends Property<Object>> properties = element.properties();
         while (properties.hasNext()) {
             Property<Object> pop = properties.next();
-            ConstantPair constantPair = LiteralConverter.convertToKVGraphLiteral(pop.value());
+            ConstantPair constantPair = LiteralConverter.convertToUGMLiteral(pop.value());
             IRI popIRI = unifiedGraph.getOrRegisterPopIRI(pop.key());
             unifiedGraph.add(popIRI, result, constantPair);
         }
         return result;
     }
 
-    private Pair transVerticesToKVGraphIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Vertex vertex) {
+    private Pair transVerticesToUGMIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Vertex vertex) {
         Pair vertexIRI = vertexes.get(vertex.id());
         if (vertexIRI == null) {
             String label = vertex.label();
@@ -88,7 +86,7 @@ public class TinkerPopConverter {
         return vertexIRI;
     }
 
-    private Pair transEdgeToKVGraphIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Edge lpgEdge) throws ConverterException {
+    private Pair transEdgeToUGMIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Edge lpgEdge) throws ConverterException {
         Pair pair = vertexes.get(lpgEdge.id());
         if (pair == null) {
             // Get the LPG vertices that correspond to the lpg vertices.
@@ -111,7 +109,8 @@ public class TinkerPopConverter {
     }
 
     Map<Object, Pair> vertexes = new HashMap<>();
+
     public void handleElement(Element element) {
-        transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes,element);
+        transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, element);
     }
 }

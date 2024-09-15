@@ -34,7 +34,7 @@ public class UGRDF2PG {
         DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setKvGraph(unifiedGraph);
+        graphAPI.setUGMGraph(unifiedGraph);
         graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();

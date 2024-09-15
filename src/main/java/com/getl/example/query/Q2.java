@@ -2,6 +2,7 @@ package com.getl.example.query;
 
 import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
+import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
 import com.getl.converter.TinkerPopConverter;
@@ -78,7 +79,7 @@ public class Q2 {
 
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createKVGraphFromTinkerPopGraph();
+        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         //GC
@@ -88,9 +89,9 @@ public class Q2 {
         DebugUtil.DebugInfo("GC " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setKvGraph(unifiedGraph);   //配置简单图的kvGraph
-        graphAPI.getDefaultConfig().addEdgeNamespaceList("http://kvgraph.example.org/edge");    //将具有http://kvgraph.example.org/edge前缀的关系识别为边
-        graphAPI.refreshLPG();  //根据kvGraph更新属性图
+        graphAPI.setUGMGraph(unifiedGraph);
+        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+        graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
         graphAPI.setGraph(null);
         unifiedGraph = null;
@@ -137,8 +138,8 @@ public class Q2 {
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createKVGraphFromLPGGraph();
-        DebugUtil.DebugInfo("lpg result 2 KV end " + (System.currentTimeMillis() - begin));
+        unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
+        DebugUtil.DebugInfo("lpg result 2 ugm end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         resultGraph = null;
         Runtime.getRuntime().gc();
@@ -161,8 +162,8 @@ public class Q2 {
                 addColumn("locationIP", Schema.SMALL_TEXT).addColumn("language", Schema.SMALL_TEXT).
                 addColumn("creationDate", Schema.DATE).addColumn("email", Schema.MID_LARGE_TEXT));
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addKVGraphToRMModel();
-        DebugUtil.DebugInfo("KV 2 RM end " + (System.currentTimeMillis() - begin));
+        rmConverter.addUGMToRMModel();
+        DebugUtil.DebugInfo("ugm 2 RM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         MysqlOp.createSchema(sessions);

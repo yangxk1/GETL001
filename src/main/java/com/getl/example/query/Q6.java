@@ -52,7 +52,7 @@ public class Q6 {
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setKvGraph(unifiedGraph);
+        graphAPI.setUGMGraph(unifiedGraph);
         graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
@@ -98,14 +98,14 @@ public class Q6 {
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        unifiedGraph = (new TinkerPopConverter(null, resultGraph, new HashMap<>())).createKVGraphFromTinkerPopGraph();
+        unifiedGraph = (new TinkerPopConverter(null, resultGraph, new HashMap<>())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         RMGraph rmGraph = new RMGraph();
         rmGraph.addSchema(new Schema("IRI").addColumn("origin_label", Schema.MID_TEXT).addColumn("cc", Schema.INT));
         rmGraph.addSchema(new Schema("predicate", "IRI1", "IRI2"));
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addKVGraphToRMModel();
+        rmConverter.addUGMToRMModel();
         DebugUtil.DebugInfo("UGM 2 RM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);

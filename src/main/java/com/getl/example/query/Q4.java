@@ -2,6 +2,7 @@ package com.getl.example.query;
 
 import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
+import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.io.LPGParser;
@@ -64,7 +65,7 @@ public class Q4 {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createKVGraphFromTinkerPopGraph();
+        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         //GC
@@ -74,8 +75,8 @@ public class Q4 {
         DebugUtil.DebugInfo("GC " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setKvGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList("http://kvgraph.example.org/edge");
+        graphAPI.setUGMGraph(unifiedGraph);
+        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
         graphAPI.setGraph(null);
@@ -99,13 +100,13 @@ public class Q4 {
                 .toList();
         DebugUtil.DebugInfo("query end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        unifiedGraph = (new LPGGraphConverter(null, lpgGraph, new HashMap<>())).createKVGraphFromLPGGraph();
+        unifiedGraph = (new LPGGraphConverter(null, lpgGraph, new HashMap<>())).createUGMFromLPGGraph();
         DebugUtil.DebugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         lpgGraph = null;
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
-        System.out.println("kvPairs: " + unifiedGraph.getCache().size());
+        System.out.println("Pairs: " + unifiedGraph.getCache().size());
         begin = System.currentTimeMillis();
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));

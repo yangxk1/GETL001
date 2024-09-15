@@ -33,26 +33,26 @@ public class LPGGraphConverter {
         defaultConfig.addEdgeNamespaceList(EDGE_NAMESPACE);
     }
 
-    public UnifiedGraph createKVGraphFromLPGGraph() {
+    public UnifiedGraph createUGMFromLPGGraph() {
         assert this.lpgGraph != null;
         UnifiedGraph unifiedGraph = new UnifiedGraph();
         this.UnifiedGraph = unifiedGraph;
-        addKVGraphFromLPGGraph();
+        addUGMFromLPGGraph();
         return unifiedGraph;
     }
 
-    public void addKVGraphFromLPGGraph() {
+    public void addUGMFromLPGGraph() {
         assert this.lpgGraph != null;
         UnifiedGraph unifiedGraph = this.UnifiedGraph;
         Map<LPGElement, Pair> vertexes = new HashMap<>();
         // Adds statements for the vertices
         lpgGraph.getVertices().stream().filter(i -> !(i instanceof LPGSuperVertex))
-                .forEach(vertex -> transElementToKVGraphIRI(unifiedGraph, this.lpgGraph, vertexes, vertex));
+                .forEach(vertex -> transElementToUGMIRI(unifiedGraph, this.lpgGraph, vertexes, vertex));
         // Adds statements for the edges
-        lpgGraph.getEdges().forEach(edge -> transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, edge));
+        lpgGraph.getEdges().forEach(edge -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge));
     }
 
-    private Pair transVerticesToKVGraphIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGVertex vertex) {
+    private Pair transVerticesToUGMIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGVertex vertex) {
         Pair vertexIRI = vertexes.get(vertex);
         if (vertexIRI != null) {
             return vertexIRI;
@@ -69,26 +69,26 @@ public class LPGGraphConverter {
     /**
      * mapper any LPG element to UG
      */
-    private Pair transElementToKVGraphIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGElement element) {
+    private Pair transElementToUGMIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGElement element) {
         if (vertexes.containsKey(element)) {
             return vertexes.get(element);
         }
         Pair result = null;
         if (element instanceof LPGVertex) {
-            result = transVerticesToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, (LPGVertex) element);
+            result = transVerticesToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGVertex) element);
         } else if (element instanceof LPGEdge) {
-            result = transEdgeToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, (LPGEdge) element);
+            result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGEdge) element);
         } else if (element instanceof LPGProperty) {
-            result = transPropertiesToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, (LPGProperty) element);
+            result = transPropertiesToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGProperty) element);
         }
         vertexes.put(element, result);
         for (LPGProperty property : element.getProperties()) {
-            transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, property);
+            transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, property);
         }
         return result;
     }
 
-    private Pair transPropertiesToKVGraphIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGProperty element) {
+    private Pair transPropertiesToUGMIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGProperty element) {
         Pair pair = vertexes.get(element);
         if (pair != null) {
             return pair;
@@ -97,19 +97,19 @@ public class LPGGraphConverter {
         String label = "";
         label = key.label();
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
-        Pair elementIRI = vertexes.computeIfAbsent(key, i -> transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, i));
+        Pair elementIRI = vertexes.computeIfAbsent(key, i -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, i));
         Object value = element.value;
         Pair valueIRI;
         if (value instanceof LPGElement) {
-            valueIRI = vertexes.computeIfAbsent((LPGElement) value, i -> transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, i));
+            valueIRI = vertexes.computeIfAbsent((LPGElement) value, i -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, i));
         } else {
-            valueIRI = LiteralConverter.convertToKVGraphLiteral(value);
+            valueIRI = LiteralConverter.convertToUGMLiteral(value);
         }
         IRI pop = propertiesGraphConfig.getPop(unifiedGraph, element.name);
         return unifiedGraph.add(pop, (BasePair) elementIRI, valueIRI);
     }
 
-    private Pair transEdgeToKVGraphIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGEdge lpgEdge) throws ConverterException {
+    private Pair transEdgeToUGMIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGEdge lpgEdge) throws ConverterException {
         Pair pair = vertexes.get(lpgEdge);
         if (pair != null) {
             return pair;
@@ -118,10 +118,10 @@ public class LPGGraphConverter {
         Pair outV = vertexes.get(lpgEdge.outVertex);
         Pair inV = vertexes.get(lpgEdge.inVertex);
         if (outV == null) {
-            outV = transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.outVertex);
+            outV = transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.outVertex);
         }
         if (inV == null) {
-            inV = transElementToKVGraphIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.inVertex);
+            inV = transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.inVertex);
         }
         String label = "";
         if (lpgEdge.outVertex instanceof LPGVertex) {
@@ -138,7 +138,7 @@ public class LPGGraphConverter {
     /**
      * mapper UG to LPG
      */
-    public LPGGraph createLPGGraphByKVGraph() {
+    public LPGGraph createLPGGraphByUGM() {
         this.lpgGraph = new LPGGraph();
         elementCache = new HashMap<>();
         for (NestedPair nestedPair : this.getUnifiedGraph().getPairs()) {

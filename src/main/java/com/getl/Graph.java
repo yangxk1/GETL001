@@ -44,7 +44,7 @@ public class Graph {
     @Setter
     private long queryTimeoutMillis = 15000;
 
-    @Getter
+    @Getter     
     @Setter
     private LPGGraphConverter lpgGraphConverter;
     private RDFConverter rdfConverter;
@@ -117,7 +117,7 @@ public class Graph {
 
     public void refreshLPG() {
         this.lpgGraphConverter.setUnifiedGraph(this.unifiedGraph);
-        this.lpgGraph = lpgGraphConverter.createLPGGraphByKVGraph();
+        this.lpgGraph = lpgGraphConverter.createLPGGraphByUGM();
     }
 
     public void labelPredicate(String url) {

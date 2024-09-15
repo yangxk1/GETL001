@@ -8,7 +8,6 @@ import com.getl.model.ug.UnifiedGraph;
 
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AsyncRM2UGTest {
@@ -29,17 +28,19 @@ public class AsyncRM2UGTest {
         MysqlOp.asyncRM2UMG.shutdown();
         long t2 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
-        System.out.println("==========RM 2 kv END [" + t2 + "]=========");
+        System.out.println("==========RM 2 ugm END [" + t2 + "]=========");
         System.out.println("pipeline " + (System.currentTimeMillis() - beginall));
         UnifiedGraph unifiedGraph = MysqlOp.asyncRM2UMG.getUnifiedGraph();
         rmConverter = new RMConverter(unifiedGraph, new RMGraph().setSchemas(rmGraph.getSchemas()));
-        rmConverter.addKVGraphToRMModel();
+        rmConverter.addUGMToRMModel();
         long t3 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
         System.out.println("==========Convert to RM END [" + t3 + "]=========");
+        System.out.println(rmConverter.rmGraph.getLines().values().stream().filter(line -> !line.getId().contains("Id")).count());
         System.out.println(rmConverter.rmGraph.getLines().size());
         HashSet<String> lines = rmGraph.getLines().values().stream().map(Line::getId).collect(Collectors.toCollection(HashSet::new));
-        lines.removeAll(rmConverter.rmGraph.getLines().values().stream().map(Line::getId).collect(Collectors.toCollection(HashSet::new)));
-        System.out.println(lines);
+        HashSet<String> lines1 = rmConverter.rmGraph.getLines().values().stream().map(Line::getId).collect(Collectors.toCollection(HashSet::new));
+        lines1.removeAll(lines);
+        System.out.println(lines1);
     }
 }

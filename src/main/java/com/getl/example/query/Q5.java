@@ -3,6 +3,7 @@ package com.getl.example.query;
 import cn.hutool.core.collection.CollectionUtil;
 import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
+import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
 import com.getl.model.ug.UnifiedGraph;
@@ -35,7 +36,7 @@ public class Q5 {
         begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = new UnifiedGraph();
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addRMModelToKVGraph();
+        rmConverter.addRMModelToUGM();
         unifiedGraph = rmConverter.unifiedGraph;
         DebugUtil.DebugInfo("RM 2 UGM END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
@@ -45,8 +46,8 @@ public class Q5 {
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setKvGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList("http://kvgraph.example.org/edge");    //将具有http://kvgraph.example.org/edge前缀的关系识别为边
+        graphAPI.setUGMGraph(unifiedGraph);
+        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
         DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
@@ -61,12 +62,12 @@ public class Q5 {
         lpgGraph.traversal().V().has(label,MultiLabelP.of("classify_by_tag")).forEachRemaining(resultGraph::addVertices);
         lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).forEachRemaining(resultGraph::addEdge);
         DebugUtil.DebugInfo("collect result" + (System.currentTimeMillis() - begin));
-        unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createKVGraphFromLPGGraph();
+        unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
         DebugUtil.DebugInfo("lpg 2 UGM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graphAPI = GraphAPI.open();
-        graphAPI.setKvGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList("http://kvgraph.example.org/edge");
+        graphAPI.setUGMGraph(unifiedGraph);
+        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
         graphAPI.refreshLPG();
         lpgGraph = graphAPI.getGraph().getLpgGraph();
         DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));

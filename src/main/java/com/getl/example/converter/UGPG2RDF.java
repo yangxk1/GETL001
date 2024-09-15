@@ -56,7 +56,7 @@ public class UGPG2RDF {
 
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createKVGraphFromTinkerPopGraph();
+        UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open(unifiedGraph);
