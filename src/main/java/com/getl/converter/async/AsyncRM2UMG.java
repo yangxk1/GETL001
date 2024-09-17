@@ -4,10 +4,7 @@ import com.getl.converter.RMConverter;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.model.RM.Line;
 import com.getl.model.ug.UnifiedGraph;
-import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.Data;
@@ -53,9 +50,9 @@ public class AsyncRM2UMG {
             }
             rmConverter.handleLine(line);
         };
-        BlockingWaitStrategy strategy = new BlockingWaitStrategy();
+        WaitStrategy strategy = new YieldingWaitStrategy();
         int bufferSize = 1024 * 1024;
-        disruptor = new Disruptor<>(factory, bufferSize, threadFactory, ProducerType.SINGLE, strategy);
+        disruptor = new Disruptor<>(factory, bufferSize, threadFactory, ProducerType.MULTI, strategy);
         disruptor.handleEventsWith(handler);
         disruptor.start();
         ringBuffer = disruptor.getRingBuffer();

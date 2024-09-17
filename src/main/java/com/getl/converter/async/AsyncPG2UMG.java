@@ -3,10 +3,7 @@ package com.getl.converter.async;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.model.LPG.LPGVertex;
 import com.getl.model.ug.UnifiedGraph;
-import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.Data;
@@ -16,6 +13,9 @@ import org.apache.tinkerpop.gremlin.structure.*;
 import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import static com.getl.example.async.AsyncPG2UGTest.inCount;
+import static com.getl.example.async.AsyncPG2UGTest.outCount;
 
 public class AsyncPG2UMG {
 
@@ -35,6 +35,7 @@ public class AsyncPG2UMG {
 
     public void shutdown() {
         addElement(new EventElement());
+        System.out.println(stopped);
         while (!stopped) {
             Thread.onSpinWait();
         }
@@ -47,15 +48,16 @@ public class AsyncPG2UMG {
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         EventFactory<ElementReference> factory = ElementReference::new;
         EventHandler<ElementReference> handler = (element, sequence, endOfBatch) -> {
+            outCount.addAndGet(1);
             if (element.element instanceof EventElement) {
                 this.stopped = true;
                 return;
             }
             tinkerPopConverter.handleElement(element.element);
         };
-        BlockingWaitStrategy strategy = new BlockingWaitStrategy();
+        WaitStrategy strategy = new YieldingWaitStrategy();
         int bufferSize = 1024 * 1024;
-        disruptor = new Disruptor<>(factory, bufferSize, threadFactory, ProducerType.SINGLE, strategy);
+        disruptor = new Disruptor<>(factory, bufferSize, threadFactory, ProducerType.MULTI, strategy);
         disruptor.handleEventsWith(handler);
         disruptor.start();
         ringBuffer = disruptor.getRingBuffer();
@@ -69,6 +71,7 @@ public class AsyncPG2UMG {
         } finally {
             ringBuffer.publish(sequence);
         }
+        inCount.addAndGet(1);
     }
 
     class EventElement implements Element {

@@ -2,6 +2,7 @@ package com.getl.io;
 
 import com.getl.converter.TinkerPopConverter;
 import com.getl.converter.async.AsyncPG2UMG;
+import com.getl.example.async.AsyncPG2UGTest;
 import com.getl.model.ug.UnifiedGraph;
 import lombok.Data;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import static org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.set;
@@ -116,8 +118,8 @@ public class LPGParser {
     private List<Element> elementCache = new ArrayList<>(ARRAY_SIZE);
 
     public LPGParser loadVertex(String fileName, String vertexLabel, String... pops) {
-        System.out.println("READING " + fileName);
-        System.out.println(System.currentTimeMillis());
+//        System.out.println("READING " + fileName);
+//        System.out.println(System.currentTimeMillis());
         Map<String, String> popMap = popMap(pops);
         try (Reader vertexReader = new FileReader(fileName)) {
             Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader().parse(vertexReader);
@@ -169,11 +171,13 @@ public class LPGParser {
         }
     }
 
+
     public void commit2Converter() {
         List<Element> cache = elementCache;
         this.elementCache = new ArrayList<>(ARRAY_SIZE);
         new Thread(() -> {
             try {
+                AsyncPG2UGTest.count.addAndGet(cache.size());
                 cache.forEach(asyncPG2UMG::addElement);
             } finally {
                 latch.countDown();
@@ -188,8 +192,7 @@ public class LPGParser {
     }
 
     public LPGParser loadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
-        System.out.println("READING " + fileName);
-        System.out.println(System.currentTimeMillis());
+//        System.out.println("READING " + fileName);
         Map<String, String> popMap = popMap(pops);
         try (Reader edgeReader = new FileReader(fileName)) {
             Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader().parse(edgeReader);

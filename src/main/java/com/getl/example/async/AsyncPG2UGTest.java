@@ -14,9 +14,14 @@ import com.getl.util.DebugUtil;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class AsyncPG2UGTest {
+
+    public static AtomicInteger inCount = new AtomicInteger(0);
+    public static AtomicInteger outCount = new AtomicInteger(0);
+    public static AtomicInteger count = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("BEGIN TO TEST PG2UGM");
@@ -84,7 +89,7 @@ public class AsyncPG2UGTest {
         Runtime.getRuntime().gc();
         System.out.println("pg count:" + unifiedGraph.traversal().V().count().next());
         System.out.println(unifiedGraph.getCache().size());
-        System.out.println(unifiedGraph.traversal().V().outE().outV().outE().dedup().limit(100).toList());
+       // System.out.println(unifiedGraph.traversal().V().outE().outV().outE().dedup().limit(100).toList());
         LPGGraph lpgGraphByUGM = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByUGM();
         System.out.println(lpgGraphByUGM.getVertices().size());
         System.out.println(lpgGraphByUGM.getEdges().size());
@@ -92,7 +97,11 @@ public class AsyncPG2UGTest {
         set1.removeAll(set2);
         System.out.println(set1);
         System.out.println();
-
-
+        System.out.println(inCount);
+        System.out.println(outCount);
+        System.out.println(count);
+        inCount.set(0);
+        outCount.set(0);
+        count.set(0);
     }
 }
