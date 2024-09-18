@@ -4,6 +4,7 @@ import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.TinkerPopConverter;
+import com.getl.example.Runnable;
 import com.getl.io.LPGParser;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.ug.BasePair;
@@ -11,27 +12,22 @@ import com.getl.model.ug.IRI;
 import com.getl.model.ug.NestedPair;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
-import com.getl.example.Runnable;
-import groovy.util.logging.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class AsyncPG2UGTest extends Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(AsyncPG2UGTest.class);
     public static AtomicInteger inCount = new AtomicInteger(0);
     public static AtomicInteger outCount = new AtomicInteger(0);
     public static AtomicInteger count = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException {
-        log.info("BEGIN TO TEST PG2UGM , current time:{}", System.currentTimeMillis());
+        System.out.println("BEGIN TO TEST PG2UGM");
+        System.out.println(System.currentTimeMillis());
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(new UnifiedGraph(), null));
         long begin = System.currentTimeMillis();
@@ -77,31 +73,31 @@ public class AsyncPG2UGTest extends Runnable {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasCreator_person_0_0.csv", "post_hasCreator_person", "Post", "Person").commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag").commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place").commit2Converter();
-//        log.info(lpgParser.ids.size());
+//        System.out.println(lpgParser.ids.size());
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
         DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
-        log.info("pg count:" + lpgParser.getGraph().traversal().V().count().next());
-        log.info("pg graph edge count:{}", lpgParser.getGraph().traversal().E().count().next());
+        System.out.println("pg count:" + lpgParser.getGraph().traversal().V().count().next());
+        System.out.println(lpgParser.getGraph().traversal().E().count().next());
         Set<Object> set1 = lpgParser.getGraph().traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
-        log.info("pg graph edge count(set):{}", set1.size());
+        System.out.println(set1.size());
         lpgParser.getAsyncPG2UMG().shutdown();
         DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
         UnifiedGraph unifiedGraph = lpgParser.getAsyncPG2UMG().getUnifiedGraph();
-        log.info("ugm edge count:" + unifiedGraph.getCache().stream().map(NestedPair::from).filter(basePair -> basePair.getLabels().stream().findFirst().map(IRI::getNameSpace).orElse("").equals(IRINamespace.EDGE_NAMESPACE)).map(BasePair::getValueIRI).map(IRI::getLocalName).collect(Collectors.toSet()).size());
+        System.out.println("ugm edge count:" + unifiedGraph.getCache().stream().map(NestedPair::from).filter(basePair -> basePair.getLabels().stream().findFirst().map(IRI::getNameSpace).orElse("").equals(IRINamespace.EDGE_NAMESPACE)).map(BasePair::getValueIRI).map(IRI::getLocalName).collect(Collectors.toSet()).size());
         lpgParser.setGraph(null);
         lpgParser.setAsyncPG2UMG(null);
         lpgParser = null;
         Runtime.getRuntime().gc();
-        log.info("pg count:" + unifiedGraph.traversal().V().count().next());
-        log.info("ugm kv cache count:{}", unifiedGraph.getCache().size());
-        // log.info(unifiedGraph.traversal().V().outE().outV().outE().dedup().limit(100).toList());
+        System.out.println("pg count:" + unifiedGraph.traversal().V().count().next());
+        System.out.println(unifiedGraph.getCache().size());
+        // System.out.println(unifiedGraph.traversal().V().outE().outV().outE().dedup().limit(100).toList());
         LPGGraph lpgGraphByUGM = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByUGM();
-        log.info("ugm 2 new lpg vertices count:{}", lpgGraphByUGM.getVertices().size());
-        log.info("ugm 2 new lpg edges count:{}", lpgGraphByUGM.getEdges().size());
+        System.out.println(lpgGraphByUGM.getVertices().size());
+        System.out.println(lpgGraphByUGM.getEdges().size());
         Set<String> set2 = lpgGraphByUGM.traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
         set1.removeAll(set2);
-        log.info("the id in set1 but not in set2 :{}", set1);
+        System.out.println(set1);
     }
 
     @Override
