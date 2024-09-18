@@ -1,6 +1,13 @@
 package com.getl.util;
 
+import groovy.util.logging.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Slf4j
 public class DebugUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(DebugUtil.class);
 
     public static void DebugInfo(String info) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -17,6 +24,6 @@ public class DebugUtil {
         long used = totalMemory - free;
         stringBuilder.append("\nUsed Memory (Byte): ").append(used);
         stringBuilder.append("\n====================================");
-        System.out.println(stringBuilder.toString());
+        log.info(stringBuilder.toString());
     }
 }
