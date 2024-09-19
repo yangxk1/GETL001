@@ -13,11 +13,16 @@ import com.getl.model.ug.NestedPair;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static org.apache.tinkerpop.gremlin.process.traversal.Order.decr;
 
 public class AsyncPG2UGTest extends Runnable {
 

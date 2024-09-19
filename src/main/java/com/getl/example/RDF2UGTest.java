@@ -6,16 +6,18 @@ import com.getl.constant.RdfDataFormat;
 import com.getl.converter.PropertiesGraphConfig;
 import com.getl.converter.RDFConverter;
 import com.getl.util.DebugUtil;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.io.*;
+
+import static org.eclipse.rdf4j.rio.helpers.BasicParserSettings.PRESERVE_BNODE_IDS;
 
 
 public class RDF2UGTest {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String RDF_URL = CommonConstant.RDF_FILES_BASE_URL;
         DebugUtil.DebugInfo("BEGIN TO TEST RDF 2 UGM");
         Graph graph = new Graph();
@@ -33,6 +35,7 @@ public class RDF2UGTest {
         DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
         System.out.println(graph.getRdfModel().size());
         begin = System.currentTimeMillis();
+        long l = System.currentTimeMillis();
         graph.handleRDFModel();
         DebugUtil.DebugInfo("RDF 2 URG END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
@@ -47,5 +50,13 @@ public class RDF2UGTest {
         System.out.println(System.currentTimeMillis());
         System.out.println("RDF SIZE : " + graph.getRdfModel().size());
         System.out.println(System.currentTimeMillis());
+        BufferedWriter fileWriter = new BufferedWriter(new FileWriter("/home/yangxk/graph/output.ttl"));
+        RDFWriter writer = Rio.createWriter(RDFFormat.TURTLE, fileWriter).set(PRESERVE_BNODE_IDS, true);
+        writer.startRDF();
+        for (Statement st : graph.getRdfModel()) {
+            writer.handleStatement(st);
+        }
+        writer.endRDF();
+        System.out.println("convert to rdf " + (System.currentTimeMillis() - l));
     }
 }
