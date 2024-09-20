@@ -89,6 +89,7 @@ public class AsyncPG2UGTest extends Runnable {
         lpgParser.getAsyncPG2UMG().shutdown();
         DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
         UnifiedGraph unifiedGraph = lpgParser.getAsyncPG2UMG().getUnifiedGraph();
+        System.out.println(unifiedGraph.getCache().size());
         System.out.println("ugm edge count:" + unifiedGraph.getCache().stream().map(NestedPair::from).filter(basePair -> basePair.getLabels().stream().findFirst().map(IRI::getNameSpace).orElse("").equals(IRINamespace.EDGE_NAMESPACE)).map(BasePair::getValueIRI).map(IRI::getLocalName).collect(Collectors.toSet()).size());
         lpgParser.setGraph(null);
         lpgParser.setAsyncPG2UMG(null);

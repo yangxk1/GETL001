@@ -232,8 +232,8 @@ public class MysqlOp {
         while (resultSet.next()) {
             String tableName = resultSet.getString(Schema.TABLE_NAME);
             Schema schema = new Schema(tableName);
-            int hasId = resultSet.getInt("has_id");
-            schema.setHasId(hasId);
+//            int hasId = resultSet.getInt("has_id");
+//            schema.setHasId(hasId);
             int type = resultSet.getInt(Schema.TYPE);
             String columnsJSON = resultSet.getString(Schema.COLUMNS);
             String in = resultSet.getString(Schema.IN);
@@ -259,7 +259,7 @@ public class MysqlOp {
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT * FROM `");
             sql.append(entry.getKey()).append("`");
-            sql.append("Limit 50000");
+//            sql.append("Limit 50000");
             String select = sql.toString();
             ArrayList<Line> lines = new ArrayList<>();
             ResultSet resultSet = session.select(select, lines);
@@ -268,14 +268,15 @@ public class MysqlOp {
                 Line line = new Line();
                 line.setTableName(entry.getKey());
                 String id = null;
-                if (schema.getHasId() == 0) {
-                    id = resultSet.getString(Schema.KEY);
-                }
+                //     if (schema.getHasId() == 0) {
+                id = resultSet.getString(Schema.KEY);
+                //   }
                 if (StringUtils.isBlank(id)) {
                     id = schema.getTableName() + ":" + UnifiedGraph.getNextID();
-                } else {
-                    id = schema.getTableName() + ":" + id;
                 }
+//                else {
+//                    id = schema.getTableName() + ":" + id;
+//                }
                 line.setId(id);
                 Map<String, Object> values = new HashMap<>();
                 if (!schema.isNode()) {

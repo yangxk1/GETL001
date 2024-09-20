@@ -80,6 +80,7 @@ public class LPGParser {
     public static final String FLOAT = "float";
     public static final String DATE = "date";
     public static final String MILLI = "milli";
+    public static final String STRING = "string";
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private Object parseValue(String value, String type) {
@@ -128,6 +129,62 @@ public class LPGParser {
             throw new RuntimeException(e);
         }
         return this;
+    }
+
+    public LPGParser loadVertexWithPro(String fileName, String vertexLabel, String... pops) {
+//        System.out.println("READING " + fileName);
+//        System.out.println(System.currentTimeMillis());
+        Map<String, String> popMap = popMap(pops);
+        try (Reader vertexReader = new FileReader(fileName)) {
+            Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader().parse(vertexReader);
+            loadVertexWithPro(records, vertexLabel, popMap);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+    }
+
+    public void loadVertexWithPro(Iterable<CSVRecord> records, String vertexLabel, Map<String, String> popMap) throws IOException {
+        for (CSVRecord record : records) {
+//            if (i++ >= 3000){break;}
+            Map<String, String> pop = record.toMap();
+            String label = pop.get("label");
+            label = label == null ? vertexLabel : label;
+            String id = pop.get("id");
+            String idTitle = "id";
+            if (StringUtils.isBlank(id)) {
+                id = pop.get(label + ".id");
+                idTitle = label + ".id";
+            }
+            Vertex vertex;
+            Iterator<Vertex> vertices = graph.vertices(label + ":" + id);
+            if (StringUtils.isNotBlank(id) && vertices.hasNext()) {
+                vertex = vertices.next();
+            } else {
+                GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
+                GraphTraversal<Vertex, Vertex> addV = g.addV(label);
+                if (StringUtils.isNotBlank(id)) {
+                    addV.property(T.id, label + ":" + id);
+                }
+                vertex = addV.next();
+                elementCache.add(vertex);
+            }
+            for (Map.Entry<String, String> entry : pop.entrySet()) {
+                if (idTitle.equals(entry.getKey()) || "id".equals(entry.getKey())) {
+                    continue;
+                }
+                if (StringUtils.isNotEmpty(entry.getValue())) {
+                    String type = popMap.get(entry.getKey());
+                    if (StringUtils.isBlank(type)) {
+                        continue;
+                    }
+                    vertex.property(set, entry.getKey(), parseValue(entry.getValue(), type));
+                }
+            }
+            //if (asyncPG2UMG != null) {
+
+            //   }
+        }
     }
 
     public void loadVertex(Iterable<CSVRecord> records, String vertexLabel, Map<String, String> popMap) throws IOException {
@@ -206,8 +263,8 @@ public class LPGParser {
     public void loadEdge(Iterable<CSVRecord> records, String edgeLabel, String from, String to, Map<String, String> popMap) throws IOException {
         String fromLabel = from == null ? "from" : from;
         String toLabel = to == null ? "to" : to;
-        from = fromLabel + ".id";
-        to = toLabel + ".id";
+        String f1 = fromLabel + ".id";
+        String t1 = toLabel + ".id";
         GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
         for (CSVRecord record : records) {
 //            if (i++ >= 3000){break;}
@@ -217,8 +274,8 @@ public class LPGParser {
             String id = pop.get("id");
             GraphTraversal<Edge, Edge> addE = g.addE(label);
             Vertex fromVertex, toVertex;
-            String fromId = fromLabel + ":" + pop.get(from);
-            String toId = toLabel + ":" + pop.get(to);
+            String fromId = fromLabel + ":" + record.get(0);
+            String toId = toLabel + ":" + record.get(1);
             if (graph.vertices(fromId).hasNext()) {
                 fromVertex = graph.vertices(fromId).next();
             } else {
@@ -235,7 +292,7 @@ public class LPGParser {
                 addE.property(T.id, label + ":" + id);
             }
             for (Map.Entry<String, String> entry : pop.entrySet()) {
-                if (from.equals(entry.getKey()) || to.equals(entry.getKey()) || "label".equals(entry.getKey()) || "id".equals(entry.getKey())) {
+                if (from.equals(entry.getKey()) || (f1).equals(entry.getKey()) || (t1).equals(entry.getKey()) || to.equals(entry.getKey()) || "label".equals(entry.getKey()) || "id".equals(entry.getKey())) {
                     continue;
                 }
                 if (StringUtils.isNotEmpty(entry.getValue())) {

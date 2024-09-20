@@ -44,25 +44,29 @@ public class Graph {
     @Setter
     private long queryTimeoutMillis = 15000;
 
-    @Getter     
+    @Getter
     @Setter
     private LPGGraphConverter lpgGraphConverter;
     private RDFConverter rdfConverter;
 
-    public Graph() {
+    public Graph(UnifiedGraph unifiedGraph) {
         this.rdfRepository = new SailRepository(new MemoryStore());
         try {
             this.rdfRepository.init();
         } catch (RepositoryException e) {
             throw new RuntimeException(String.valueOf(e));
         }
-        this.unifiedGraph = new UnifiedGraph();
+        this.unifiedGraph = unifiedGraph;
         this.lpgGraph = new LPGGraph();
         this.rdfModel = new LinkedHashModel();
         this.tinkerPopGraph = TinkerGraph.open();
         this.rdfConverter = new RDFConverter(this.unifiedGraph);
         Map<String, PropertiesGraphConfig> lpgConfigs = new HashMap<>();
         lpgGraphConverter = new LPGGraphConverter(this.unifiedGraph, this.lpgGraph, lpgConfigs);
+    }
+
+    public Graph() {
+        this(new UnifiedGraph());
     }
 
     public void setDefaultConfig(PropertiesGraphConfig defaultConfig) {
