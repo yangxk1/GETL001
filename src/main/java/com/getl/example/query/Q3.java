@@ -40,7 +40,7 @@ public class Q3 {
         }
         DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        graph.labelPredicate("http://dbpedia.org/ontology/type");
+        //graph.labelPredicate("http://dbpedia.org/ontology/type");
         graph.handleRDFModel();
         UnifiedGraph unifiedGraph = graph.getUnifiedGraph();
         DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
@@ -58,25 +58,27 @@ public class Q3 {
         unifiedGraph = null;
         graphAPI = null;
         DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
-        System.out.println("result vertex count: " + lpgGraph.getVertices().size());
-        System.out.println("result edge count: " + lpgGraph.getEdges().size());
+        // System.out.println("result vertex count: " + lpgGraph.getVertices().size());
+        // System.out.println("result edge count: " + lpgGraph.getEdges().size());
         begin = System.currentTimeMillis();
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
 
         GraphTraversalSource g = lpgGraph.traversal();// Initialize your GraphTraversalSource
-// Q3: Select vertices with a degree greater than 20 and the edges between them
-        List<Map<String, Object>> results = g.V()
-                .property("_degree", __.bothE().count())
-                .has("_degree", P.gt(20)).as("n1")
+// Q3: Select vertices with a degree greater than 5 and the edges between them
+        g.V()
+                .property("_degree", __.bothE().count()).toList();
+        List<Map<String, Object>> results = lpgGraph.traversal().V()
+                .has("_degree", P.gt(5)).as("n1")
                 .outE().as("e1")
-                .inV().has("_degree", P.gt(20)).as("n2")
+                .inV().has("_degree", P.gt(5)).as("n2")
                 .select("n1", "e1", "n2")
                 .dedup("e1")
                 .toList();
         DebugUtil.DebugInfo("query end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
+        //  System.out.println(results.size());
         LPGGraph resultGraph = new LPGGraph();
         for (Map<String, Object> result : results) {
             Vertex n1 = (LPGVertex) result.get("n1");
@@ -88,8 +90,8 @@ public class Q3 {
             lpgEdge.setId(e1.id());
         }
         DebugUtil.DebugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
-        System.out.println("result vertex count: " + resultGraph.getVertices().size());
-        System.out.println("result edge count: " + resultGraph.getEdges().size());
+        //   System.out.println("result vertex count: " + resultGraph.getVertices().size());
+        //    System.out.println("result edge count: " + resultGraph.getEdges().size());
         lpgGraph = null;
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));

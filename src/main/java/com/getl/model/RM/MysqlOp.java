@@ -23,7 +23,8 @@ public class MysqlOp {
     public static void createSchema(MysqlSessions session) {
 
         String sql = "CREATE TABLE IF NOT EXISTS SESSION (" + Schema.TABLE_NAME + " varchar(255)," + Schema.TYPE + " int,"
-                + Schema.COLUMNS + " json," + Schema.IN + " varchar(255)," + Schema.OUT + " varchar(255), PRIMARY KEY (" + Schema.TABLE_NAME + "))";
+                + Schema.HAS_ID + " int," + Schema.COLUMNS + " json," + Schema.IN_LABEL + " varchar(255)," + Schema.OUT_LABEL + " varchar(255),"
+                + Schema.IN + " varchar(255)," + Schema.OUT + " varchar(255), PRIMARY KEY (" + Schema.TABLE_NAME + "))";
         try {
             session.execute(sql);
         } catch (SQLException e) {
@@ -67,6 +68,7 @@ public class MysqlOp {
         }
     }
 
+    @Deprecated
     public static void writeSchema(MysqlSessions session, RMGraph graph) {
         for (Schema schema : graph.getSchemas().values()) {
             //update SCHEMA
@@ -97,15 +99,21 @@ public class MysqlOp {
             StringBuilder sql = new StringBuilder();
             sql.append("INSERT INTO SESSION (").append(Schema.TABLE_NAME).append(",")
                     .append(Schema.TYPE).append(",")
+                    .append(Schema.HAS_ID).append(",")
                     .append(Schema.COLUMNS).append(",")
+                    .append(Schema.IN_LABEL).append(",")
+                    .append(Schema.OUT_LABEL).append(",")
                     .append(Schema.IN).append(",")
                     .append(Schema.OUT).append(") VALUES ('");
             sql.append(schema.getTableName()).append("',");
-            sql.append(schema.getType()).append(",'");
+            sql.append(schema.getType()).append(",");
+            sql.append(schema.getHasId()).append(",'");
             sql.append(JSONUtil.toJsonStr(schema.getColumns())).append("','");
+            sql.append(schema.getInLabel()).append("','");
+            sql.append(schema.getOutLabel()).append("','");
             sql.append(schema.getIn()).append("','");
             sql.append(schema.getOut());
-            sql.append("') ON DUPLICATE KEY UPDATE table_name = VALUES(table_name) , type = VALUES(type) , columns = VALUES(columns), _in = VALUES(_in), _out = VALUES(_out);");
+            sql.append("') ON DUPLICATE KEY UPDATE table_name = VALUES(table_name) , type = VALUES(type) , has_id = VALUES(has_id) , columns = VALUES(columns), _in_label=VALUES(_in_label) , _out_label=VALUES(_out_label) , _in = VALUES(_in), _out = VALUES(_out);");
             try {
                 session.execute(sql.toString());
             } catch (SQLException e) {
@@ -232,8 +240,8 @@ public class MysqlOp {
         while (resultSet.next()) {
             String tableName = resultSet.getString(Schema.TABLE_NAME);
             Schema schema = new Schema(tableName);
-//            int hasId = resultSet.getInt("has_id");
-//            schema.setHasId(hasId);
+            int hasId = resultSet.getInt("has_id");
+            schema.setHasId(hasId);
             int type = resultSet.getInt(Schema.TYPE);
             String columnsJSON = resultSet.getString(Schema.COLUMNS);
             String in = resultSet.getString(Schema.IN);
@@ -243,6 +251,18 @@ public class MysqlOp {
             String out = resultSet.getString(Schema.OUT);
             if (!resultSet.wasNull()) {
                 schema.setOut(out);
+            }
+            String inLabel = resultSet.getString(Schema.IN_LABEL);
+            if (!resultSet.wasNull()) {
+                schema.setInLabel(inLabel);
+            } else {
+                schema.setInLabel(schema.getIn());
+            }
+            String outLabel = resultSet.getString(Schema.OUT_LABEL);
+            if (!resultSet.wasNull()) {
+                schema.setOutLabel(outLabel);
+            } else {
+                schema.setOutLabel(schema.getOut());
             }
             schema.setType(type);
             TypeReference<Map<String, String>> mapTypeReference = new TypeReference<Map<String, String>>() {
@@ -273,10 +293,9 @@ public class MysqlOp {
                 //   }
                 if (StringUtils.isBlank(id)) {
                     id = schema.getTableName() + ":" + UnifiedGraph.getNextID();
+                } else {
+                    id = schema.getTableName() + ":" + id;
                 }
-//                else {
-//                    id = schema.getTableName() + ":" + id;
-//                }
                 line.setId(id);
                 Map<String, Object> values = new HashMap<>();
                 if (!schema.isNode()) {

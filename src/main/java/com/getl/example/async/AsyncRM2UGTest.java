@@ -1,14 +1,17 @@
 package com.getl.example.async;
 
 import com.getl.constant.CommonConstant;
+import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
 import com.getl.converter.async.AsyncRM2UMG;
 import com.getl.example.Runnable;
+import com.getl.model.LPG.LPGGraph;
 import com.getl.model.RM.*;
 import com.getl.model.ug.UnifiedGraph;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -32,16 +35,18 @@ public class AsyncRM2UGTest extends Runnable {
         begin = System.currentTimeMillis();
         System.out.println("==========RM 2 ugm END [" + t2 + "]=========");
         System.out.println("pipeline " + (System.currentTimeMillis() - beginall));
+        HashSet<String> lines = rmGraph.getLines().values().stream().map(Line::getId).collect(Collectors.toCollection(HashSet::new));
+        rmGraph = null;
+        Runtime.getRuntime().gc();
         UnifiedGraph unifiedGraph = MysqlOp.asyncRM2UMG.getUnifiedGraph();
+//        LPGGraph lpgGraphByUGM = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByUGM();
+//        System.out.println(lpgGraphByUGM.getVertices().size());
         rmConverter = new RMConverter(unifiedGraph, new RMGraph().setSchemas(rmGraph.getSchemas()));
         rmConverter.addUGMToRMModel();
         long t3 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
         System.out.println("==========Convert to RM END [" + t3 + "]=========");
-        System.out.println(rmConverter.rmGraph.getLines().values().stream().filter(line -> !line.getId().contains("Id")).count());
-        System.out.println(rmConverter.rmGraph.getLines().size());
-        HashSet<String> lines = rmGraph.getLines().values().stream().map(Line::getId).collect(Collectors.toCollection(HashSet::new));
-        HashSet<String> lines1 = rmConverter.rmGraph.getLines().values().stream().map(Line::getId).collect(Collectors.toCollection(HashSet::new));
+        HashSet<String> lines1 = rmConverter.rmGraph.getLines().values().stream().filter(line -> !line.getTableName().equals("user")).map(Line::getId).collect(Collectors.toCollection(HashSet::new));
         lines1.removeAll(lines);
         System.out.println(lines1);
     }

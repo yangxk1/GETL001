@@ -19,8 +19,6 @@ import com.getl.util.DebugUtil;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class LBDC2UGTest {
     public static void main(String[] args) throws InterruptedException, SQLException, ClassNotFoundException {

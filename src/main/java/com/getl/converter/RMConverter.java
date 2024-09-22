@@ -82,7 +82,7 @@ public class RMConverter {
         } else {
             //edge
             IRI edgeLabel = unifiedGraph.getOrRegisterBaseIRI(EDGE_NAMESPACE, schema.getTableName());
-            String outId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getOut())).map(id -> schema.getOut() + ":" + id).orElse(null);
+            String outId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getOut())).map(id -> schema.getOutLabel() + ":" + id).orElse(null);
             if (outId == null) {
                 return null;
             }
@@ -90,9 +90,9 @@ public class RMConverter {
             if (out == null) {
                 out = new Line();
                 out.setId(outId);
-                out.setTableName(schema.getOut());
+                out.setTableName(schema.getOutLabel());
             }
-            String inId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getIn())).map(id -> schema.getIn() + ":" + id).orElse(null);
+            String inId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getIn())).map(id -> schema.getInLabel() + ":" + id).orElse(null);
             if (inId == null) {
                 return null;
             }
@@ -100,7 +100,7 @@ public class RMConverter {
             if (in == null) {
                 in = new Line();
                 in.setId(inId);
-                in.setTableName(schema.getIn());
+                in.setTableName(schema.getInLabel());
             }
             Schema outSM = Optional.of(out).map(Line::getTableName).map(rmGraph.getSchemas()::get).orElse(null);
             Schema inSM = Optional.of(in).map(Line::getTableName).map(rmGraph.getSchemas()::get).orElse(null);

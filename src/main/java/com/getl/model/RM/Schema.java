@@ -16,6 +16,9 @@ public class Schema {
     public static final String COLUMNS = "columns";
     public static final String IN = "_in";
     public static final String OUT = "_out";
+    public static final String IN_LABEL = "_in_label";
+    public static final String OUT_LABEL = "_out_label";
+    public static final String HAS_ID = "has_id";
     //table name(label)
     private String tableName;
     //0:node\1:edge
@@ -25,6 +28,8 @@ public class Schema {
     //if this is a schema for edges, it has inVertex id(id) and outVertex id(out)
     private String in;
     private String out;
+    private String inLabel;
+    private String outLabel;
     //property name and its type
     private Map<String, String> columns = new HashMap<>();
 
@@ -32,9 +37,11 @@ public class Schema {
         if (type == 1) {
             if (StringUtils.isBlank(in)) {
                 in = "in_node";
+                inLabel = "in_node";
             }
             if (StringUtils.isBlank(out)) {
                 out = "out_node";
+                outLabel = "out_node";
             }
         }
         this.type = type;
