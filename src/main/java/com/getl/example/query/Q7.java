@@ -6,6 +6,9 @@ import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Q7 {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("BEGIN TO TEST PG2UGM");
@@ -64,7 +67,10 @@ public class Q7 {
         lpgParser.getAsyncPG2UMG().shutdown();
         begin = System.currentTimeMillis();
         RandomWalk randomWalk = new RandomWalk(lpgParser.getGraph());
-        randomWalk.forward(Math.toIntExact(count), 3);
+        List<List<Object>> lists = randomWalk.asyncForward(Math.toIntExact(count), 3);
+        for (int i = 0; i < lists.size(); i++) {
+//            System.out.println(i + " : " + lists.get(i).stream().map(Object::toString).collect(Collectors.joining("->")));
+        }
         System.out.println("rand walk end " + (System.currentTimeMillis() - begin));
         double v = 1.0 * (System.currentTimeMillis() - begin) / count;
         System.out.println(v);
