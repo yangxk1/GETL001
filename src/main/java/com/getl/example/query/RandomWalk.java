@@ -1,5 +1,6 @@
 package com.getl.example.query;
 
+import org.apache.commons.collections.list.SynchronizedList;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.*;
@@ -10,12 +11,16 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RandomWalk {
 
+    private long countTime = 0;
     private GraphTraversalSource g;
     private Graph graph;
-    List<List<Object>> order = new ArrayList<>();
+    List<List<Object>> order;
 
     public RandomWalk(Graph graph) {
         this.graph = graph;
@@ -23,13 +28,42 @@ public class RandomWalk {
     }
 
     public void forward(int order_size, int maxSteps) {
+        List<Vertex> vertexList = graph.traversal().V().hasLabel("Person").toList();
+        order = new ArrayList<>(order_size);
         for (int i = 0; i < order_size; i++) {
-            List<Vertex> vertexList = graph.traversal().V().hasLabel("Person").toList();
             vertexList.stream().skip(new Random().nextInt(vertexList.size())).findAny().ifPresent(person -> randomWalk(person.id(), maxSteps));
         }
-        for (int i = 0; i < order.size(); i++) {
-//            System.out.println(i + " : " + order.get(i).stream().map(a -> (String) a).collect(Collectors.joining(" -> ")));
+    }
+
+    public void asyncForward(int order_size, int maxSteps) {
+        countTime = 0;
+        List<Vertex> vertexList = graph.traversal().V().hasLabel("Person").toList();
+        order = Collections.synchronizedList(new ArrayList<>(order_size));
+        int poolSize = 8;
+        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
+        CountDownLatch countDownLatch = new CountDownLatch(poolSize);
+        try {
+            for (int i = 1; i <= poolSize; i++) {
+                final int index = i;
+                System.out.println((index - 1) * order_size / poolSize + "_____" + index * order_size / poolSize);
+                executorService.submit(() -> {
+                    for (int j = (index - 1) / poolSize * order_size; j < index / poolSize * order_size; j++) {
+//                        System.out.println(j+"->");
+                        randomWalk(vertexList.get(j).id(), maxSteps);
+                    }
+                    countDownLatch.countDown();
+                });
+            }
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            executorService.shutdown();
         }
+//        for (int i = 0; i < order.size(); i++) {
+////            System.out.println(i + " : " + order.get(i).stream().map(a -> (String) a).collect(Collectors.joining(" -> ")));
+//        }
+        System.out.println("order size: " + order.size());
     }
 
     private void randomWalk(Object startVertexId, int maxSteps) {
@@ -68,10 +102,9 @@ public class RandomWalk {
             List<Map.Entry<Vertex, Double>> post_person_neighbors = new ArrayList<>();
             g.V(currentVertex_post.id()).in("person_likes_post", "post_hasCreator_person").forEachRemaining(neighbor -> {
                 double weightedValue = calculateNePersonWeight(currentVertex_post, neighbor);
-                if (neighbor.equals(currentVertex_person)) {
-                    weightedValue = Math.max(0.01, weightedValue - 10);
+                if (!neighbor.equals(currentVertex_person)) {
+                    post_person_neighbors.add(new AbstractMap.SimpleEntry<>(neighbor, weightedValue));
                 }
-                post_person_neighbors.add(new AbstractMap.SimpleEntry<>(neighbor, weightedValue));
             });
             // If no neighbors, break the loop
             if (post_person_neighbors.isEmpty()) {
@@ -133,7 +166,6 @@ public class RandomWalk {
     //时间相关性
     private double getRecentScore(Vertex neighbor) {
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         VertexProperty<Object> createTime = neighbor.property("create_time");
         if (!createTime.isPresent()) {
             return 0.1;

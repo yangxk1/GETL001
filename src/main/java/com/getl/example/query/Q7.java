@@ -59,11 +59,15 @@ public class Q7 {
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
         DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        Long count = lpgParser.getGraph().traversal().V().hasLabel("Person").count().next();
+        System.out.println(count);
+        lpgParser.getAsyncPG2UMG().shutdown();
         begin = System.currentTimeMillis();
         RandomWalk randomWalk = new RandomWalk(lpgParser.getGraph());
-        randomWalk.forward(250,  3);
+        randomWalk.forward(Math.toIntExact(count), 3);
         System.out.println("rand walk end " + (System.currentTimeMillis() - begin));
-        lpgParser.getAsyncPG2UMG().shutdown();
+        double v = 1.0 * (System.currentTimeMillis() - begin) / count;
+        System.out.println(v);
     }
 
 }

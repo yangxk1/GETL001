@@ -44,7 +44,7 @@ public class LBDC2UGTest {
         System.out.println();
     }
 
-    private static void loadFromRDF(UnifiedGraph unifiedGraph) {
+    public static void loadFromRDF(UnifiedGraph unifiedGraph) {
         String RDF_URL = CommonConstant.LBDC_RDF_FILES_URL;
         DebugUtil.DebugInfo("BEGIN TO LOAD RDF");
         Graph graph = new Graph(unifiedGraph);
@@ -62,7 +62,7 @@ public class LBDC2UGTest {
         DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
     }
 
-    private static void loadFromRM(UnifiedGraph unifiedGraph) throws SQLException, ClassNotFoundException {
+    public static void loadFromRM(UnifiedGraph unifiedGraph) throws SQLException, ClassNotFoundException {
         DebugUtil.DebugInfo("BEGIN TO LOAD RM");
         RMGraph rmGraph = new RMGraph();
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
@@ -82,7 +82,7 @@ public class LBDC2UGTest {
         DebugUtil.DebugInfo("rm pipeline " + (System.currentTimeMillis() - beginall));
     }
 
-    private static void loadFromPG(UnifiedGraph unifiedGraph) throws InterruptedException {
+    public static void loadFromPG(UnifiedGraph unifiedGraph) throws InterruptedException {
         DebugUtil.DebugInfo("BEGIN TO LOAD PG");
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(unifiedGraph, null));
         long begin = System.currentTimeMillis();
