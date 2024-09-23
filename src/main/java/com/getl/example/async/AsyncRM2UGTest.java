@@ -39,8 +39,8 @@ public class AsyncRM2UGTest extends Runnable {
         rmGraph = null;
         Runtime.getRuntime().gc();
         UnifiedGraph unifiedGraph = MysqlOp.asyncRM2UMG.getUnifiedGraph();
-//        LPGGraph lpgGraphByUGM = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByUGM();
-//        System.out.println(lpgGraphByUGM.getVertices().size());
+        LPGGraph lpgGraphByUGM = new LPGGraphConverter(unifiedGraph, null, new HashMap<>()).createLPGGraphByUGM();
+        System.out.println(lpgGraphByUGM.getVertices().size());
         rmConverter = new RMConverter(unifiedGraph, new RMGraph().setSchemas(rmGraph.getSchemas()));
         rmConverter.addUGMToRMModel();
         long t3 = System.currentTimeMillis() - begin;

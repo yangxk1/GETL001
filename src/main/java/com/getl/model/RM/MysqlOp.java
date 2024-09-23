@@ -279,7 +279,7 @@ public class MysqlOp {
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT * FROM `");
             sql.append(entry.getKey()).append("`");
-//            sql.append("Limit 50000");
+            sql.append("Limit 50000");
             String select = sql.toString();
             ArrayList<Line> lines = new ArrayList<>();
             ResultSet resultSet = session.select(select, lines);
@@ -288,9 +288,9 @@ public class MysqlOp {
                 Line line = new Line();
                 line.setTableName(entry.getKey());
                 String id = null;
-                //     if (schema.getHasId() == 0) {
-                id = resultSet.getString(Schema.KEY);
-                //   }
+                if (schema.getHasId() == 0) {
+                    id = resultSet.getString(Schema.KEY);
+                }
                 if (StringUtils.isBlank(id)) {
                     id = schema.getTableName() + ":" + UnifiedGraph.getNextID();
                 } else {
