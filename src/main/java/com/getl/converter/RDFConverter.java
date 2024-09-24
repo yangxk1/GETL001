@@ -141,6 +141,14 @@ public class RDFConverter {
         });
     }
 
+    private Resource createTriple(NestedPair nestedPair, Model rdf, Map<String, Statement> resolvedStatement) {
+        ValueFactory factory = SimpleValueFactory.getInstance();
+        Optional<Statement> statement = transformToRDFStatement(nestedPair, rdf, resolvedStatement);
+        Statement rdfStatement = statement.orElse(null);
+        assert rdfStatement != null;
+        return factory.createTriple(rdfStatement.getSubject(), rdfStatement.getPredicate(), rdfStatement.getObject());
+    }
+
     /**
      * Using RDF Reification to express the properties of statement
      * <a href="https://stackoverflow.com/questions/55885944/can-rdf-model-a-labeled-property-graph-with-edge-properties">介绍</a>
@@ -178,7 +186,7 @@ public class RDFConverter {
         //subject
         BasePair key = nestedPair.to().from();
         if (key.getContent() != null) {
-            subject = Optional.of(createStatementIRI(key.getContent(), rdf, resolvedStatement));
+            subject = Optional.of(createTriple(key.getContent(), rdf, resolvedStatement));
         } else {
             addType(rdf, key);
             subject = createNode(key);
@@ -198,7 +206,7 @@ public class RDFConverter {
         } else {
             BasePair basePair = (BasePair) value;
             if (basePair.getContent() != null) {
-                object = Optional.of(createStatementIRI(basePair.getContent(), rdf, resolvedStatement));
+                object = Optional.of(createTriple(basePair.getContent(), rdf, resolvedStatement));
             } else {
                 addType(rdf, basePair);
                 object = createNode(basePair);
@@ -245,6 +253,6 @@ public class RDFConverter {
     }
 
     public com.getl.model.ug.IRI createOrObtainLabelNode(IRI object) {
-        return unifiedGraph.getOrRegisterLabel(object.getNamespace(),object.getLocalName());
+        return unifiedGraph.getOrRegisterLabel(object.getNamespace(), object.getLocalName());
     }
 }
