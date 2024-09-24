@@ -1,4 +1,4 @@
-package com.getl.example;
+package com.getl.example.converter;
 
 import com.getl.constant.CommonConstant;
 import com.getl.converter.RMConverter;

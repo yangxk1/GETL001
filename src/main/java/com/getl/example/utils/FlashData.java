@@ -1,4 +1,4 @@
-package com.getl.example;
+package com.getl.example.utils;
 
 import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;

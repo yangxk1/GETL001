@@ -1,4 +1,4 @@
-package com.getl.example;
+package com.getl.example.converter;
 
 import com.getl.Graph;
 import com.getl.constant.CommonConstant;
