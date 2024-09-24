@@ -4,7 +4,7 @@ import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.example.Runnable;
-import com.getl.example.query.utils.LoadUtil;
+import com.getl.example.utils.LoadUtil;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.ug.BasePair;
 import com.getl.model.ug.IRI;

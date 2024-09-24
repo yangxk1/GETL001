@@ -5,6 +5,7 @@ import com.getl.constant.CommonConstant;
 import com.getl.converter.RMConverter;
 import com.getl.converter.async.AsyncRM2UMG;
 import com.getl.example.Runnable;
+import com.getl.example.utils.LoadUtil;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.RM.MysqlOp;
 import com.getl.model.RM.MysqlSessions;
@@ -14,27 +15,11 @@ import com.getl.util.DebugUtil;
 import java.sql.SQLException;
 
 public class Q1 extends Runnable {
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException, InterruptedException {
         DebugUtil.DebugInfo("BEGIN TO TEST Q1");
-        System.out.println(System.currentTimeMillis());
-        RMGraph rmGraph = new RMGraph();
-        RMConverter rmConverter = new RMConverter(new UnifiedGraph(), rmGraph);
-        MysqlOp.asyncRM2UMG = new AsyncRM2UMG(rmConverter);
-        MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
-        long begin = System.currentTimeMillis();
-        long beginall = System.currentTimeMillis();
-        MysqlOp.query(sessions, rmGraph);
-        long t1 = System.currentTimeMillis() - begin;
-        begin = System.currentTimeMillis();
-        System.out.println("==========QUERY FROM MYSQL END [" + t1 + "]=========");
-        System.out.println("Line Size " + rmGraph.getLines().size());
-        MysqlOp.asyncRM2UMG.shutdown();
-        UnifiedGraph unifiedGraph = MysqlOp.asyncRM2UMG.getUnifiedGraph();
-        DebugUtil.DebugInfo("RM2UGM " + (System.currentTimeMillis() - begin));
+        UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
         System.out.println("Pairs: " + unifiedGraph.getCache().size());
-        begin = System.currentTimeMillis();
-        rmGraph = null;
-        rmConverter = null;
+        long begin = System.currentTimeMillis();
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
@@ -46,16 +31,14 @@ public class Q1 extends Runnable {
 
     @Override
     public String init() {
-        return "";
+        return validateParams(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
     }
 
     @Override
     public void forward() {
         try {
             main(null);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

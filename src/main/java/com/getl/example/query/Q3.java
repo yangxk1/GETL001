@@ -6,6 +6,7 @@ import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.constant.RdfDataFormat;
 import com.getl.converter.LPGGraphConverter;
+import com.getl.example.utils.LoadUtil;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
@@ -27,25 +28,9 @@ import java.util.Map;
 public class Q3 {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        String RDF_URL = CommonConstant.RDF_FILES_BASE_URL;
         DebugUtil.DebugInfo("BEGIN TO TEST Q3");
-        Graph graph = new Graph();
+        UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRDFFile();
         long begin = System.currentTimeMillis();
-        File resource = new File(RDF_URL);
-        try {
-            System.out.println("read " + RDF_URL);
-            graph.readRDFFile(RdfDataFormat.TURTLE, resource);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
-        begin = System.currentTimeMillis();
-        //graph.labelPredicate("http://dbpedia.org/ontology/type");
-        graph.handleRDFModel();
-        UnifiedGraph unifiedGraph = graph.getUnifiedGraph();
-        DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
-        begin = System.currentTimeMillis();
-        graph = null;
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();

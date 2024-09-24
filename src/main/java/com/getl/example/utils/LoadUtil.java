@@ -1,4 +1,4 @@
-package com.getl.example.query.utils;
+package com.getl.example.utils;
 
 import com.getl.Graph;
 import com.getl.constant.CommonConstant;
@@ -15,8 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class LoadUtil {
     public static Map<String, Schema> schema;
