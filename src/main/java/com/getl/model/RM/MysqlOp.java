@@ -23,7 +23,7 @@ public class MysqlOp {
 
     public static void createSchema(MysqlSessions session) {
 
-        String sql = "CREATE TABLE IF NOT EXISTS SESSION (id int(4) primary key not null auto_increment, " + Schema.TABLE_NAME + " varchar(255)," + Schema.TYPE + " int,"
+        String sql = "CREATE TABLE IF NOT EXISTS SESSION (" + Schema.TABLE_NAME + " varchar(255)," + Schema.TYPE + " int,"
                 + Schema.HAS_ID + " int," + Schema.COLUMNS + " json," + Schema.IN_LABEL + " varchar(255)," + Schema.OUT_LABEL + " varchar(255),"
                 + Schema.IN + " varchar(255)," + Schema.OUT + " varchar(255), PRIMARY KEY (" + Schema.TABLE_NAME + "))";
         try {

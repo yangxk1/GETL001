@@ -29,7 +29,8 @@ import static org.eclipse.rdf4j.rio.helpers.BasicParserSettings.PRESERVE_BNODE_I
 
 public class FlashData {
     public static void main(String[] args) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
-        Convert2RDF();
+//        Convert2RDF();
+        Convert2RM();
     }
 
     public static void statistics(String[] args) {
