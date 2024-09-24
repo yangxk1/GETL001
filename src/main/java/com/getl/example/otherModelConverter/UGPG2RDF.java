@@ -1,4 +1,4 @@
-package com.getl.example.converter;
+package com.getl.example.otherModelConverter;
 
 import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;

@@ -164,7 +164,7 @@ public class FlashData {
         }
         DebugUtil.DebugInfo("convert to rdf end: " + (System.currentTimeMillis() - begin));
         System.out.println(graphAPI.getRDF().size());
-        BufferedWriter fileWriter = new BufferedWriter(new FileWriter(CommonConstant.LBDC_RDF_FILES_URL));
+        BufferedWriter fileWriter = new BufferedWriter(new FileWriter(CommonConstant.LDBC_RDF_FILES_URL));
         RDFWriter writer = Rio.createWriter(RDFFormat.NTRIPLES, fileWriter).set(PRESERVE_BNODE_IDS, true);
         writer.startRDF();
         for (Statement st : graphAPI.getRDF()) {
@@ -218,7 +218,7 @@ public class FlashData {
         rmConverter.addUGMToRMModel();
         System.out.println("convert 2 rm end: " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        MysqlSessions sessions = new MysqlSessions(CommonConstant.LBDC_JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
+        MysqlSessions sessions = new MysqlSessions(CommonConstant.LDBC_JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         MysqlOp.createSchema(sessions);
         MysqlOp.write(sessions, rmGraph);
         System.out.println("write rm end: " + (System.currentTimeMillis() - begin));

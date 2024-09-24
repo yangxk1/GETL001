@@ -1,4 +1,4 @@
-package com.getl.example.async;
+package com.getl.example.utils;
 
 import com.getl.Graph;
 import com.getl.api.GraphAPI;
@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class LBDC2UGTest {
+public class LDBC2UGUtil {
     public static void main(String[] args) throws InterruptedException, SQLException, ClassNotFoundException {
         UnifiedGraph unifiedGraph = new UnifiedGraph();
         long begin = System.currentTimeMillis();
@@ -45,7 +45,7 @@ public class LBDC2UGTest {
     }
 
     public static void loadFromRDF(UnifiedGraph unifiedGraph) {
-        String RDF_URL = CommonConstant.LBDC_RDF_FILES_URL;
+        String RDF_URL = CommonConstant.LDBC_RDF_FILES_URL;
         DebugUtil.DebugInfo("BEGIN TO LOAD RDF");
         Graph graph = new Graph(unifiedGraph);
         long begin = System.currentTimeMillis();
@@ -67,7 +67,7 @@ public class LBDC2UGTest {
         RMGraph rmGraph = new RMGraph();
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
         MysqlOp.asyncRM2UMG = new AsyncRM2UMG(rmConverter);
-        MysqlSessions sessions = new MysqlSessions(CommonConstant.LBDC_JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
+        MysqlSessions sessions = new MysqlSessions(CommonConstant.LDBC_JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         long begin = System.currentTimeMillis();
         long beginall = System.currentTimeMillis();
         MysqlOp.query(sessions, rmGraph);

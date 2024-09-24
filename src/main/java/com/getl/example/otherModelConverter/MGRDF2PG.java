@@ -1,4 +1,4 @@
-package com.getl.example.converter;
+package com.getl.example.otherModelConverter;
 
 import com.getl.Graph;
 import com.getl.constant.RdfDataFormat;

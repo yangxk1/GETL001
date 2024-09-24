@@ -6,6 +6,8 @@ import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
+import com.getl.example.Runnable;
+import com.getl.example.utils.LoadUtil;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.Subgraph;
@@ -14,6 +16,7 @@ import com.getl.model.RM.MysqlSessions;
 import com.getl.model.RM.RMGraph;
 import com.getl.query.step.MultiLabelP;
 import com.getl.util.DebugUtil;
+import com.mysql.cj.util.LogUtils;
 import org.apache.tinkerpop.gremlin.structure.*;
 
 import java.sql.SQLException;
@@ -24,24 +27,11 @@ import java.util.concurrent.ExecutorService;
 
 import static org.apache.tinkerpop.gremlin.structure.T.label;
 
-public class Q5 {
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+public class Q5 extends Runnable {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException, InterruptedException {
         DebugUtil.DebugInfo("BEGIN TO TEST Q5");
-        RMGraph rmGraph = new RMGraph();
-        MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
+        UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
         long begin = System.currentTimeMillis();
-        MysqlOp.query(sessions, rmGraph);
-        DebugUtil.DebugInfo("QUERY FROM MYSQL END " + (System.currentTimeMillis() - begin));
-        System.out.println("Line Size" + rmGraph.getLines().size());
-        begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = new UnifiedGraph();
-        RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
-        rmConverter.addRMModelToUGM();
-        unifiedGraph = rmConverter.unifiedGraph;
-        DebugUtil.DebugInfo("RM 2 UGM END " + (System.currentTimeMillis() - begin));
-        begin = System.currentTimeMillis();
-        rmGraph = null;
-        rmConverter = null;
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
@@ -59,7 +49,7 @@ public class Q5 {
         System.out.println("add Edge count:" + lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).toList().size());
         begin = System.currentTimeMillis();
         LPGGraph resultGraph = new LPGGraph();
-        lpgGraph.traversal().V().has(label,MultiLabelP.of("classify_by_tag")).forEachRemaining(resultGraph::addVertices);
+        lpgGraph.traversal().V().has(label, MultiLabelP.of("classify_by_tag")).forEachRemaining(resultGraph::addVertices);
         lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).forEachRemaining(resultGraph::addEdge);
         DebugUtil.DebugInfo("collect result" + (System.currentTimeMillis() - begin));
         unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
@@ -151,5 +141,19 @@ public class Q5 {
         }
         subgraphs.forEach(Subgraph::complete);
         DebugUtil.DebugInfo("addE end: ");
+    }
+
+    @Override
+    public String init() {
+        return validateParams(CommonConstant.JDBC_PASSWORD, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_URL);
+    }
+
+    @Override
+    public void forward() {
+        try {
+            main(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

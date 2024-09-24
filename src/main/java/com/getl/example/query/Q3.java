@@ -6,6 +6,7 @@ import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.constant.RdfDataFormat;
 import com.getl.converter.LPGGraphConverter;
+import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGEdge;
@@ -25,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Q3 {
+public class Q3 extends Runnable {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         DebugUtil.DebugInfo("BEGIN TO TEST Q3");
@@ -55,9 +56,9 @@ public class Q3 {
         g.V()
                 .property("_degree", __.bothE().count()).toList();
         List<Map<String, Object>> results = lpgGraph.traversal().V()
-                .has("_degree", P.gt(5)).as("n1")
+                .has("_degree", P.gt(20)).as("n1")
                 .outE().as("e1")
-                .inV().has("_degree", P.gt(5)).as("n2")
+                .inV().has("_degree", P.gt(20)).as("n2")
                 .select("n1", "e1", "n2")
                 .dedup("e1")
                 .toList();
@@ -92,5 +93,19 @@ public class Q3 {
         DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
         System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
         System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
+    }
+
+    @Override
+    public String init() {
+        return validateParams(CommonConstant.RDF_FILES_BASE_URL);
+    }
+
+    @Override
+    public void forward() {
+        try {
+            main(null);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

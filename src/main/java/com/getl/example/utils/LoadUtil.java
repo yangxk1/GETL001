@@ -71,8 +71,8 @@ public class LoadUtil {
         DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin) + " ms");
         lpgParser.getAsyncPG2UMG().shutdown();
         DebugUtil.DebugInfo("pg to ugm end " + (System.currentTimeMillis() - begin) + " ms");
-//        System.out.println("vertices count:" + lpgParser.getGraph().traversal().V().count().next());
-//        System.out.println("edges count:" + lpgParser.getGraph().traversal().E().count().next());
+        System.out.println("vertices count:" + lpgParser.getGraph().traversal().V().count().next());
+        System.out.println("edges count:" + lpgParser.getGraph().traversal().E().count().next());
         return lpgParser.getAsyncPG2UMG().getUnifiedGraph();
     }
 

@@ -1,4 +1,4 @@
-package com.getl.example.converter;
+package com.getl.example.otherModelConverter;
 
 import com.getl.constant.CommonConstant;
 import com.getl.converter.mg.PGMapperI;

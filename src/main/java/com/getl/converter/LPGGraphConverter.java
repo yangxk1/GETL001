@@ -77,7 +77,7 @@ public class LPGGraphConverter {
         if (element instanceof LPGVertex) {
             result = transVerticesToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGVertex) element);
         } else if (element instanceof LPGEdge) {
-            result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGEdge) element);
+            result = ((NestedPair) transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGEdge) element)).from();
         } else if (element instanceof LPGProperty) {
             result = transPropertiesToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGProperty) element);
         }
@@ -132,7 +132,7 @@ public class LPGGraphConverter {
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
         String edgeLabel = propertiesGraphConfig.getEdge(lpgEdge.label);
         IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edgeLabel);
-        return unifiedGraph.add(edge, lpgEdge.getId(), (BasePair) outV, inV);
+        return unifiedGraph.add(edge, lpgEdge.getId(), outV, inV);
     }
 
     /**

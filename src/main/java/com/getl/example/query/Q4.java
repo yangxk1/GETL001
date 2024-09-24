@@ -5,6 +5,7 @@ import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.TinkerPopConverter;
+import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
 import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.*;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
 
-public class Q4 {
+public class Q4 extends Runnable {
     public static void main(String[] args) throws ParseException, SQLException, ClassNotFoundException, InterruptedException {
         DebugUtil.DebugInfo("BEGIN TO TEST Q4");
         UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles();
@@ -69,5 +70,19 @@ public class Q4 {
         graphAPI.refreshRDF();
         DebugUtil.DebugInfo("UGM2RDF end " + (System.currentTimeMillis() - begin));
         System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
+    }
+
+    @Override
+    public String init() {
+        return "";
+    }
+
+    @Override
+    public void forward() {
+        try {
+            main(null);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

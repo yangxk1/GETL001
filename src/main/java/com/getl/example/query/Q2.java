@@ -6,6 +6,7 @@ import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
 import com.getl.converter.TinkerPopConverter;
+import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
 import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
@@ -32,7 +33,7 @@ import java.util.Map;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.between;
 import static org.apache.tinkerpop.gremlin.structure.T.label;
 
-public class Q2 {
+public class Q2 extends Runnable {
     public static void main(String[] args) throws ParseException, SQLException, ClassNotFoundException, InterruptedException {
         UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles();
         long begin = System.currentTimeMillis();
@@ -123,5 +124,19 @@ public class Q2 {
         DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));
         System.out.println("Lines: " + rmGraph.getLines().size());
 
+    }
+
+    @Override
+    public String init() {
+        return validateParams(CommonConstant.LPG_FILES_BASE_URL);
+    }
+
+    @Override
+    public void forward() {
+        try {
+            main(null);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
