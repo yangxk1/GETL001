@@ -3,10 +3,16 @@ package com.getl.example.query;
 import com.getl.constant.CommonConstant;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.io.LPGParser;
+import com.getl.model.LPG.LPGEdge;
+import com.getl.model.LPG.LPGGraph;
+import com.getl.model.LPG.LPGVertex;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Q7 {
@@ -67,9 +73,22 @@ public class Q7 {
         lpgParser.getAsyncPG2UMG().shutdown();
         begin = System.currentTimeMillis();
         RandomWalk randomWalk = new RandomWalk(lpgParser.getGraph());
-        List<List<Object>> lists = randomWalk.asyncForward(Math.toIntExact(count), 3);
+        LPGGraph resultGraph = new LPGGraph();
+        List<List<Vertex>> lists = randomWalk.asyncForward(Math.toIntExact(count), 3);
+        System.out.println("rand walk end " + (System.currentTimeMillis() - begin));
         for (int i = 0; i < lists.size(); i++) {
 //            System.out.println(i + " : " + lists.get(i).stream().map(Object::toString).collect(Collectors.joining("->")));
+            List<Vertex> vertexIds = lists.get(i);
+            if (vertexIds.size() < 3) {
+                continue;
+            }
+            Vertex v1 = vertexIds.get(0);
+            Vertex e = vertexIds.get(1);
+            Vertex v2 = vertexIds.get(2);
+            LPGVertex n1V = resultGraph.getOrCreateVertex(v1.id(), v1.label(), v1.properties());
+            LPGVertex n2V = resultGraph.getOrCreateVertex(v2.id(), v2.label(), v2.properties());
+            LPGEdge lpgEdge = new LPGEdge(resultGraph, n1V, n2V, "recommend");
+            lpgEdge.addPropertyValue("post", e.id());
         }
         System.out.println("rand walk end " + (System.currentTimeMillis() - begin));
         double v = 1.0 * (System.currentTimeMillis() - begin) / count;

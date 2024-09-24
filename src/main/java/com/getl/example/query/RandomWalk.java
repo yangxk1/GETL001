@@ -20,23 +20,23 @@ public class RandomWalk {
     private long countTime = 0;
     private GraphTraversalSource g;
     private Graph graph;
-    List<List<Object>> order;
+    List<List<Vertex>> order;
 
     public RandomWalk(Graph graph) {
         this.graph = graph;
         this.g = this.graph.traversal();
     }
 
-    public List<List<Object>> forward(int order_size, int maxSteps) {
+    public List<List<Vertex>> forward(int order_size, int maxSteps) {
         List<Vertex> vertexList = graph.traversal().V().hasLabel("Person").toList();
         order = new ArrayList<>(order_size);
         for (int i = 0; i < order_size; i++) {
-            vertexList.stream().skip(new Random().nextInt(vertexList.size())).findAny().ifPresent(person -> randomWalk(person.id(), maxSteps));
+            vertexList.stream().skip(new Random().nextInt(vertexList.size())).findAny().ifPresent(person -> randomWalk(person, maxSteps));
         }
         return order;
     }
 
-    public List<List<Object>> asyncForward(int order_size, int maxSteps) {
+    public List<List<Vertex>> asyncForward(int order_size, int maxSteps) {
         countTime = 0;
         List<Vertex> vertexList = graph.traversal().V().hasLabel("Person").toList();
         order = Collections.synchronizedList(new ArrayList<>(order_size));
@@ -49,7 +49,7 @@ public class RandomWalk {
                 System.out.println(Thread.currentThread().getName() + " " + (index - 1) * order_size / poolSize + "_____" + index * order_size / poolSize);
                 new Thread(() -> {
                     for (int j = (index - 1) / poolSize * order_size; j < index / poolSize * order_size; j++) {
-                        randomWalk(vertexList.get(j).id(), maxSteps);
+                        randomWalk(vertexList.get(j), maxSteps);
                     }
                     countDownLatch.countDown();
                 }).start();
@@ -62,17 +62,17 @@ public class RandomWalk {
         return order;
     }
 
-    private void randomWalk(Object startVertexId, int maxSteps) {
-        Object currentPeopleId = startVertexId;
-        Object currentPostId = null;
-        List<Object> visited = new ArrayList<>();
-        visited.add(currentPeopleId);
-        for (int step = 0; step < maxSteps / 3; step++) {
+    private void randomWalk(Vertex startVertex, int maxSteps) {
+        Vertex currentperson = startVertex;
+        Vertex currentPost = null;
+        List<Vertex> visited = new ArrayList<>();
+        visited.add(currentperson);
+        for (int step = 0; step < (maxSteps - 1) / 2; step++) {
             //person -> post
-            Vertex currentVertex_person = g.V(currentPeopleId).next();
             List<Map.Entry<Vertex, Double>> person_post_neighbors = new ArrayList<>();
-            g.V(currentPeopleId).out("person_likes_post", "post_hasCreator_person").forEachRemaining(neighbor -> {
-                double weightedValue = calculateNePostWeight(currentVertex_person, neighbor);
+            Vertex finalCurrentperson = currentperson;
+            g.V(currentperson).out("person_likes_post", "post_hasCreator_person").forEachRemaining(neighbor -> {
+                double weightedValue = calculateNePostWeight(finalCurrentperson, neighbor);
                 person_post_neighbors.add(new AbstractMap.SimpleEntry<>(neighbor, weightedValue));
             });
 
@@ -82,14 +82,14 @@ public class RandomWalk {
             }
 
             // Randomly select the next vertex based on weights
-            currentPostId = selectWeightedRandomVertex(person_post_neighbors);
+            currentPost = selectWeightedRandomVertex(person_post_neighbors);
             //post -> person
-            visited.add(currentPostId);
-            Vertex currentVertex_post = g.V(currentPostId).next();
+            visited.add(currentPost);
             List<Map.Entry<Vertex, Double>> post_person_neighbors = new ArrayList<>();
-            g.V(currentPostId).in("person_likes_post", "post_hasCreator_person").forEachRemaining(neighbor -> {
-                double weightedValue = calculateNePersonWeight(currentVertex_post, neighbor);
-                if (!neighbor.equals(currentVertex_person)) {
+            Vertex finalCurrentPost = currentPost;
+            g.V(currentPost).in("person_likes_post", "post_hasCreator_person").forEachRemaining(neighbor -> {
+                double weightedValue = calculateNePersonWeight(finalCurrentPost, neighbor);
+                if (!neighbor.equals(finalCurrentperson)) {
                     post_person_neighbors.add(new AbstractMap.SimpleEntry<>(neighbor, weightedValue));
                 }
             });
@@ -97,8 +97,8 @@ public class RandomWalk {
             if (post_person_neighbors.isEmpty()) {
                 break;
             }
-            currentPeopleId = selectWeightedRandomVertex(post_person_neighbors);
-            visited.add(currentPeopleId);
+            currentperson = selectWeightedRandomVertex(post_person_neighbors);
+            visited.add(currentperson);
         }
         order.add(visited);
     }
@@ -173,7 +173,7 @@ public class RandomWalk {
         }
     }
 
-    private Object selectWeightedRandomVertex(List<Map.Entry<Vertex, Double>> weightedNeighbors) {
+    private Vertex selectWeightedRandomVertex(List<Map.Entry<Vertex, Double>> weightedNeighbors) {
         double totalWeight = weightedNeighbors.stream().mapToDouble(Map.Entry::getValue).sum();
         double randomValue = Math.random() * totalWeight;
         double cumulativeWeight = 0.0;
@@ -181,9 +181,9 @@ public class RandomWalk {
         for (Map.Entry<Vertex, Double> entry : weightedNeighbors) {
             cumulativeWeight += entry.getValue();
             if (cumulativeWeight >= randomValue) {
-                return entry.getKey().id(); // Return the vertex ID
+                return entry.getKey(); // Return the vertex ID
             }
         }
-        return -1; // Should not reach here
+        return null; // Should not reach here
     }
 }

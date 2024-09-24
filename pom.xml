@@ -15,7 +15,7 @@
         <hutool.version>5.8.25</hutool.version>
         <rdf4j-version>4.3.9</rdf4j-version>
         <tinkerpop-version>3.4.9</tinkerpop-version>
-        <main-class>com.getl.example.async.LBDC2UGTest</main-class>
+        <main-class>com.getl.example.GetlExampleMain</main-class>
     </properties>
     <dependencies>
         <dependency>
