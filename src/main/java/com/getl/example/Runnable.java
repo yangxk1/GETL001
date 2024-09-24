@@ -7,7 +7,20 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.SQLException;
+
 public abstract class Runnable {
+
+    public String validateParams(String... params) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String param : params) {
+            if (StringUtils.isBlank(param)) {
+                stringBuilder.append(param);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
     public abstract String init();
 
     public abstract void forward();

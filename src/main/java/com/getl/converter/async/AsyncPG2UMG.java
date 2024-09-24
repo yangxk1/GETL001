@@ -14,8 +14,6 @@ import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import static com.getl.example.async.AsyncPG2UGTest.inCount;
-import static com.getl.example.async.AsyncPG2UGTest.outCount;
 
 public class AsyncPG2UMG {
 
@@ -48,7 +46,6 @@ public class AsyncPG2UMG {
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         EventFactory<ElementReference> factory = ElementReference::new;
         EventHandler<ElementReference> handler = (element, sequence, endOfBatch) -> {
-            outCount.addAndGet(1);
             if (element.element instanceof EventElement) {
                 this.stopped = true;
                 return;
@@ -71,7 +68,6 @@ public class AsyncPG2UMG {
         } finally {
             ringBuffer.publish(sequence);
         }
-        inCount.addAndGet(1);
     }
 
     class EventElement implements Element {

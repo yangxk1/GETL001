@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 public class MysqlOp {
 
@@ -240,7 +241,7 @@ public class MysqlOp {
         while (resultSet.next()) {
             String tableName = resultSet.getString(Schema.TABLE_NAME);
             Schema schema = new Schema(tableName);
-            int hasId = resultSet.getInt("has_id");
+            int hasId = resultSet.getInt(Schema.HAS_ID);
             schema.setHasId(hasId);
             int type = resultSet.getInt(Schema.TYPE);
             String columnsJSON = resultSet.getString(Schema.COLUMNS);
@@ -273,13 +274,16 @@ public class MysqlOp {
         graph.setSchemas(schemas);
     }
 
+    public static CountDownLatch countDownLatch;
+
     public static void query(MysqlSessions session, RMGraph graph) throws SQLException {
         querySchema(session, graph);
+        countDownLatch = new CountDownLatch(graph.getSchemas().entrySet().size());
         for (Map.Entry<String, Schema> entry : graph.getSchemas().entrySet()) {
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT * FROM `");
             sql.append(entry.getKey()).append("`");
-            sql.append("Limit 5000");
+//            sql.append("Limit 5000");
             String select = sql.toString();
             ArrayList<Line> lines = new ArrayList<>();
             ResultSet resultSet = session.select(select, lines);
@@ -336,16 +340,19 @@ public class MysqlOp {
                 graph.getLines().put(id, line);
                 lines.add(line);
             }
+            List<Line> cache = lines;
             new Thread(() -> {
                 try {
                     System.out.println(Thread.currentThread().getName() + " " + schema.getTableName() + " " + (schema.isNode() ? "node" : "edge"));
-                    List<Line> cache = lines;
                     cache.forEach(asyncRM2UMG::addLine);
                 } finally {
-//                    latch.countDown();
+                    countDownLatch.countDown();
                 }
             }).start();
         }
     }
 
+    public static void waitAll() throws InterruptedException {
+        countDownLatch.await();
+    }
 }

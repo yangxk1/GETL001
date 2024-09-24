@@ -234,7 +234,6 @@ public class LPGParser {
         this.elementCache = new ArrayList<>(ARRAY_SIZE);
         new Thread(() -> {
             try {
-                AsyncPG2UGTest.count.addAndGet(cache.size());
                 cache.forEach(asyncPG2UMG::addElement);
             } finally {
                 latch.countDown();
