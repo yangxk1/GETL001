@@ -18,8 +18,11 @@ public class LPGGraph implements Graph {
      * The vertices of this labeled property graph.
      */
     @Setter
-    @Getter
     private Map<Object, LPGVertex> vertices = new LinkedHashMap<>();
+
+    public Map<Object, LPGVertex> getVs() {
+        return vertices;
+    }
 
     public Collection<LPGVertex> getVertices() {
         return vertices.values();

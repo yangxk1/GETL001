@@ -46,11 +46,21 @@ public class Schema {
         }
         this.type = type;
     }
+    public Schema(String tableName, String out,String outLabel, String in ,String inLabel) {
+        this.tableName = tableName;
+        this.in = in;
+        this.inLabel = inLabel;
+        this.out = out;
+        this.outLabel = outLabel;
+        setType(1);
+    }
 
     public Schema(String tableName, String out, String in) {
         this.tableName = tableName;
         this.in = in;
+        this.inLabel = in;
         this.out = out;
+        this.outLabel = out;
         setType(1);
     }
 

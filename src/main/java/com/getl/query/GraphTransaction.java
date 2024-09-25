@@ -1,6 +1,7 @@
 
 package com.getl.query;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGProperty;
@@ -81,7 +82,7 @@ public class GraphTransaction {
 
     public Iterator<Vertex> queryVertices(Object... vertexIds) {
         Set<Object> vIds = Arrays.stream(vertexIds).collect(Collectors.toSet());
-        Iterator iterator = Optional.ofNullable(vIds).stream().map(lpgGraph::getVertex).iterator();
+        Iterator iterator = Optional.ofNullable(vIds).orElse(new HashSet<>()).stream().map(lpgGraph::getVertex).collect(Collectors.toList()).iterator();
         return iterator;
 //        return this.lpgGraph.getVertices().stream()
 ////                .filter(i -> vIds.contains(i.id()))

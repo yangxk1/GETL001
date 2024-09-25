@@ -40,7 +40,7 @@ public class RandomWalk {
         int order_size = vertexList.size();
         System.out.println("Person count: " + vertexList.size());
         order = Collections.synchronizedList(new ArrayList<>(order_size));
-        int poolSize = 16;
+        int poolSize = 32;
 //        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
         CountDownLatch countDownLatch = new CountDownLatch(poolSize);
         try {

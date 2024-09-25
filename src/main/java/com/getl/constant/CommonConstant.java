@@ -4,6 +4,7 @@ public class CommonConstant {
     public static final String WEIGHT_KEY = "DEFAULT_PROPERTIES_KEY_WEIGHT";
     private static String JDBC_BASE_URL = "jdbc:mysql://47.95.7.12:3306/";
     public static String JDBC_URL = JDBC_BASE_URL + "rm_data?useSSH=false";
+    public static String LDBC_JDBC_RESULT = JDBC_BASE_URL + "movie_q7_2?useSSH=false";
     public static String RESULT_JDBC_URL = JDBC_BASE_URL + "result_data?useSSH=false";
     public static String LDBC_JDBC_URL = JDBC_BASE_URL + "movie_q7_1?useSSH=false";
     public static String JDBC_USERNAME = "root";

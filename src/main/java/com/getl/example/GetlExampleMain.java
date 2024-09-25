@@ -4,6 +4,7 @@ import com.getl.example.async.AsyncPG2UGTest;
 import com.getl.example.async.AsyncRM2UGTest;
 import com.getl.example.query.*;
 import com.getl.example.utils.FlashData;
+import com.getl.example.utils.LdbcStatistics;
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
@@ -24,6 +25,13 @@ public class GetlExampleMain {
             try {
                 FlashData.main(args);
             } catch (InterruptedException | IOException | SQLException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        } else if (cmd.getOptionValue("c").equalsIgnoreCase("LdbcStatistics")) {
+            try {
+                LdbcStatistics.main(args);
+            } catch (InterruptedException | SQLException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
             return;
