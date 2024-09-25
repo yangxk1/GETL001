@@ -80,11 +80,13 @@ public class GraphTransaction {
     }
 
     public Iterator<Vertex> queryVertices(Object... vertexIds) {
-        Set<Object> vertexes = Arrays.stream(vertexIds).collect(Collectors.toSet());
-        return this.lpgGraph.getVertices().stream()
-                .filter(i -> vertexes.contains(i.id()))
-                .map(i -> (Vertex) i)
-                .collect(Collectors.toList()).iterator();
+        Set<Object> vIds = Arrays.stream(vertexIds).collect(Collectors.toSet());
+        Iterator iterator = Optional.ofNullable(vIds).stream().map(lpgGraph::getVertex).iterator();
+        return iterator;
+//        return this.lpgGraph.getVertices().stream()
+////                .filter(i -> vIds.contains(i.id()))
+////                .map(i -> (Vertex) i)
+////                .collect(Collectors.toList()).iterator();
     }
 
     public Iterator<Edge> queryEdges() {

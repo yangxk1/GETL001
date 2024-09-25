@@ -2,11 +2,13 @@ package com.getl.constant;
 
 public class CommonConstant {
     public static final String WEIGHT_KEY = "DEFAULT_PROPERTIES_KEY_WEIGHT";
-    public static String JDBC_URL = "jdbc:mysql://8.140.49.185:3306/movie_002?useSSH=false";
-    public static String LDBC_JDBC_URL = "jdbc:mysql://8.140.49.185:3306/movie_q7_1?useSSH=false";
+    private static String JDBC_BASE_URL = "jdbc:mysql://47.95.7.12:3306/";
+    public static String JDBC_URL = JDBC_BASE_URL + "rm_data?useSSH=false";
+    public static String RESULT_JDBC_URL = JDBC_BASE_URL + "result_data?useSSH=false";
+    public static String LDBC_JDBC_URL = JDBC_BASE_URL + "movie_q7_1?useSSH=false";
     public static String JDBC_USERNAME = "root";
-    public static String JDBC_PASSWORD = "hbulis123!";
-    public static String LPG_FILES_BASE_URL = "/usr/local/graphdata/social_network-csv_basic-sf0.1/";
-    public static String RDF_FILES_BASE_URL = "/usr/local/graphdata/mapping_en_cp.ttl";
-    public static String LDBC_RDF_FILES_URL = "/home/yangxk/graph/LDBC_RDF.ttl";
+    public static String JDBC_PASSWORD = "123";
+    public static String LPG_FILES_BASE_URL = "/home/yaof/lib629/social_network-csv_basic-longdateformatter-sf1/";
+    public static String RDF_FILES_BASE_URL = "/home/yaof/lib629/RDF/mapping_en.ttl";
+    public static String LDBC_RDF_FILES_URL = "/home/yaof/lib629/RDF/LDBC_RDF.ttl";
 }

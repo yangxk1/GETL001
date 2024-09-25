@@ -264,9 +264,12 @@ public class LPGParser {
         String toLabel = to == null ? "to" : to;
         String f1 = fromLabel + ".id";
         String t1 = toLabel + ".id";
+        int i = 0;
         GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
         for (CSVRecord record : records) {
-//            if (i++ >= 3000){break;}
+//            if (i++ >= 3000) {
+//                break;
+//            }
             Map<String, String> pop = record.toMap();
             String label = pop.get("label");
             label = label == null ? edgeLabel : label;

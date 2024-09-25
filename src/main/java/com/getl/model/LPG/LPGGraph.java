@@ -18,6 +18,7 @@ public class LPGGraph implements Graph {
      * The vertices of this labeled property graph.
      */
     @Setter
+    @Getter
     private Map<Object, LPGVertex> vertices = new LinkedHashMap<>();
 
     public Collection<LPGVertex> getVertices() {
@@ -57,14 +58,17 @@ public class LPGGraph implements Graph {
     public void addEdge(@NonNull LPGEdge e) {
         edges.add(e);
     }
+
     public void addEdge(@NonNull Edge e) {
         edges.add((LPGEdge) e);
     }
+
     public void addVertices(@NonNull Vertex... vertices) {
         for (Vertex v : vertices) {
             this.addVertex((LPGVertex) v);
         }
     }
+
     /**
      * Adds new vertices to this graph, if a vertex already exists in the graph nothing happens.
      *

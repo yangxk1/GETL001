@@ -54,6 +54,9 @@ public class GetlExampleMain {
             case "q6":
                 runnable = new Q6();
                 break;
+            case "q7":
+                runnable = new Q7();
+                break;
         }
         if (runnable == null) {
             throw new RuntimeException("illegal parameters - c CLASS NAME: " + cmd.getOptionValue("c"));

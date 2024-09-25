@@ -283,7 +283,7 @@ public class MysqlOp {
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT * FROM `");
             sql.append(entry.getKey()).append("`");
-            sql.append("Limit 5000");
+//            sql.append("Limit 5000");
             String select = sql.toString();
             ArrayList<Line> lines = new ArrayList<>();
             ResultSet resultSet = session.select(select, lines);
@@ -297,7 +297,7 @@ public class MysqlOp {
                 }
                 if (StringUtils.isBlank(id)) {
                     id = schema.getTableName() + ":" + UnifiedGraph.getNextID();
-                } else {
+                } else if (id.charAt(0) <= '9' && id.charAt(0) >= '0') {
                     id = schema.getTableName() + ":" + id;
                 }
                 line.setId(id);

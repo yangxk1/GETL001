@@ -17,8 +17,11 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesParser;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +34,7 @@ public class FlashData {
     public static void main(String[] args) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
 //        Convert2PG();
         Convert2RDF();
-        Convert2RM();
+//        Convert2RM();
     }
 
     public static void statistics(String[] args) {
@@ -140,8 +143,7 @@ public class FlashData {
         }
         DebugUtil.DebugInfo("convert to rdf end: " + (System.currentTimeMillis() - begin));
         System.out.println(graphAPI.getRDF().size());
-        BufferedWriter fileWriter = new BufferedWriter(new FileWriter(CommonConstant.LDBC_RDF_FILES_URL));
-        RDFWriter writer = Rio.createWriter(RDFFormat.NTRIPLES, fileWriter).set(PRESERVE_BNODE_IDS, true);
+        org.eclipse.rdf4j.rio.RDFWriter writer = new NTriplesWriter(new FileOutputStream(CommonConstant.LDBC_RDF_FILES_URL));
         writer.startRDF();
         for (Statement st : graphAPI.getRDF()) {
             writer.handleStatement(st);
@@ -159,10 +161,7 @@ public class FlashData {
         String BASE_URL_DYNAMIC = BASE_URL + "dynamic/";
         lpgParser.latchSize(5);
         lpgParser.loadVertex(BASE_URL_STATIC + "organisation_0_0.csv", "Organisation").commit2Converter();
-        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "person_0_0.csv", "Person", "firstName", LPGParser.STRING, "lastName", LPGParser.STRING, "gender", LPGParser.STRING, "birthday", LPGParser.DATE, "creationDate", LPGParser.DATE).commit2Converter();
-        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.DATE, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
-        lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.DATE).commit2Converter();
-        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "imageFile", LPGParser.STRING, "creationDate", LPGParser.DATE, "language", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
+        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "imageFile", LPGParser.STRING, "creationDate", LPGParser.MILLI, "language", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
         DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
@@ -192,12 +191,14 @@ public class FlashData {
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
         rmConverter.addUGMToRMModel();
         System.out.println("convert 2 rm end: " + (System.currentTimeMillis() - begin));
+        System.out.println("rm count: " + rmGraph.getLines().size());
         begin = System.currentTimeMillis();
         MysqlSessions sessions = new MysqlSessions(CommonConstant.LDBC_JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         MysqlOp.createSchema(sessions);
         MysqlOp.write(sessions, rmGraph);
         System.out.println("write rm end: " + (System.currentTimeMillis() - begin));
     }
+
     private static void Convert2PG() throws InterruptedException, IOException, SQLException, ClassNotFoundException {
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(new UnifiedGraph(), null));
         long begin = System.currentTimeMillis();
@@ -207,10 +208,10 @@ public class FlashData {
         //EDGE
         lpgParser.latchSize(7);
         lpgParser.loadEdge(BASE_URL_STATIC + "organisation_isLocatedIn_place_0_0.csv", "organisation_isLocatedIn_place", "Organisation", "Place").commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasMember_person_0_0.csv", "forum_hasMember_person", "Forum", "Person", "joinDate", LPGParser.DATE).commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_knows_person_0_0.csv", "person_knows_person", "Person", "Person", "creationDate", LPGParser.DATE).commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_comment_0_0.csv", "person_likes_comment", "Person", "Comment", "creationDate", LPGParser.DATE).commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.DATE).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasMember_person_0_0.csv", "forum_hasMember_person", "Forum", "Person", "joinDate", LPGParser.MILLI).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_knows_person_0_0.csv", "person_knows_person", "Person", "Person", "creationDate", LPGParser.MILLI).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_comment_0_0.csv", "person_likes_comment", "Person", "Comment", "creationDate", LPGParser.MILLI).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT).commit2Converter();
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));

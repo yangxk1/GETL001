@@ -36,10 +36,13 @@ public class Q7 extends Runnable {
         graphAPI.refreshLPG();
         DebugUtil.DebugInfo("ug 2 lpg end: " + (System.currentTimeMillis() - begin) + " ms");
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
-        Long count = lpgGraph.traversal().V().hasLabel("Person").count().next();
+        graphAPI = null;
+        unifiedGraph = null;
+        Runtime.getRuntime().gc();
+        begin = System.currentTimeMillis();
         RandomWalk randomWalk = new RandomWalk(lpgGraph);
         LPGGraph resultGraph = new LPGGraph();
-        List<List<Vertex>> lists = randomWalk.asyncForward(Math.toIntExact(count), 3);
+        List<List<Vertex>> lists = randomWalk.forward( 3);
         System.out.println("rand walk end " + (System.currentTimeMillis() - begin));
         for (int i = 0; i < lists.size(); i++) {
             List<Vertex> vertexIds = lists.get(i);
@@ -54,11 +57,9 @@ public class Q7 extends Runnable {
             LPGEdge lpgEdge = new LPGEdge(resultGraph, n1V, n2V, "recommend");
             lpgEdge.addPropertyValue("post", e.id());
         }
-        System.out.println("rand walk end " + (System.currentTimeMillis() - begin));
-        double v = 1.0 * (System.currentTimeMillis() - begin) / count;
-        System.out.println(v);
+        System.out.println("collect result to pg end " + (System.currentTimeMillis() - begin));
         System.out.println("vertices count: " + resultGraph.getVertices().size());
-        System.out.println("vertices count: " + resultGraph.getEdges().size());
+        System.out.println("edges count: " + resultGraph.getEdges().size());
     }
 
     @Override
