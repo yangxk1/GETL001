@@ -110,34 +110,34 @@ public class RandomWalk {
     }
 
     /**
-     * @param currentVertexPost post vertex
-     * @param neighbor          person vertex
+     * @param post   post vertex
+     * @param person person vertex
      */
-    private double calculateNePersonWeight(Vertex currentVertexPost, Vertex neighbor) {
-        double weight = 0.0;
-        boolean personKnowsPerson = g.V(currentVertexPost.id()).both("person_knows_person").has(T.id, neighbor.id()).hasNext();
+    private double calculateNePersonWeight(Vertex post, Vertex person) {
+        double weight = 1.0;
+        boolean personKnowsPerson = g.V(post.id()).both("person_knows_person").has(T.id, person.id()).hasNext();
         if (personKnowsPerson) {
             weight += 10.0;
         }
-        weight += calculateNePostWeight(neighbor, currentVertexPost);
+        weight += getTagsSimilarity(person, post);
         return weight;
     }
 
     /**
-     * @param vertex   person vertex
-     * @param neighbor post vertex
+     * @param person person vertex
+     * @param post   post vertex
      */
-    private double calculateNePostWeight(Vertex vertex, Vertex neighbor) {
-        double weight = 0.0;
-        double recentScore = getRecentScore(neighbor);
-        weight += recentScore * (getInteractionCount(neighbor) + getTagsSimilarity(vertex, neighbor));
+    private double calculateNePostWeight(Vertex person, Vertex post) {
+        double weight = 1.0;
+        double recentScore = getRecentScore(post);
+        weight += recentScore * (getInteractionCount(post) + getTagsSimilarity(person, post));
 
         return weight;
     }
 
     private double getTagsSimilarity(Vertex vertex, Vertex neighbor) {
         HashSet<Object> userTags = new HashSet<>(g.V(vertex.id()).out("person_hasInterest_tag").id().toList());
-        HashSet<Object> commentTags = new HashSet<>(g.V(vertex.id()).out("post_hasTag_tag").id().toList());
+        HashSet<Object> commentTags = new HashSet<>(g.V(neighbor.id()).out("post_hasTag_tag").id().toList());
 
         // 计算相似度
         int commonTagsCount = 0;
