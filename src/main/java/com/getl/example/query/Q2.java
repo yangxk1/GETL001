@@ -118,7 +118,7 @@ public class Q2 extends Runnable {
         rmConverter.addUGMToRMModel();
         DebugUtil.DebugInfo("ugm 2 RM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
+        MysqlSessions sessions = new MysqlSessions(CommonConstant.RESULT_JDBC_URL_2, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         MysqlOp.createSchema(sessions);
         MysqlOp.write(sessions, rmGraph);
         DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));

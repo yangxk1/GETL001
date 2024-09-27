@@ -18,22 +18,18 @@ public abstract class Runnable {
                 stringBuilder.append(param);
             }
         }
-        return stringBuilder.toString();
+        if (stringBuilder.length() > 0) {
+            return stringBuilder.toString();
+        }
+        return "";
     }
 
     public abstract String init();
 
     public abstract void forward();
 
-    public void accept(Options options, String[] args) {
-        options.addOption("r", false, "RDF FILE URL");
-        options.addOption("j", false, "JDBC URL");
-        options.addOption("ju", false, "JDBC USER NAME");
-        options.addOption("jp", false, "JDBC PASSWORD");
-        options.addOption("p", false, "PROPERTY GRAPH FILE URL");
-        DefaultParser parser = new DefaultParser();
+    public void accept(CommandLine commandLine, String[] args) {
         try {
-            CommandLine commandLine = parser.parse(options, args);
             if (commandLine.hasOption("r")) {
                 CommonConstant.RDF_FILES_BASE_URL = commandLine.getOptionValue("r");
             }
@@ -49,7 +45,7 @@ public abstract class Runnable {
             if (commandLine.hasOption("p")) {
                 CommonConstant.LPG_FILES_BASE_URL = commandLine.getOptionValue("p");
             }
-        } catch (ParseException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         String init = init();

@@ -283,7 +283,7 @@ public class MysqlOp {
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT * FROM `");
             sql.append(entry.getKey()).append("`");
-//            sql.append("Limit 5000");
+//            sql.append("Limit 20");
             String select = sql.toString();
             ArrayList<Line> lines = new ArrayList<>();
             ResultSet resultSet = session.select(select, lines);

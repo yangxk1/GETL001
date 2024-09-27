@@ -74,8 +74,8 @@ public class Q6 extends Runnable {
             lpgEdge.setId(e1.id());
         }
         DebugUtil.DebugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
-        System.out.println("vertices count: "+resultGraph.getVertices().size());
-        System.out.println("edge count: "+resultGraph.getEdges().size());
+        System.out.println("vertices count: " + resultGraph.getVertices().size());
+        System.out.println("edge count: " + resultGraph.getEdges().size());
         begin = System.currentTimeMillis();
         computeComponents(resultGraph);
         DebugUtil.DebugInfo("cc end " + (System.currentTimeMillis() - begin));
@@ -93,8 +93,9 @@ public class Q6 extends Runnable {
         rmConverter.addUGMToRMModel();
         DebugUtil.DebugInfo("UGM 2 RM end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
+        MysqlSessions sessions = new MysqlSessions(CommonConstant.RESULT_JDBC_URL_6, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         MysqlOp.createSchema(sessions);
+        MysqlOp.write(sessions, rmGraph);
         DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));
         System.out.println("Lines: " + rmGraph.getLines().size());
     }
@@ -157,7 +158,7 @@ public class Q6 extends Runnable {
     public void forward() {
         try {
             main(null);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class UnifiedGraph implements Graph {
     public Map<String, PropertiesGraphConfig> lpgConfigs;
     private static volatile AtomicInteger idIncrementer = new AtomicInteger(100);
-    private Map<IRI, BasePair> IRIs = new ConcurrentHashMap<>();
+    private Map<IRI, BasePair> IRI2BasePair = new ConcurrentHashMap<>();
     private List<NestedPair> cache = new ArrayList<>();
     private Map<String, IRI> labels = new ConcurrentHashMap<>();
     private Map<String, IRI> s2IRI = new ConcurrentHashMap<>();
@@ -68,7 +68,7 @@ public class UnifiedGraph implements Graph {
         assert IRIId != null;
         String url = baseURI + IRIId;
         IRI IRIInstant = s2IRI.computeIfAbsent(url, i -> new IRI(baseURI, IRIId));
-        return IRIs.computeIfAbsent(IRIInstant, i -> new BasePair(new HashSet<>(), i));
+        return IRI2BasePair.computeIfAbsent(IRIInstant, i -> new BasePair(new HashSet<>(), i));
     }
 
     public void addLabel(BasePair basePair, IRI label) {
@@ -76,7 +76,7 @@ public class UnifiedGraph implements Graph {
     }
 
     public BasePair addLabel(IRI subject, IRI label) {
-        BasePair basePair = IRIs.computeIfAbsent(subject, i -> new BasePair(new HashSet<>(), i));
+        BasePair basePair = IRI2BasePair.computeIfAbsent(subject, i -> new BasePair(new HashSet<>(), i));
         addLabel(basePair, label);
         return basePair;
     }
@@ -112,14 +112,14 @@ public class UnifiedGraph implements Graph {
 
     public void merge(UnifiedGraph source) {
         this.labels.putAll(source.labels);
-        this.IRIs.putAll(source.IRIs);
+        this.IRI2BasePair.putAll(source.IRI2BasePair);
         this.s2IRI.putAll(source.s2IRI);
         this.cache.addAll(source.cache);
     }
 
     public void gc() {
         this.labels = new HashMap<>();
-        this.IRIs = new HashMap<>();
+        this.IRI2BasePair = new HashMap<>();
         this.s2IRI = new HashMap<>();
     }
 
@@ -144,7 +144,7 @@ public class UnifiedGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
-        Iterator basePairIterator = this.IRIs.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getNameSpace).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
+        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getNameSpace).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
         return basePairIterator;
     }
 

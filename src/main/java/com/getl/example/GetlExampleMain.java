@@ -6,6 +6,7 @@ import com.getl.example.query.*;
 import com.getl.example.utils.FlashData;
 import com.getl.example.utils.LdbcStatistics;
 import org.apache.commons.cli.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -15,6 +16,11 @@ public class GetlExampleMain {
     public static void main(String[] args) throws ParseException {
         Options options = new Options();
         options.addOption("c", true, "CLASS NAME");
+        options.addOption("r", false, "RDF FILE URL");
+        options.addOption("j", false, "JDBC URL");
+        options.addOption("ju", false, "JDBC USER NAME");
+        options.addOption("jp", false, "JDBC PASSWORD");
+        options.addOption("p", false, "PROPERTY GRAPH FILE URL");
         CommandLineParser parser = new DefaultParser();
         parser.parse(options, args);
         CommandLine cmd = parser.parse(options, args);
@@ -69,6 +75,6 @@ public class GetlExampleMain {
         if (runnable == null) {
             throw new RuntimeException("illegal parameters - c CLASS NAME: " + cmd.getOptionValue("c"));
         }
-        runnable.accept(options, args);
+        runnable.accept(cmd, args);
     }
 }

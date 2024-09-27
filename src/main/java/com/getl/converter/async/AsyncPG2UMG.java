@@ -33,7 +33,6 @@ public class AsyncPG2UMG {
 
     public void shutdown() {
         addElement(new EventElement());
-        System.out.println(stopped);
         while (!stopped) {
             Thread.onSpinWait();
         }
@@ -53,7 +52,7 @@ public class AsyncPG2UMG {
             tinkerPopConverter.handleElement(element.element);
         };
         WaitStrategy strategy = new YieldingWaitStrategy();
-        int bufferSize = 1024 * 1024;
+        int bufferSize = 1024 * 1024 * 8;
         disruptor = new Disruptor<>(factory, bufferSize, threadFactory, ProducerType.MULTI, strategy);
         disruptor.handleEventsWith(handler);
         disruptor.start();

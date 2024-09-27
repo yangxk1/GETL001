@@ -116,7 +116,7 @@ public class RDFConverter {
             rdfStatement.ifPresent(rdf::add);
         }
         //handle all basePair. Prevent IRIs from having no properties or relationships
-        for (BasePair basePair : this.unifiedGraph.getIRIs().values()) {
+        for (BasePair basePair : this.unifiedGraph.getIRI2BasePair().values()) {
             addType(rdf, basePair);
         }
         return rdf;

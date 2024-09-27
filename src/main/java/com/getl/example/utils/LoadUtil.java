@@ -18,6 +18,7 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerVertex;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -76,27 +77,27 @@ public class LoadUtil {
         DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin) + " ms");
         lpgParser.getAsyncPG2UMG().shutdown();
         DebugUtil.DebugInfo("pg to ugm end " + (System.currentTimeMillis() - begin) + " ms");
-        System.out.println("vertices count:" + lpgParser.getGraph().traversal().V().count().next());
-        System.out.println("edges count:" + lpgParser.getGraph().traversal().E().count().next());
-        int i = 0;
-        Iterator<Vertex> vertices = lpgParser.getGraph().vertices();
-        while (vertices.hasNext()) {
-            TinkerVertex vertex = (TinkerVertex) vertices.next();
-            for (String key : vertex.keys()) {
-                while (vertex.properties(key).hasNext()) {
-                    i++;
-                }
-            }
-        }
-        System.out.println("vertex properties count: " + i);
-        System.out.println("Edges count: " + lpgParser.getGraph().traversal().E().count().next());
-        i = 0;
-        Iterator<Edge> edges = lpgParser.getGraph().edges();
-        while (edges.hasNext()) {
-            TinkerEdge edge = (TinkerEdge) edges.next();
-            i += edge.keys().size();
-        }
-        System.out.println("edge properties count: " + i);
+//        System.out.println("vertices count:" + lpgParser.getGraph().traversal().V().count().next());
+//        System.out.println("edges count:" + lpgParser.getGraph().traversal().E().count().next());
+//        int i = 0;
+//        Iterator<Vertex> vertices = lpgParser.getGraph().vertices();
+//        while (vertices.hasNext()) {
+//            TinkerVertex vertex = (TinkerVertex) vertices.next();
+//            for (String key : vertex.keys()) {
+//                while (vertex.properties(key).hasNext()) {
+//                    i++;
+//                }
+//            }
+//        }
+//        System.out.println("vertex properties count: " + i);
+//        System.out.println("Edges count: " + lpgParser.getGraph().traversal().E().count().next());
+//        i = 0;
+//        Iterator<Edge> edges = lpgParser.getGraph().edges();
+//        while (edges.hasNext()) {
+//            TinkerEdge edge = (TinkerEdge) edges.next();
+//            i += edge.keys().size();
+//        }
+//        System.out.println("edge properties count: " + i);
         return lpgParser.getAsyncPG2UMG().getUnifiedGraph();
     }
 
@@ -113,6 +114,8 @@ public class LoadUtil {
         MysqlOp.asyncRM2UMG.shutdown();
         DebugUtil.DebugInfo("RM 2 ugm END " + (System.currentTimeMillis() - begin) + " ms");
         schema = rmConverter.rmGraph.getSchemas();
+//        System.out.println(("rows count:" + rmConverter.rmGraph.getLines().size()));
+//        rmConverter.rmGraph.getLines().values().stream().sorted(Comparator.comparing(Line::getId)).forEach(System.out::println);
         return MysqlOp.asyncRM2UMG.getUnifiedGraph();
     }
 
@@ -130,7 +133,7 @@ public class LoadUtil {
         }
         DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        //graph.labelPredicate("http://dbpedia.org/ontology/type");
+        graph.labelPredicate("http://dbpedia.org/ontology/type");
         graph.handleRDFModel();
         DebugUtil.DebugInfo("RDF 2 ugm END " + (System.currentTimeMillis() - begin));
         return graph.getUnifiedGraph();

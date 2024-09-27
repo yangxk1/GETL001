@@ -114,7 +114,7 @@ public class RMConverter {
     }
 
     public void addUGMToRMModel() {
-        for (BasePair basePair : unifiedGraph.getIRIs().values()) {
+        for (BasePair basePair : unifiedGraph.getIRI2BasePair().values()) {
             handleBasePair(basePair);
         }
         for (NestedPair nestedPair : unifiedGraph.getPairs()) {

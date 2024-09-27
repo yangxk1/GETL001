@@ -8,6 +8,8 @@ import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
 import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
+import com.getl.model.LPG.LPGElement;
+import com.getl.model.LPG.LPGVertex;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.Subgraph;
@@ -68,9 +70,8 @@ public class Q5 extends Runnable {
 
     private static void subGraph(LPGGraph graph) {
         Subgraph.SubGraphBuilder subGraphBuilder = new Subgraph.SubGraphBuilder(graph, "classify_by_tag");
-        subGraphBuilder.traversal(graph.traversal().V().has(label, "movie").toList());
         subGraphBuilder.groupBy("tag", movie -> {
-            Iterator<Edge> edges = movie.edges(Direction.OUT, "genome-scores");
+            Iterator<Edge> edges = movie.edges(Direction.BOTH, "genome-scores");
             double relevance = -5;
             String tag = null;
             while (edges.hasNext()) {
@@ -78,16 +79,21 @@ public class Q5 extends Runnable {
                 Object o = next.property("relevance").orElse(-5);
                 if (relevance < (double) o) {
                     tag = next.inVertex().id().toString();
+                    relevance = (double) o;
                 }
             }
             return Optional.ofNullable(tag);
         });
         subGraphBuilder.traversal(graph.traversal().V().has(label, "movie").toList());
         List<Subgraph> subgraphs = subGraphBuilder.getSubGraphs();
+//        for (Subgraph subgraph : subgraphs) {
+//            System.out.printf(subgraph.toString());
+//            System.out.println(subgraph.property("tag").value().toString());
+//        }
         DebugUtil.DebugInfo("group end subGraph number: " + subgraphs.size());
         subGraphBuilder.addV(((subgraph, vertex) -> {
-            vertex.vertices(Direction.OUT, "genome-scores").forEachRemaining(subgraph::addVertex);
-            vertex.edges(Direction.IN, "ratings").forEachRemaining(edge -> {
+            vertex.vertices(Direction.BOTH, "genome-scores").forEachRemaining(subgraph::addVertex);
+            vertex.edges(Direction.BOTH, "ratings").forEachRemaining(edge -> {
                 Object o = edge.property("rating").orElse(0);
                 if (5 <= (double) o) {
                     subgraph.addVertex(edge.outVertex());

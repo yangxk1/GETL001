@@ -51,7 +51,7 @@ public class AsyncRM2UMG {
             rmConverter.handleLine(line);
         };
         WaitStrategy strategy = new YieldingWaitStrategy();
-        int bufferSize = 1024 * 1024;
+        int bufferSize = 1024 * 1024 * 8;
         disruptor = new Disruptor<>(factory, bufferSize, threadFactory, ProducerType.MULTI, strategy);
         disruptor.handleEventsWith(handler);
         disruptor.start();

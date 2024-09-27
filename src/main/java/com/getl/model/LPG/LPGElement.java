@@ -115,11 +115,11 @@ public abstract class LPGElement implements Vertex {
         return propNameToProp.values();
     }
 
-    protected LinkedHashSet<LPGEdge> getOutEdges() {
+    public LinkedHashSet<LPGEdge> getOutEdges() {
         return outEdges;
     }
 
-    protected LinkedHashSet<LPGEdge> getInEdges() {
+    public LinkedHashSet<LPGEdge> getInEdges() {
         return inEdges;
     }
 

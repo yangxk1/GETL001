@@ -97,6 +97,7 @@ public class Subgraph extends LPGVertex {
         }
 
         public SubGraphBuilder traversal(List<Vertex> vertices) {
+            System.out.println("movies count: " + vertices.size());
             Stream<Vertex> stream = Optional.ofNullable(vertices).orElse(Collections.emptyList()).stream();
             //分组
             Map<Object, List<LPGElement>> group = group(stream, groupKey);
