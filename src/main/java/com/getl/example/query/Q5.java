@@ -43,8 +43,8 @@ public class Q5 extends Runnable {
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
         DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
-        System.out.println("vertex size :" + lpgGraph.getVertices().size());
-        System.out.println("edge size :" + lpgGraph.getEdges().size());
+//        System.out.println("vertex size :" + lpgGraph.getVertices().size());
+//        System.out.println("edge size :" + lpgGraph.getEdges().size());
         begin = System.currentTimeMillis();
         subGraph(lpgGraph);
         DebugUtil.DebugInfo("SUBGRAPH end" + (System.currentTimeMillis() - begin));

@@ -57,17 +57,14 @@ public class RDFConverter {
         Map<Statement, NestedPair> rdfToOGStatement = new HashMap<>();
 
         for (Statement rdfStatement : rdfData) {
-            Statement rdfStatementNoCTX = SimpleValueFactory.getInstance().createStatement(rdfStatement.getSubject(),
-                    rdfStatement.getPredicate(), rdfStatement.getObject());
-
-            NestedPair nestedPair = rdfToOGStatement.get(rdfStatementNoCTX);
+            NestedPair nestedPair = rdfToOGStatement.get(rdfStatement);
             if (nestedPair == null) {
-                nestedPair = this.createPairFromRDFStatement(rdfStatementNoCTX);
+                nestedPair = this.createPairFromRDFStatement(rdfStatement);
                 if (nestedPair == null) {
                     continue;
                 }
 //                this.unifiedGraph.addStatement(nestedPair);
-                rdfToOGStatement.put(rdfStatementNoCTX, nestedPair);
+                rdfToOGStatement.put(rdfStatement, nestedPair);
             }
         }
     }

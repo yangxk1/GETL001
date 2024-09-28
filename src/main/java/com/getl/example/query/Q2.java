@@ -9,14 +9,11 @@ import com.getl.converter.TinkerPopConverter;
 import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
 import com.getl.io.LPGParser;
+import com.getl.model.RM.*;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGVertex;
-import com.getl.model.RM.MysqlOp;
-import com.getl.model.RM.MysqlSessions;
-import com.getl.model.RM.RMGraph;
-import com.getl.model.RM.Schema;
 import com.getl.query.step.MultiLabelP;
 import com.getl.util.DebugUtil;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -26,9 +23,8 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.P.between;
 import static org.apache.tinkerpop.gremlin.structure.T.label;
@@ -135,7 +131,7 @@ public class Q2 extends Runnable {
     public void forward() {
         try {
             main(null);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

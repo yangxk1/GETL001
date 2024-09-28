@@ -46,8 +46,7 @@ public class LPGGraphConverter {
         UnifiedGraph unifiedGraph = this.UnifiedGraph;
         Map<LPGElement, Pair> vertexes = new HashMap<>();
         // Adds statements for the vertices
-        lpgGraph.getVertices().stream().filter(i -> !(i instanceof LPGSuperVertex))
-                .forEach(vertex -> transElementToUGMIRI(unifiedGraph, this.lpgGraph, vertexes, vertex));
+        lpgGraph.getVertices().forEach(vertex -> transElementToUGMIRI(unifiedGraph, this.lpgGraph, vertexes, vertex));
         // Adds statements for the edges
         lpgGraph.getEdges().forEach(edge -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge));
     }
@@ -77,7 +76,7 @@ public class LPGGraphConverter {
         if (element instanceof LPGVertex) {
             result = transVerticesToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGVertex) element);
         } else if (element instanceof LPGEdge) {
-            result = ((NestedPair) transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGEdge) element)).from();
+            result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGEdge) element);
         } else if (element instanceof LPGProperty) {
             result = transPropertiesToUGMIRI(unifiedGraph, lpgGraph, vertexes, (LPGProperty) element);
         }
@@ -106,7 +105,7 @@ public class LPGGraphConverter {
             valueIRI = LiteralConverter.convertToUGMLiteral(value);
         }
         IRI pop = propertiesGraphConfig.getPop(unifiedGraph, element.name);
-        return unifiedGraph.add(pop, (BasePair) elementIRI, valueIRI);
+        return unifiedGraph.add(pop, (BasePair) elementIRI, valueIRI).from();
     }
 
     private Pair transEdgeToUGMIRI(UnifiedGraph unifiedGraph, LPGGraph lpgGraph, Map<LPGElement, Pair> vertexes, LPGEdge lpgEdge) throws ConverterException {
@@ -132,7 +131,7 @@ public class LPGGraphConverter {
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
         String edgeLabel = propertiesGraphConfig.getEdge(lpgEdge.label);
         IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edgeLabel);
-        return unifiedGraph.add(edge, lpgEdge.getId(), outV, inV);
+        return unifiedGraph.add(edge, lpgEdge.getId(), outV, inV).from();
     }
 
     /**
