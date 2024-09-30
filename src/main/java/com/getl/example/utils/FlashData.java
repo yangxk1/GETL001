@@ -32,8 +32,8 @@ import static org.eclipse.rdf4j.rio.helpers.BasicParserSettings.PRESERVE_BNODE_I
 
 public class FlashData {
     public static void main(String[] args) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
-//        Convert2PG();
-//        Convert2RDF();
+        Convert2PG();
+        Convert2RDF();
         Convert2RM();
     }
 
@@ -161,6 +161,9 @@ public class FlashData {
         String BASE_URL_DYNAMIC = BASE_URL + "dynamic/";
         lpgParser.latchSize(5);
         lpgParser.loadVertex(BASE_URL_STATIC + "organisation_0_0.csv", "Organisation").commit2Converter();
+        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "person_0_0.csv", "Person", "firstName", LPGParser.STRING, "lastName", LPGParser.STRING, "gender", LPGParser.STRING, "birthday", LPGParser.MILLI, "creationDate", LPGParser.MILLI).commit2Converter();
+        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.MILLI, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
+        lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "imageFile", LPGParser.STRING, "creationDate", LPGParser.MILLI, "language", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
