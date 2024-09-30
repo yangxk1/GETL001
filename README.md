@@ -11,13 +11,13 @@ The GETL is a Java Maven project and requires JDK 11 and Maven 3.6.1 to build fr
 Extra dependencies are required by examples:
 - MySQL (>=5.7)
 
+## Configurations
+
+Before building the project, please configure the path of the data file and MySQL in the yaml file.
+
+In the `src/main/resources/config.yaml` file, we can configure MySQL configuration and PG\RDF data file paths for the project.
+
 ## Building GETL and examples
-
-Before building the project, please configure the path of the test file and MYSQL in the code.
-
-In the `src/main/Java/com/getl/example` directory, there are all the experiments. Please select the experiment you want to run and copy its full class name (e.g. `com.getl.example.query.Q1`) to the `<main-class>` tag in the `pom.xml` file
-
-Then, move to the `src/main/Java/com/getl/constant/CommonConstant.Java` file and configure MySQL configuration and PG\RDF data file paths for the project.
 
 Next, change into the root directory of GETL, and use the Maven command to build the project.
 ```
@@ -25,12 +25,29 @@ mvn package
 ```
 Now, we have generated the `GETL-1.00.jar` file in the `\target` directory. We can run the project with command:
 ```
-java -jar GETL-1.00.jar
+java -jar GETL-1.00.jar -c q1
 ```
+`-c` command line argument control which example class will be run.
+
+A part of runnable example classes are shown below:
+
+| Abbreviation | Full class name                      |
+| :------------: | :------------------------------------: |
+| q1           | com.getl.example.query.Q1            |
+| q2           | com.getl.example.query.Q2            |
+| ...          | ...                                  |
+| q7           | com.getl.example.query.Q7            |
+| pg2ug        | com.getl.example.converter.PG2UGTest |
+| rm2ug        | com.getl.example.converter.RM2UGTest |
+| ...          | ...                                  |
+
 If we allocate too little memory, there may be problems. We can use the following command to ensure that the JVM has sufficient heap and stack space.
 ```
-java -jar -Xms40960m -Xmx92160m -Xss64m GETL-1.00.jar
+java -jar -Xms40960m -Xmx92160m -Xss64m GETL-1.00.jar -c q1
 ```
+## Implement an runnable class
+
+We can also customize a class to implement the ETL operations we want to accomplish. This operation is very simple. We just need to let our class extend the `com.getl.example.Runnable` abstract class and implement the `accept` method. Finally, register this runnable class in the `com.getl.example.GetlExampleMain` class, and we can execute it like the class in the example
 
 ## Dataset
 
