@@ -10,18 +10,19 @@ import com.getl.util.DebugUtil;
 import java.sql.SQLException;
 
 public class RM2UGTest extends Runnable {
-    public static void main(String[] args) throws SQLException, ClassNotFoundException, InterruptedException {
-        UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
-        long begin = System.currentTimeMillis();
-        RMConverter rmConverter = new RMConverter(unifiedGraph, new RMGraph().setSchemas(LoadUtil.schema));
-        rmConverter.addUGMToRMModel();
-        DebugUtil.DebugInfo("ugm 2 rm time: " + (System.currentTimeMillis() - begin) + " ms");
+    public static void main(String[] args) {
+        new RM2UGTest().accept();
     }
 
     @Override
-    public void forward() {
+    public void accept() {
         try {
-            main(null);
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
+            long begin = System.currentTimeMillis();
+            RMConverter rmConverter = new RMConverter(unifiedGraph, new RMGraph().setSchemas(LoadUtil.schema));
+            rmConverter.addUGMToRMModel();
+            DebugUtil.DebugInfo("ugm 2 rm time: " + (System.currentTimeMillis() - begin) + " ms");
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

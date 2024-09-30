@@ -14,5 +14,7 @@ lpg:
     base: /home/graphdata/social_network-csv_basic-longdateformatter-sf1/
 rdf:
   url:
-    base: /home/graphdata/RDF/mapping_en.ttl
+    base:
+      source: /home/graphdata/RDF/mapping_en.ttl
+      target: /home/graphdata/output.ttl
     ldbc: /home/graphdata/RDF/LDBC_RDF.ttl

@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GetlExampleMain {
+public class GetlExampleMain  {
 
     private static Map<String, String> classMap;
 
@@ -35,7 +35,8 @@ public class GetlExampleMain {
         CommonConstant.LDBC_JDBC_URL = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.ldbc.source");
         CommonConstant.LDBC_JDBC_RESULT = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.ldbc.target");
         CommonConstant.LPG_FILES_BASE_URL = yamlGet(obj, "lpg.url.base");
-        CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base");
+        CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base.source");
+        CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base.target");
         CommonConstant.LDBC_RDF_FILES_URL = yamlGet(obj, "rdf.url.ldbc");
 
         classMap = new HashMap<>();
@@ -49,23 +50,27 @@ public class GetlExampleMain {
         classMap.put("pg2ug", "com.getl.example.converter.PG2UGTest");
         classMap.put("rm2ug", "com.getl.example.converter.RM2UGTest");
         classMap.put("rdf2ug", "com.getl.example.converter.RDF2UGTest");
-
-
+        classMap.put("pg2rdf", "com.getl.example.otherModelConverter.UGPG2RDF");
+        classMap.put("rdf2pg", "com.getl.example.otherModelConverter.UGRDF2PG");
     }
 
     public static void main(String[] args) throws ParseException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         init();
         Options options = new Options();
-        options.addOption("c", true, "CLASS NAME");
+        options.addOption("c", false, "CLASS NAME");
         CommandLineParser parser = new DefaultParser();
         parser.parse(options, args);
         CommandLine cmd = parser.parse(options, args);
         if (!cmd.hasOption("c")) {
-            throw new RuntimeException("Required parameters -c CLASS NAME");
+            StringBuilder stringBuilder = new StringBuilder();
+            classMap.forEach((k, v) -> {
+                stringBuilder.append("       ").append(k).append(" : ").append(v).append("\n");
+            });
+            throw new RuntimeException("Required parameters -c CLASS \n" + stringBuilder);
         }
-        String className = classMap.get(cmd.getOptionValue("c").toLowerCase());
+        String className = classMap.get(cmd.getOptionValue("c").toLowerCase()) == null ? cmd.getOptionValue("c") : classMap.get(cmd.getOptionValue("c").toLowerCase());
         Class clazz = Class.forName(className);
         Runnable queryInstance = (Runnable) clazz.getDeclaredConstructor().newInstance();
-        queryInstance.accept(cmd, args);
+        queryInstance.accept();
     }
 }

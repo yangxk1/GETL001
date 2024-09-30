@@ -3,13 +3,19 @@ package com.getl.example.otherModelConverter;
 import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
 import com.getl.converter.TinkerPopConverter;
+import com.getl.example.Runnable;
 import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
 
 
-public class UGPG2RDF {
+public class UGPG2RDF extends Runnable {
     public static void main(String[] args) {
+        new UGPG2RDF().accept();
+    }
+
+    @Override
+    public void accept() {
         DebugUtil.DebugInfo("BEGIN TO TEST Q2");
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser();

@@ -30,40 +30,8 @@ import java.util.concurrent.ExecutorService;
 import static org.apache.tinkerpop.gremlin.structure.T.label;
 
 public class Q5 extends Runnable {
-    public static void main(String[] args) throws SQLException, ClassNotFoundException, InterruptedException {
-        DebugUtil.DebugInfo("BEGIN TO TEST Q5");
-        UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
-        long begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
-        DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
-        begin = System.currentTimeMillis();
-        GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setUGMGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
-        graphAPI.refreshLPG();
-        LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
-        DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
-        begin = System.currentTimeMillis();
-        subGraph(lpgGraph);
-        DebugUtil.DebugInfo("SUBGRAPH end" + (System.currentTimeMillis() - begin));
-        System.out.println("add Edge count:" + lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).toList().size());
-        begin = System.currentTimeMillis();
-        LPGGraph resultGraph = new LPGGraph();
-        lpgGraph.traversal().V().has(label, MultiLabelP.of("classify_by_tag")).forEachRemaining(resultGraph::addVertices);
-        lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).forEachRemaining(resultGraph::addEdge);
-        DebugUtil.DebugInfo("collect result" + (System.currentTimeMillis() - begin));
-        unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
-        DebugUtil.DebugInfo("lpg 2 UGM end " + (System.currentTimeMillis() - begin));
-        begin = System.currentTimeMillis();
-        graphAPI = GraphAPI.open();
-        graphAPI.setUGMGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
-        graphAPI.refreshLPG();
-        lpgGraph = graphAPI.getGraph().getLpgGraph();
-        DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
-        System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
-        System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
-        Subgraph.SubGraphBuilder.getExecutorPool().shutdown();
+    public static void main(String[] args) {
+        new Q5().accept();
     }
 
     private static void subGraph(LPGGraph graph) {
@@ -142,9 +110,41 @@ public class Q5 extends Runnable {
     }
 
     @Override
-    public void forward() {
+    public void accept() {
         try {
-            main(null);
+            DebugUtil.DebugInfo("BEGIN TO TEST Q5");
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
+            long begin = System.currentTimeMillis();
+            Runtime.getRuntime().gc();
+            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            GraphAPI graphAPI = GraphAPI.open();
+            graphAPI.setUGMGraph(unifiedGraph);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.refreshLPG();
+            LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
+            DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            subGraph(lpgGraph);
+            DebugUtil.DebugInfo("SUBGRAPH end" + (System.currentTimeMillis() - begin));
+            System.out.println("add Edge count:" + lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).toList().size());
+            begin = System.currentTimeMillis();
+            LPGGraph resultGraph = new LPGGraph();
+            lpgGraph.traversal().V().has(label, MultiLabelP.of("classify_by_tag")).forEachRemaining(resultGraph::addVertices);
+            lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).forEachRemaining(resultGraph::addEdge);
+            DebugUtil.DebugInfo("collect result" + (System.currentTimeMillis() - begin));
+            unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
+            DebugUtil.DebugInfo("lpg 2 UGM end " + (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
+            graphAPI = GraphAPI.open();
+            graphAPI.setUGMGraph(unifiedGraph);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.refreshLPG();
+            lpgGraph = graphAPI.getGraph().getLpgGraph();
+            DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
+            System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
+            System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
+            Subgraph.SubGraphBuilder.getExecutorPool().shutdown();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

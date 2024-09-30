@@ -4,6 +4,7 @@ import com.getl.Graph;
 import com.getl.api.GraphAPI;
 import com.getl.constant.IRINamespace;
 import com.getl.constant.RdfDataFormat;
+import com.getl.example.Runnable;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.util.DebugUtil;
@@ -13,8 +14,13 @@ import java.io.IOException;
 
 import static com.getl.constant.CommonConstant.RDF_FILES_BASE_URL;
 
-public class UGRDF2PG {
+public class UGRDF2PG extends Runnable {
     public static void main(String[] args) {
+        new UGRDF2PG().accept();
+    }
+
+    @Override
+    public void accept() {
         String RDF_URL = RDF_FILES_BASE_URL;
         DebugUtil.DebugInfo("BEGIN TO TEST RDF2PG by UG");
         Graph graph = new Graph();
