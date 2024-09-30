@@ -43,8 +43,6 @@ public class Q5 extends Runnable {
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
         DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
-//        System.out.println("vertex size :" + lpgGraph.getVertices().size());
-//        System.out.println("edge size :" + lpgGraph.getEdges().size());
         begin = System.currentTimeMillis();
         subGraph(lpgGraph);
         DebugUtil.DebugInfo("SUBGRAPH end" + (System.currentTimeMillis() - begin));
@@ -86,10 +84,6 @@ public class Q5 extends Runnable {
         });
         subGraphBuilder.traversal(graph.traversal().V().has(label, "movie").toList());
         List<Subgraph> subgraphs = subGraphBuilder.getSubGraphs();
-//        for (Subgraph subgraph : subgraphs) {
-//            System.out.printf(subgraph.toString());
-//            System.out.println(subgraph.property("tag").value().toString());
-//        }
         DebugUtil.DebugInfo("group end subGraph number: " + subgraphs.size());
         subGraphBuilder.addV(((subgraph, vertex) -> {
             vertex.vertices(Direction.BOTH, "genome-scores").forEachRemaining(subgraph::addVertex);
@@ -99,7 +93,6 @@ public class Q5 extends Runnable {
                     subgraph.addVertex(edge.outVertex());
                 }
             });
-//            graph.traversal().V(vertex.id()).inE("ratings").has("rating", P.gte(5)).outV().toList().forEach(subGraph::addVertex);
         }));
         DebugUtil.DebugInfo("addV end ");
         Map<Object, Set<Object>> userInSubGraph = new ConcurrentHashMap<>();
@@ -122,7 +115,6 @@ public class Q5 extends Runnable {
         }
         DebugUtil.DebugInfo("agg user end: ");
         for (int i = 0; i < subgraphs.size() - 1; i++) {
-//            System.out.println("No." + i + " : " + System.currentTimeMillis());
             Subgraph a = subgraphs.get(i);
             Set<Object> u1 = userInSubGraph.get(a.id());
             if (CollectionUtil.isEmpty(u1)) {
@@ -147,11 +139,6 @@ public class Q5 extends Runnable {
         }
         subgraphs.forEach(Subgraph::complete);
         DebugUtil.DebugInfo("addE end: ");
-    }
-
-    @Override
-    public String init() {
-        return validateParams(CommonConstant.JDBC_PASSWORD, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_URL);
     }
 
     @Override

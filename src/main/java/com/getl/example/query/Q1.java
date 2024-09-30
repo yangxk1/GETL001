@@ -29,10 +29,6 @@ public class Q1 extends Runnable {
         System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
     }
 
-    @Override
-    public String init() {
-        return validateParams(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
-    }
 
     @Override
     public void forward() {

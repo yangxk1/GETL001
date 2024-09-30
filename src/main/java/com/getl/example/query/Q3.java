@@ -44,8 +44,6 @@ public class Q3 extends Runnable {
         unifiedGraph = null;
         graphAPI = null;
         DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
-        // System.out.println("result vertex count: " + lpgGraph.getVertices().size());
-        // System.out.println("result edge count: " + lpgGraph.getEdges().size());
         begin = System.currentTimeMillis();
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
@@ -76,8 +74,6 @@ public class Q3 extends Runnable {
             lpgEdge.setId(e1.id());
         }
         DebugUtil.DebugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
-        //   System.out.println("result vertex count: " + resultGraph.getVertices().size());
-        //    System.out.println("result edge count: " + resultGraph.getEdges().size());
         lpgGraph = null;
         Runtime.getRuntime().gc();
         DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
@@ -93,11 +89,6 @@ public class Q3 extends Runnable {
         DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
         System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
         System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
-    }
-
-    @Override
-    public String init() {
-        return validateParams(CommonConstant.RDF_FILES_BASE_URL);
     }
 
     @Override

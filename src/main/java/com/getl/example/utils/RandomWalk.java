@@ -12,7 +12,6 @@ import java.util.concurrent.CountDownLatch;
 
 public class RandomWalk {
 
-    private long countTime = 0;
     private GraphTraversalSource g;
     private Graph graph;
     List<List<Vertex>> order;
@@ -28,20 +27,15 @@ public class RandomWalk {
         System.out.println("Person count: " + order_size);
         order = new ArrayList<>(order_size);
         vertexList.forEach(i -> randomWalk(i, maxSteps, order));
-//        for (int i = 0; i < order_size; i++) {
-//            vertexList.stream().skip(new Random().nextInt(vertexList.size())).findAny().ifPresent(person -> randomWalk(person, maxSteps, order));
-//        }
         return order;
     }
 
     public List<List<Vertex>> asyncForward(int maxSteps) {
-        countTime = 0;
         List<Vertex> vertexList = graph.traversal().V().hasLabel("Person").toList();
         int order_size = vertexList.size();
         System.out.println("Person count: " + vertexList.size());
         order = Collections.synchronizedList(new ArrayList<>(order_size));
         int poolSize = 32;
-//        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
         CountDownLatch countDownLatch = new CountDownLatch(poolSize);
         try {
             for (int i = 1; i <= poolSize; i++) {
@@ -139,7 +133,6 @@ public class RandomWalk {
         HashSet<Object> userTags = new HashSet<>(g.V(vertex.id()).out("person_hasInterest_tag").id().toList());
         HashSet<Object> commentTags = new HashSet<>(g.V(neighbor.id()).out("post_hasTag_tag").id().toList());
 
-        // 计算相似度
         int commonTagsCount = 0;
         for (Object tag : commentTags) {
             if (userTags.contains(tag)) {
@@ -149,14 +142,12 @@ public class RandomWalk {
         return commonTagsCount;
     }
 
-    //点赞评论
     private double getInteractionCount(Vertex neighbor) {
         Long likeCount = g.V(neighbor.id()).in("person_likes_post").count().next();
         Long replyCount = g.V(neighbor.id()).in("comment_replyOf_post").count().next();
         return (likeCount * 1.0) + (replyCount * 2.0);
     }
 
-    //时间相关性
     private double getRecentScore(Vertex neighbor) {
         LocalDateTime now = LocalDateTime.now();
         VertexProperty<Object> createTime = neighbor.property("create_time");
@@ -168,14 +159,12 @@ public class RandomWalk {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
         long daysBetween = ChronoUnit.DAYS.between(creationDate, now);
-        // 假设最近的评论得分最高，分数随着时间增长而减少
-        // 例如：一天内得10分，超过7天则得分线性下降
         if (daysBetween < 1) {
             return 10.0;
         } else if (daysBetween < 7) {
             return 10.0 - (daysBetween * (10.0 / 10)); // 线性下降
         } else {
-            return 0.1; // 超过一周的评论推荐型最低
+            return 0.1;
         }
     }
 

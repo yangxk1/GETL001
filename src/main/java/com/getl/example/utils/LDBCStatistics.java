@@ -1,17 +1,12 @@
 package com.getl.example.utils;
 
 import com.getl.Graph;
-import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
-import com.getl.constant.IRINamespace;
 import com.getl.constant.RdfDataFormat;
 import com.getl.converter.RMConverter;
 import com.getl.converter.TinkerPopConverter;
 import com.getl.converter.async.AsyncRM2UMG;
 import com.getl.io.LPGParser;
-import com.getl.model.LPG.LPGEdge;
-import com.getl.model.LPG.LPGGraph;
-import com.getl.model.LPG.LPGVertex;
 import com.getl.model.RM.Line;
 import com.getl.model.RM.MysqlOp;
 import com.getl.model.RM.MysqlSessions;
@@ -28,7 +23,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-public class LdbcStatistics {
+public class LDBCStatistics {
     public static void main(String[] args) throws InterruptedException, SQLException, ClassNotFoundException {
         loadFromRM(new UnifiedGraph());
         Runtime.getRuntime().gc();

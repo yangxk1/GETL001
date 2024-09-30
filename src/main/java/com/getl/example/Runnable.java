@@ -8,23 +8,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Runnable {
-
-    public String validateParams(String... params) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String param : params) {
-            if (StringUtils.isBlank(param)) {
-                stringBuilder.append(param);
-            }
-        }
-        if (stringBuilder.length() > 0) {
-            return stringBuilder.toString();
-        }
-        return "";
-    }
-
-    public abstract String init();
 
     public abstract void forward();
 
@@ -47,10 +34,6 @@ public abstract class Runnable {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-        String init = init();
-        if (StringUtils.isNotBlank(init)) {
-            throw new RuntimeException("Required parameters :" + init);
         }
         forward();
     }

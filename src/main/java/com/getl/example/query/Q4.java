@@ -73,11 +73,6 @@ public class Q4 extends Runnable {
     }
 
     @Override
-    public String init() {
-        return "";
-    }
-
-    @Override
     public void forward() {
         try {
             main(null);

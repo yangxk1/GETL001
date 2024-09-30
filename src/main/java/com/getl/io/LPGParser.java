@@ -2,8 +2,6 @@ package com.getl.io;
 
 import com.getl.converter.TinkerPopConverter;
 import com.getl.converter.async.AsyncPG2UMG;
-import com.getl.example.async.AsyncPG2UGTest;
-import com.getl.model.ug.UnifiedGraph;
 import lombok.Data;
 import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
@@ -23,12 +21,9 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import static org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.set;
-import static org.javacc.parser.JavaCCGlobals.fileName;
 
 @Data
 public class LPGParser {
@@ -37,6 +32,7 @@ public class LPGParser {
     private AsyncPG2UMG asyncPG2UMG;
     private static final int ARRAY_SIZE = 1024 * 4;
     private CountDownLatch latch;
+    private boolean async = false;
 
     public void latchSize(int size) {
         latch = new CountDownLatch(size);
@@ -53,6 +49,7 @@ public class LPGParser {
     public LPGParser(TinkerPopConverter tinkerPopConverter) {
         this();
         asyncPG2UMG = new AsyncPG2UMG(tinkerPopConverter);
+        async = true;
     }
 
     public LPGParser(Graph graph) {
@@ -102,7 +99,6 @@ public class LPGParser {
                 } catch (ParseException e) {
                     return Date.valueOf(value);
                 }
-//                return Date.valueOf(value);
             case MILLI:
                 return new Date(Long.parseLong(value));
             default:
@@ -119,8 +115,6 @@ public class LPGParser {
     private List<Element> elementCache = new ArrayList<>(ARRAY_SIZE);
 
     public LPGParser loadVertex(String fileName, String vertexLabel, String... pops) {
-//        System.out.println("READING " + fileName);
-//        System.out.println(System.currentTimeMillis());
         Map<String, String> popMap = popMap(pops);
         try (Reader vertexReader = new FileReader(fileName)) {
             Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader().parse(vertexReader);
@@ -132,8 +126,6 @@ public class LPGParser {
     }
 
     public LPGParser loadVertexWithPro(String fileName, String vertexLabel, String... pops) {
-//        System.out.println("READING " + fileName);
-//        System.out.println(System.currentTimeMillis());
         Map<String, String> popMap = popMap(pops);
         try (Reader vertexReader = new FileReader(fileName)) {
             Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader().parse(vertexReader);
@@ -146,7 +138,6 @@ public class LPGParser {
 
     public void loadVertexWithPro(Iterable<CSVRecord> records, String vertexLabel, Map<String, String> popMap) throws IOException {
         for (CSVRecord record : records) {
-//            if (i++ >= 3000){break;}
             Map<String, String> pop = record.toMap();
             String label = pop.get("label");
             label = label == null ? vertexLabel : label;
@@ -167,7 +158,9 @@ public class LPGParser {
                     addV.property(T.id, label + ":" + id);
                 }
                 vertex = addV.next();
-                elementCache.add(vertex);
+                if (async) {
+                    elementCache.add(vertex);
+                }
             }
             for (Map.Entry<String, String> entry : pop.entrySet()) {
                 if (idTitle.equals(entry.getKey()) || "id".equals(entry.getKey())) {
@@ -181,9 +174,6 @@ public class LPGParser {
                     vertex.property(set, entry.getKey(), parseValue(entry.getValue(), type));
                 }
             }
-            //if (asyncPG2UMG != null) {
-
-            //   }
         }
     }
 
@@ -211,7 +201,9 @@ public class LPGParser {
                     addV.property(T.id, label + ":" + id);
                 }
                 vertex = addV.next();
-                elementCache.add(vertex);
+                if (async) {
+                    elementCache.add(vertex);
+                }
             }
             for (Map.Entry<String, String> entry : pop.entrySet()) {
                 if (idTitle.equals(entry.getKey()) || "id".equals(entry.getKey())) {
@@ -222,9 +214,6 @@ public class LPGParser {
                     vertex.property(set, entry.getKey(), parseValue(entry.getValue(), type));
                 }
             }
-            //if (asyncPG2UMG != null) {
-
-            //   }
         }
     }
 
@@ -241,14 +230,8 @@ public class LPGParser {
         }).start();
     }
 
-    public void asyncLoadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
-        new Thread(() -> {
-            loadEdge(fileName, edgeLabel, from, to, pops);
-        }).start();
-    }
 
     public LPGParser loadEdge(String fileName, String edgeLabel, String from, String to, String... pops) {
-//        System.out.println("READING " + fileName);
         Map<String, String> popMap = popMap(pops);
         try (Reader edgeReader = new FileReader(fileName)) {
             Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD.withFirstRecordAsHeader().parse(edgeReader);
@@ -264,12 +247,8 @@ public class LPGParser {
         String toLabel = to == null ? "to" : to;
         String f1 = fromLabel + ".id";
         String t1 = toLabel + ".id";
-        int i = 0;
         GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
         for (CSVRecord record : records) {
-//            if (i++ >= 3000) {
-//                break;
-//            }
             Map<String, String> pop = record.toMap();
             String label = pop.get("label");
             label = label == null ? edgeLabel : label;
@@ -303,9 +282,9 @@ public class LPGParser {
                 }
             }
             Edge next = addE.next();
-            //  if (asyncPG2UMG != null) {
-            elementCache.add(next);
-            //  }
+            if (this.async) {
+                elementCache.add(next);
+            }
         }
     }
 }

@@ -148,12 +148,6 @@ public class Q6 extends Runnable {
             }
         }
     }
-
-    @Override
-    public String init() {
-        return validateParams(CommonConstant.RDF_FILES_BASE_URL);
-    }
-
     @Override
     public void forward() {
         try {

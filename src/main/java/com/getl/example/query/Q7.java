@@ -97,10 +97,6 @@ public class Q7 extends Runnable {
         DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));
     }
 
-    @Override
-    public String init() {
-        return validateParams(CommonConstant.JDBC_PASSWORD, CommonConstant.JDBC_USERNAME, CommonConstant.LDBC_JDBC_URL, CommonConstant.LDBC_RDF_FILES_URL, CommonConstant.LPG_FILES_BASE_URL);
-    }
 
     @Override
     public void forward() {

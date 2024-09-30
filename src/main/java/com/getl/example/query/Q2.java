@@ -123,11 +123,6 @@ public class Q2 extends Runnable {
     }
 
     @Override
-    public String init() {
-        return validateParams(CommonConstant.LPG_FILES_BASE_URL);
-    }
-
-    @Override
     public void forward() {
         try {
             main(null);
