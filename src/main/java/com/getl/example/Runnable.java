@@ -16,25 +16,7 @@ public abstract class Runnable {
     public abstract void forward();
 
     public void accept(CommandLine commandLine, String[] args) {
-        try {
-            if (commandLine.hasOption("r")) {
-                CommonConstant.RDF_FILES_BASE_URL = commandLine.getOptionValue("r");
-            }
-            if (commandLine.hasOption("j")) {
-                CommonConstant.JDBC_URL = commandLine.getOptionValue("j");
-            }
-            if (commandLine.hasOption("ju")) {
-                CommonConstant.JDBC_USERNAME = commandLine.getOptionValue("ju");
-            }
-            if (commandLine.hasOption("jp")) {
-                CommonConstant.JDBC_PASSWORD = commandLine.getOptionValue("jp");
-            }
-            if (commandLine.hasOption("p")) {
-                CommonConstant.LPG_FILES_BASE_URL = commandLine.getOptionValue("p");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
         forward();
     }
 }

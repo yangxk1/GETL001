@@ -1,15 +1,11 @@
 package com.getl.example;
 
-import com.getl.example.converter.PG2UGTest;
-import com.getl.example.converter.RM2UGTest;
-import com.getl.example.query.*;
-import com.getl.example.utils.DistributeDataset;
-import com.getl.example.utils.LDBCStatistics;
+import com.getl.constant.CommonConstant;
 import org.apache.commons.cli.*;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +13,31 @@ public class GetlExampleMain {
 
     private static Map<String, String> classMap;
 
+    public static String yamlGet(Map<String, Object> obj, String uri) {
+        String[] split = uri.split("\\.");
+        Map resultMap = obj;
+        for (int i = 0; i < split.length - 1; i++) {
+            resultMap = (Map) resultMap.get(split[i]);
+        }
+        return resultMap.get(split[split.length - 1]).toString();
+    }
+
     public static void init() {
+        Yaml yaml = new Yaml();
+        InputStream inputStream = GetlExampleMain.class.getClassLoader().getResourceAsStream("config.yaml");
+        Map<String, Object> obj = yaml.load(inputStream);
+        CommonConstant.JDBC_BASE_URL = yamlGet(obj, "jdbc.url");
+        CommonConstant.JDBC_USERNAME = yamlGet(obj, "jdbc.username");
+        CommonConstant.JDBC_PASSWORD = yamlGet(obj, "jdbc.password");
+        CommonConstant.JDBC_URL = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.base");
+        CommonConstant.RESULT_JDBC_URL_2 = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.q2");
+        CommonConstant.RESULT_JDBC_URL_6 = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.q6");
+        CommonConstant.LDBC_JDBC_URL = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.ldbc.source");
+        CommonConstant.LDBC_JDBC_RESULT = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.ldbc.target");
+        CommonConstant.LPG_FILES_BASE_URL = yamlGet(obj, "lpg.url.base");
+        CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base");
+        CommonConstant.LDBC_RDF_FILES_URL = yamlGet(obj, "rdf.url.ldbc");
+
         classMap = new HashMap<>();
         classMap.put("q1", "com.getl.example.query.Q1");
         classMap.put("q2", "com.getl.example.query.Q2");
@@ -26,8 +46,9 @@ public class GetlExampleMain {
         classMap.put("q5", "com.getl.example.query.Q5");
         classMap.put("q6", "com.getl.example.query.Q6");
         classMap.put("q7", "com.getl.example.query.Q7");
-        classMap.put("asyncpg2ugtest", "com.getl.example.converter.AsyncPG2UGTest");
-        classMap.put("asyncrm2ugtest", "com.getl.example.converter.AsyncRM2UGTest");
+        classMap.put("pg2ug", "com.getl.example.converter.PG2UGTest");
+        classMap.put("rm2ug", "com.getl.example.converter.RM2UGTest");
+        classMap.put("rdf2ug", "com.getl.example.converter.RDF2UGTest");
 
 
     }
@@ -36,11 +57,6 @@ public class GetlExampleMain {
         init();
         Options options = new Options();
         options.addOption("c", true, "CLASS NAME");
-        options.addOption("r", false, "RDF FILE URL");
-        options.addOption("j", false, "JDBC URL");
-        options.addOption("ju", false, "JDBC USER NAME");
-        options.addOption("jp", false, "JDBC PASSWORD");
-        options.addOption("p", false, "PROPERTY GRAPH FILE URL");
         CommandLineParser parser = new DefaultParser();
         parser.parse(options, args);
         CommandLine cmd = parser.parse(options, args);
@@ -51,54 +67,5 @@ public class GetlExampleMain {
         Class clazz = Class.forName(className);
         Runnable queryInstance = (Runnable) clazz.getDeclaredConstructor().newInstance();
         queryInstance.accept(cmd, args);
-        if (cmd.getOptionValue("c").equalsIgnoreCase("flashdata")) {
-            try {
-                DistributeDataset.main(args);
-            } catch (InterruptedException | IOException | SQLException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-            return;
-        } else if (cmd.getOptionValue("c").equalsIgnoreCase("LdbcStatistics")) {
-            try {
-                LDBCStatistics.main(args);
-            } catch (InterruptedException | SQLException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-            return;
-        }
-        Runnable runnable = null;
-        switch (cmd.getOptionValue("c").toLowerCase()) {
-            case "asyncpg2ugtest":
-                runnable = new PG2UGTest();
-                break;
-            case "asyncrm2ugtest":
-                runnable = new RM2UGTest();
-                break;
-            case "q1":
-                runnable = new Q1();
-                break;
-            case "q2":
-                runnable = new Q2();
-                break;
-            case "q3":
-                runnable = new Q3();
-                break;
-            case "q4":
-                runnable = new Q4();
-                break;
-            case "q5":
-                runnable = new Q5();
-                break;
-            case "q6":
-                runnable = new Q6();
-                break;
-            case "q7":
-                runnable = new Q7();
-                break;
-        }
-        if (runnable == null) {
-            throw new RuntimeException("illegal parameters - c CLASS NAME: " + cmd.getOptionValue("c"));
-        }
-        runnable.accept(cmd, args);
     }
 }
