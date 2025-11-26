@@ -10,7 +10,7 @@ public class IRI implements CharSequence {
         this.localName = localName;
     }
 
-    public String getNameSpace() {
+    public String getNameSpaceId() {
         return nameSpaceId;
     }
 
@@ -20,6 +20,7 @@ public class IRI implements CharSequence {
     public Object getLocalID() {return this.localName;}
 
     public String toString() {
+        //TODO
         return nameSpaceId + localName;
     }
 

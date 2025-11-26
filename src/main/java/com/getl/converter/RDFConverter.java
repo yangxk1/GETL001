@@ -130,8 +130,10 @@ public class RDFConverter {
         typedIRI.add(keyIRI);
         basePair.from().forEach(label -> {
             if (label != null) {
-                IRI key = SimpleValueFactory.getInstance().createIRI(keyIRI.getNameSpace(), keyIRI.getLocalName());
-                IRI typeIRI = SimpleValueFactory.getInstance().createIRI(label.getNameSpace(), label.getLocalName());
+                String keyIRINamespace = unifiedGraph.getNsPool().getNamespace(keyIRI.getNameSpaceId());
+                String typeIRINamespace = unifiedGraph.getNsPool().getNamespace(label.getNameSpaceId());
+                IRI key = SimpleValueFactory.getInstance().createIRI(keyIRINamespace, keyIRI.getLocalName());
+                IRI typeIRI = SimpleValueFactory.getInstance().createIRI(typeIRINamespace, label.getLocalName());
                 Optional.ofNullable(createRDFStatement(key, labelPredicate, typeIRI)).ifPresent(rdf::add);
 
             }
@@ -179,7 +181,8 @@ public class RDFConverter {
         Set<com.getl.model.ug.IRI> fields = nestedPair.from().from();
         //edge and property only have one label
         com.getl.model.ug.IRI field = fields.iterator().next();
-        predicate = Optional.of(SimpleValueFactory.getInstance().createIRI(field.getNameSpace(), field.getLocalName()));
+        String fieldNamespace= unifiedGraph.getNsPool().getNamespace(field.getNameSpaceId());
+        predicate = Optional.of(SimpleValueFactory.getInstance().createIRI(fieldNamespace, field.getLocalName()));
         //subject
         BasePair key = nestedPair.to().from();
         if (key.getContent() != null) {
@@ -229,7 +232,8 @@ public class RDFConverter {
         if (basePair.hasLabel(IRINamespace.BLANK_NODE)) {
             return Optional.of(SimpleValueFactory.getInstance().createBNode(basePair.to().getLocalName()));
         }
-        return Optional.of(SimpleValueFactory.getInstance().createIRI(basePair.to().getNameSpace(), basePair.to().getLocalName()));
+        String namespace = unifiedGraph.getNsPool().getNamespace(basePair.to().getNameSpaceId());
+        return Optional.of(SimpleValueFactory.getInstance().createIRI(namespace, basePair.to().getLocalName()));
     }
 
     public void labelPredicate(String url) {

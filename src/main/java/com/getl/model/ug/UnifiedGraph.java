@@ -151,7 +151,7 @@ public class UnifiedGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
-        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getNameSpace).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
+        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getLocalName).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
         return basePairIterator;
     }
 
