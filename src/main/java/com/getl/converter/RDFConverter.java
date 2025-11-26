@@ -53,19 +53,8 @@ public class RDFConverter {
      * @param rdfData An RDF data model
      */
     public void addRDFModelToUG(@NonNull Model rdfData) {
-
-        Map<Statement, NestedPair> rdfToOGStatement = new HashMap<>();
-
         for (Statement rdfStatement : rdfData) {
-            NestedPair nestedPair = rdfToOGStatement.get(rdfStatement);
-            if (nestedPair == null) {
-                nestedPair = this.createPairFromRDFStatement(rdfStatement);
-                if (nestedPair == null) {
-                    continue;
-                }
-//                this.unifiedGraph.addStatement(nestedPair);
-                rdfToOGStatement.put(rdfStatement, nestedPair);
-            }
+            this.createPairFromRDFStatement(rdfStatement);
         }
     }
 

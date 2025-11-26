@@ -23,6 +23,11 @@ public class UGRDF2PG extends Runnable {
     public void accept() {
         String RDF_URL = RDF_FILES_BASE_URL;
         DebugUtil.DebugInfo("BEGIN TO TEST RDF2PG by UG");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Graph graph = new Graph();
         long begin = System.currentTimeMillis();
         File resource = new File(RDF_URL);
@@ -39,13 +44,14 @@ public class UGRDF2PG extends Runnable {
         UnifiedGraph unifiedGraph = graph.getUnifiedGraph();
         DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        GraphAPI graphAPI = GraphAPI.open();
-        graphAPI.setUGMGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
-        graphAPI.refreshLPG();
-        LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
-        DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
-        System.out.println("result vertex count: " + lpgGraph.getVertices().size());
-        System.out.println("result edge count: " + lpgGraph.getEdges().size());
+        System.out.println("result vertex count: " + unifiedGraph.getPairs().size());
+//        GraphAPI graphAPI = GraphAPI.open();
+//        graphAPI.setUGMGraph(unifiedGraph);
+//        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+//        graphAPI.refreshLPG();
+//        LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
+//        DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+//        System.out.println("result vertex count: " + lpgGraph.getVertices().size());
+//        System.out.println("result edge count: " + lpgGraph.getEdges().size());
     }
 }
