@@ -24,6 +24,7 @@ public class UnifiedGraph implements Graph {
     private List<NestedPair> cache = new ArrayList<>();
     private Map<String, IRI> labels = new ConcurrentHashMap<>();
     private Map<String, IRI> s2IRI = new ConcurrentHashMap<>();
+    private NamespacePool nsPool = NamespacePool.getInstance();
 
     public Collection<NestedPair> getPairs() {
         return cache;
@@ -35,7 +36,8 @@ public class UnifiedGraph implements Graph {
 
     public IRI getOrRegisterLabel(String namespace, String label) {
         assert label != null;
-        return labels.computeIfAbsent(label, i -> new IRI(namespace, label));
+        String namespaceId = nsPool.getNamespaceId(namespace);
+        return labels.computeIfAbsent(label, i -> new IRI(namespaceId, label));
     }
 
     public IRI getOrRegisterLabel(String labelIRI) {
@@ -45,12 +47,17 @@ public class UnifiedGraph implements Graph {
 
     public IRI getOrRegisterPopIRI(String iri) {
         assert iri != null;
-        return s2IRI.computeIfAbsent(iri, i -> new IRI(IRINamespace.PROPERTIES_NAMESPACE, iri));
+        //TODO
+        int index = iri.indexOf("/");
+        String namespace = iri.substring(0, index);
+        String localName = iri.substring(index + 1);
+        return getOrRegisterBaseIRI(namespace, localName);
     }
 
     public IRI getOrRegisterBaseIRI(String namespace, String localName) {
-        String url = namespace + localName;
-        return s2IRI.computeIfAbsent(url, i -> new IRI(namespace, localName));
+        String namespaceId = nsPool.getNamespaceId(namespace);
+        String url = namespaceId + "$$" + localName;
+        return s2IRI.computeIfAbsent(url, i -> new IRI(namespaceId, localName));
     }
 
     public BasePair getOrRegisterBasePair(String iri) {
@@ -67,7 +74,7 @@ public class UnifiedGraph implements Graph {
     public BasePair getOrRegisterBasePair(String baseURI, String IRIId) {
         assert IRIId != null;
         String url = baseURI + IRIId;
-        IRI IRIInstant = s2IRI.computeIfAbsent(url, i -> new IRI(baseURI, IRIId));
+        IRI IRIInstant = getOrRegisterBaseIRI(baseURI, IRIId);
         return IRI2BasePair.computeIfAbsent(IRIInstant, i -> new BasePair(null, i));
     }
 
