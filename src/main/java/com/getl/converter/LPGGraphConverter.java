@@ -223,10 +223,13 @@ public class LPGGraphConverter {
         if (element == null) {
             LPGVertex vertex = new LPGVertex(lpgGraph);
             element = vertex;
-            for (IRI label : basePair.from()) {
-                String labelStr = label.getLocalName();
-                PropertiesGraphConfig propertiesGraphConfig = Optional.of(labelStr).map(lpgConfigs::get).orElse(defaultConfig);
-                vertex.addLabel(propertiesGraphConfig.mapLabel(label));
+            Set<IRI> from = basePair.from();
+            if (!CollectionUtil.isEmpty(from)) {
+                for (IRI label : from) {
+                    String labelStr = label.getLocalName();
+                    PropertiesGraphConfig propertiesGraphConfig = Optional.of(labelStr).map(lpgConfigs::get).orElse(defaultConfig);
+                    vertex.addLabel(propertiesGraphConfig.mapLabel(label));
+                }
             }
             element.setId(basePair.to().getLocalName());
             lpgGraph.addVertex(vertex);
