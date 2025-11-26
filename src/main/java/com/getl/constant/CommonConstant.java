@@ -10,8 +10,8 @@ public class CommonConstant {
     public static String LDBC_JDBC_URL;
     public static String JDBC_USERNAME;
     public static String JDBC_PASSWORD;
-    public static String LPG_FILES_BASE_URL;
-    public static String RDF_FILES_BASE_URL;
+    public static String LPG_FILES_BASE_URL = "/Users/yangxk/data/social_network-csv_basic-sf0.1/";
+    public static String RDF_FILES_BASE_URL = "/Users/yangxk/data/limit_mappingbased-objects_lang=en.ttl/";
     public static String RDF_FILES_BASE_RESULT_URL;
     public static String LDBC_RDF_FILES_URL;
 }

@@ -38,13 +38,26 @@ public class UGRDF2PG extends Runnable {
             throw new RuntimeException(e);
         }
         DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         begin = System.currentTimeMillis();
         graph.labelPredicate("http://dbpedia.org/ontology/type");
         graph.handleRDFModel();
         UnifiedGraph unifiedGraph = graph.getUnifiedGraph();
         DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
-        System.out.println("result vertex count: " + unifiedGraph.getPairs().size());
+        System.out.println("ugm vertex count: " + unifiedGraph.getPairs().size());
+        graph = null;
+        System.gc();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
 //        GraphAPI graphAPI = GraphAPI.open();
 //        graphAPI.setUGMGraph(unifiedGraph);
 //        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
