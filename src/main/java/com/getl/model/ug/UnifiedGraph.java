@@ -75,7 +75,7 @@ public class UnifiedGraph implements Graph {
         assert IRIId != null;
         String url = baseURI + IRIId;
         IRI IRIInstant = getOrRegisterBaseIRI(baseURI, IRIId);
-        return IRI2BasePair.computeIfAbsent(IRIInstant, i -> new BasePair(null, i));
+        return IRI2BasePair.computeIfAbsent(IRIInstant, i -> new BasePair(new HashSet<>(), i));
     }
 
     public void addLabel(BasePair basePair, IRI label) {
@@ -83,7 +83,7 @@ public class UnifiedGraph implements Graph {
     }
 
     public BasePair addLabel(IRI subject, IRI label) {
-        BasePair basePair = IRI2BasePair.computeIfAbsent(subject, i -> new BasePair(null, i));
+        BasePair basePair = IRI2BasePair.computeIfAbsent(subject, i -> new BasePair(new HashSet<>(), i));
         addLabel(basePair, label);
         return basePair;
     }

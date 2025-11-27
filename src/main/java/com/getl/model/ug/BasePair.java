@@ -20,7 +20,7 @@ public class BasePair implements Pair, Vertex, Edge {
 
     @Setter
     @Getter
-    private Set<IRI> labels = null;
+    private Set<IRI> labels = new HashSet<>();
     @Setter
     @Getter
     private IRI valueIRI;
@@ -39,9 +39,6 @@ public class BasePair implements Pair, Vertex, Edge {
     }
 
     public void addLabel(IRI label) {
-        if (this.labels == null) {
-            this.labels = new HashSet<>();
-        }
         this.labels.add(label);
     }
 
@@ -61,7 +58,7 @@ public class BasePair implements Pair, Vertex, Edge {
     }
 
     public boolean hasLabel(IRI label) {
-        return labels != null && labels.contains(label);
+        return labels.contains(label);
     }
 
     @Override
