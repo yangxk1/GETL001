@@ -90,7 +90,7 @@ public class BasePair implements Pair, Vertex, Edge {
         Iterator basePairIterator;
         basePairIterator = relations.stream().filter(pair -> {
             if (hashSet.isEmpty()) {
-                return IRINamespace.EDGE_NAMESPACE.equals(pair.from().getLabels().stream().findFirst().map(IRI::getNameSpaceId).orElse(""));
+                return IRINamespace.EDGE_NAMESPACE_ID.equals(pair.from().getLabels().stream().findFirst().map(IRI::getNameSpaceId).orElse(""));
             } else {
                 return hashSet.contains(pair.from().label());
             }
@@ -135,7 +135,7 @@ public class BasePair implements Pair, Vertex, Edge {
         Set<String> hashSet = new HashSet<>(List.of(propertyKeys));
         return relations.stream().map(pair -> {
             String label = pair.from().labels.stream().findFirst().map(IRI::getLocalName).orElse("");
-            if ((propertyKeys.length == 0 && !IRINamespace.PROPERTIES_NAMESPACE.equals(label)) || hashSet.contains(label)) {
+            if ((propertyKeys.length == 0 && !IRINamespace.PROPERTIES_NAMESPACE_ID.equals(label)) || hashSet.contains(label)) {
                 return null;
             }
             Object value = Optional.of(pair).map(NestedPair::to).map(NestedPair.RelationPair::to).map(Pair::to).orElse(null);

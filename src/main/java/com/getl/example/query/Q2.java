@@ -18,8 +18,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -42,7 +40,7 @@ public class Q2 extends Runnable {
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
             graphAPI.setGraph(null);

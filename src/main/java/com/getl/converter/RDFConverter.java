@@ -143,7 +143,7 @@ public class RDFConverter {
      */
     private IRI createStatementIRI(NestedPair nestedPair, Model rdf, Map<String, Statement> resolvedStatement) {
         ValueFactory factory = SimpleValueFactory.getInstance();
-        IRI iri = factory.createIRI(IRINamespace.STATEMENT_NAMESPACE, nestedPair.getID());
+        IRI iri = factory.createIRI(IRINamespace.STATEMENT_NAMESPACE_ID, nestedPair.getID());
         rdf.add(createRDFStatement(iri, labelPredicate, RDF.STATEMENT));
         Optional<Statement> statement = transformToRDFStatement(nestedPair, rdf, resolvedStatement);
         Statement RDFStatement = statement.orElse(null);

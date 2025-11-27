@@ -21,7 +21,7 @@ public class IRI implements CharSequence {
 
     public String toString() {
         //TODO
-        return nameSpaceId + localName;
+        return nameSpaceId +"$$"+ localName;
     }
 
     @Override

@@ -24,7 +24,7 @@ public abstract class LPGElement implements Vertex {
     @Getter
     private final LPGGraph graph;
     // Maps property names to property objects
-    protected Map<String, LPGProperty> propNameToProp = null;
+    protected final Map<String, LPGProperty> propNameToProp = new HashMap<>();
 
     private boolean removed = false;
 
@@ -41,9 +41,6 @@ public abstract class LPGElement implements Vertex {
      */
     public LPGProperty addPropertyValue(@NonNull String propName, @NonNull Object propValue) {
         LPGProperty property;
-        if (propNameToProp == null){
-            propNameToProp = new HashMap<>();
-        }
         if (this.propNameToProp.containsKey(propName)) {
             property = this.propNameToProp.get(propName);
             property.addValue(propValue);
@@ -94,7 +91,7 @@ public abstract class LPGElement implements Vertex {
      * @return The property or empty optional if not found.
      */
     public Optional<LPGProperty> propertyForName(@NonNull String name) {
-        return Optional.ofNullable(propNameToProp).map(m -> m.get(name));
+        return Optional.ofNullable(propNameToProp.get(name));
     }
 
     /**
@@ -115,7 +112,7 @@ public abstract class LPGElement implements Vertex {
      * @return The properties of this element.
      */
     public Collection<LPGProperty> getProperties() {
-        return propNameToProp == null ? Collections.emptySet() : propNameToProp.values();
+        return propNameToProp.values();
     }
 
     public LinkedHashSet<LPGEdge> getOutEdges() {

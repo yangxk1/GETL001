@@ -42,16 +42,18 @@ public class UnifiedGraph implements Graph {
 
     public IRI getOrRegisterLabel(String labelIRI) {
         assert labelIRI != null;
-        return labels.computeIfAbsent(labelIRI, i -> new IRI(IRINamespace.LABEL_NAMESPACE, labelIRI));
+        return labels.computeIfAbsent(labelIRI, i -> new IRI(IRINamespace.LABEL_NAMESPACE_ID, labelIRI));
     }
 
-    public IRI getOrRegisterPopIRI(String iri) {
-        assert iri != null;
-        //TODO
-        int index = iri.indexOf("/");
-        String namespace = iri.substring(0, index);
-        String localName = iri.substring(index + 1);
-        return getOrRegisterBaseIRI(namespace, localName);
+    public IRI getOrRegisterPopIRI(String propertyName) {
+        assert propertyName != null;
+        return s2IRI.computeIfAbsent(propertyName, i -> new IRI(IRINamespace.PROPERTIES_NAMESPACE_ID, propertyName));
+    }
+
+    public IRI getOrRegisterIDIRI(String localName) {
+        String namespaceId = IRINamespace.IRI_NAMESPACE_ID;
+        String url = namespaceId + "$$" + localName;
+        return s2IRI.computeIfAbsent(url, i -> new IRI(IRINamespace.IRI_NAMESPACE_ID, localName));
     }
 
     public IRI getOrRegisterBaseIRI(String namespace, String localName) {
@@ -67,7 +69,7 @@ public class UnifiedGraph implements Graph {
 
     public BasePair getOrRegisterIdIRI(String iri) {
         assert iri != null;
-        return getOrRegisterBasePair(IRINamespace.IRI_NAMESPACE, iri);
+        return getOrRegisterBasePair(IRINamespace.IRI_NAMESPACE_ID, iri);
     }
 
 
@@ -151,7 +153,7 @@ public class UnifiedGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
-        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getLocalName).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
+        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getLocalName).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE_ID)).iterator();
         return basePairIterator;
     }
 

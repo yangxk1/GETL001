@@ -16,7 +16,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class Q3 extends Runnable {
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
             graphAPI.setGraph(null);
@@ -84,7 +83,7 @@ public class Q3 extends Runnable {
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             lpgGraph = graphAPI.getGraph().getLpgGraph();
             DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));

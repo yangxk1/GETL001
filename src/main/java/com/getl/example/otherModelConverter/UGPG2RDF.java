@@ -27,10 +27,10 @@ public class UGPG2RDF extends Runnable {
         lpgParser.loadVertex(BASE_URL_STATIC + "tag_0_0.csv", "Tag");
         lpgParser.loadVertex(BASE_URL_STATIC + "tagclass_0_0.csv", "TagClass");
         //DYNAMIC
-        lpgParser.loadVertex(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.MILLI);
-        lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.MILLI);
-        lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_0_0.csv", "Person", "birthday", LPGParser.MILLI, "creationDate", LPGParser.MILLI);
-        lpgParser.loadVertex(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "creationDate", LPGParser.MILLI, "length", LPGParser.INT);
+        lpgParser.loadVertex(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.STRING);
+        lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.STRING);
+        lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_0_0.csv", "Person", "birthday", LPGParser.STRING, "creationDate", LPGParser.STRING);
+        lpgParser.loadVertex(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "creationDate", LPGParser.STRING, "length", LPGParser.INT);
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_email_emailaddress_0_0.csv", "Person");
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "person_speaks_language_0_0.csv", "Person");
 
@@ -46,14 +46,14 @@ public class UGPG2RDF extends Runnable {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "comment_replyOf_comment_0_0.csv", "comment_replyOf_comment", "Comment", "Comment");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "comment_replyOf_post_0_0.csv", "comment_replyOf_post", "Comment", "Post");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_containerOf_post_0_0.csv", "forum_containerOf_post", "Forum", "Post");
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasMember_person_0_0.csv", "forum_hasMember_person", "Forum", "Person", "joinDate", LPGParser.MILLI);
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasMember_person_0_0.csv", "forum_hasMember_person", "Forum", "Person", "joinDate", LPGParser.STRING);
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasModerator_person_0_0.csv", "forum_hasModerator_person", "Forum", "Person");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasTag_tag_0_0.csv", "forum_hasTag_tag", "Forum", "Tag");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_hasInterest_tag_0_0.csv", "person_hasInterest_tag", "Person", "Tag");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_isLocatedIn_place_0_0.csv", "person_isLocatedIn_place", "Person", "Place");
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_knows_person_0_0.csv", "person_knows_person", "Person", "Person", "creationDate", LPGParser.MILLI);
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_comment_0_0.csv", "person_likes_comment", "Person", "Comment", "creationDate", LPGParser.MILLI);
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI);
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_knows_person_0_0.csv", "person_knows_person", "Person", "Person", "creationDate", LPGParser.STRING);
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_comment_0_0.csv", "person_likes_comment", "Person", "Comment", "creationDate", LPGParser.STRING);
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.STRING);
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT);
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT);
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasCreator_person_0_0.csv", "post_hasCreator_person", "Post", "Person");
@@ -61,9 +61,44 @@ public class UGPG2RDF extends Runnable {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
 
         DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        try{
+            Thread.sleep(5000);
+            System.gc();
+            Thread.sleep(5000);
+        }catch (InterruptedException e){
+
+        }
         begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
         DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
+        try{
+            Thread.sleep(5000);
+        }catch (InterruptedException e){
+
+        }
+        lpgParser = null;
+        System.gc();
+        try{
+            Thread.sleep(5000);
+        }catch (InterruptedException e){
+
+        }
+        begin = System.currentTimeMillis();
+        GraphAPI graphAPI = GraphAPI.open(unifiedGraph);
+        graphAPI.refreshLPG();
+        System.gc();
+        try{
+            Thread.sleep(5000);
+        }catch (InterruptedException e){
+
+        }
+        System.out.println("RDF SIZE : " + graphAPI.getGraph()).size());
+        DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
+        try{
+            Thread.sleep(5000);
+        }catch (InterruptedException e){
+
+        }
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open(unifiedGraph);
         graphAPI.refreshRDF();

@@ -43,7 +43,7 @@ public class NestedPair implements Pair {
 
     public NestedPair(IRI predicateLabel, BasePair key, Pair value) {
         this.relationPair = new RelationPair(key, value);
-        IRI iri = new IRI(IRINamespace.IRI_NAMESPACE, "AUTO:" + getNextID());
+        IRI iri = new IRI(IRINamespace.IRI_NAMESPACE_ID, "AUTO:" + getNextID());
         this.predicate = new BasePair(Set.of(predicateLabel), iri);
         //key.getRelations().add(this);
         predicate.setContent(this);
@@ -55,7 +55,7 @@ public class NestedPair implements Pair {
 
     public NestedPair(IRI predicateLabel, Object id, BasePair key, Pair value) {
         this.relationPair = new RelationPair(key, value);
-        IRI iri = new IRI(IRINamespace.IRI_NAMESPACE, id.toString());
+        IRI iri = new IRI(IRINamespace.IRI_NAMESPACE_ID, id.toString());
         this.predicate = new BasePair(Set.of(predicateLabel), iri);
         //key.getRelations().add(this);
         predicate.setContent(this);

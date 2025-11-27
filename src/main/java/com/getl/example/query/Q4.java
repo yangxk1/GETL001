@@ -1,20 +1,15 @@
 package com.getl.example.query;
 
 import com.getl.api.GraphAPI;
-import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
-import com.getl.converter.TinkerPopConverter;
 import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
-import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.util.DebugUtil;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.HashMap;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.P.*;
@@ -37,7 +32,7 @@ public class Q4 extends Runnable {
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
             graphAPI.setGraph(null);

@@ -2,26 +2,17 @@ package com.getl.example.query;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.getl.api.GraphAPI;
-import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
-import com.getl.converter.RMConverter;
 import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
-import com.getl.model.LPG.LPGElement;
-import com.getl.model.LPG.LPGVertex;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.Subgraph;
-import com.getl.model.RM.MysqlOp;
-import com.getl.model.RM.MysqlSessions;
-import com.getl.model.RM.RMGraph;
 import com.getl.query.step.MultiLabelP;
 import com.getl.util.DebugUtil;
-import com.mysql.cj.util.LogUtils;
 import org.apache.tinkerpop.gremlin.structure.*;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -120,7 +111,7 @@ public class Q5 extends Runnable {
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
             DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
@@ -138,7 +129,7 @@ public class Q5 extends Runnable {
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             lpgGraph = graphAPI.getGraph().getLpgGraph();
             DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));

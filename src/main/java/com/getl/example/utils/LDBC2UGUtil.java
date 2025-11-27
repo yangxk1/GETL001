@@ -35,7 +35,7 @@ public class LDBC2UGUtil {
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open();
         graphAPI.setUGMGraph(unifiedGraph);
-        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+        graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
         graphAPI.refreshLPG();
         LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
         DebugUtil.DebugInfo("convert 2 pg time: " + (System.currentTimeMillis() - begin) + " ms");

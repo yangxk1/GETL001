@@ -30,7 +30,7 @@ public class LPGGraphConverter {
         this.lpgConfigs = lpgConfigs;
         this.defaultConfig = new PropertiesGraphConfig();
         defaultConfig = new PropertiesGraphConfig();
-        defaultConfig.addEdgeNamespaceList(EDGE_NAMESPACE);
+        defaultConfig.addEdgeNamespaceList(EDGE_NAMESPACE_ID);
     }
 
     public UnifiedGraph createUGMFromLPGGraph() {
@@ -130,7 +130,7 @@ public class LPGGraphConverter {
         }
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
         String edgeLabel = propertiesGraphConfig.getEdge(lpgEdge.label);
-        IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edgeLabel);
+        IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE_ID, edgeLabel);
         return unifiedGraph.add(edge, lpgEdge.getId(), outV, inV).from();
     }
 

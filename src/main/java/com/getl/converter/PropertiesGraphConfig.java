@@ -169,7 +169,7 @@ public class PropertiesGraphConfig {
 
             @Override
             public IRI IDtoIRI(Object id, UnifiedGraph unifiedGraph) {
-                return unifiedGraph.getOrRegisterBaseIRI(IRINamespace.IRI_NAMESPACE, id.toString());
+                return unifiedGraph.getOrRegisterIDIRI(id.toString());
             }
         }
     }

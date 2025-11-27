@@ -19,10 +19,8 @@ import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.DebugUtil;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Q7 extends Runnable {
     public static void main(String[] args) {
@@ -46,7 +44,7 @@ public class Q7 extends Runnable {
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             DebugUtil.DebugInfo("ug 2 lpg end: " + (System.currentTimeMillis() - begin) + " ms");
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();

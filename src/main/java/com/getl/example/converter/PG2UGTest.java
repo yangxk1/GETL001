@@ -25,7 +25,7 @@ public class PG2UGTest extends Runnable {
         try {
             UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles();
             System.out.println("ugm cache count: " + unifiedGraph.getCache().size());
-            System.out.println("ugm edge count: " + unifiedGraph.getCache().stream().map(NestedPair::from).filter(basePair -> basePair.getLabels().stream().findFirst().map(IRI::getNameSpaceId).orElse("").equals(IRINamespace.EDGE_NAMESPACE)).map(BasePair::getValueIRI).map(IRI::getLocalName).collect(Collectors.toSet()).size());
+            System.out.println("ugm edge count: " + unifiedGraph.getCache().stream().map(NestedPair::from).filter(basePair -> basePair.getLabels().stream().findFirst().map(IRI::getNameSpaceId).orElse("").equals(IRINamespace.EDGE_NAMESPACE_ID)).map(BasePair::getValueIRI).map(IRI::getLocalName).collect(Collectors.toSet()).size());
             System.out.println("ugm vertices count: " + unifiedGraph.traversal().V().count().next());
             Runtime.getRuntime().gc();
             long begin = System.currentTimeMillis();
