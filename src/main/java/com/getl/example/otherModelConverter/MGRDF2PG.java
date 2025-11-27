@@ -5,18 +5,24 @@ import com.getl.constant.RdfDataFormat;
 import com.getl.converter.mg.PGMapperI;
 import com.getl.converter.mg.PGMapperR4j;
 import com.getl.converter.mg.RDFMapper;
+import com.getl.example.Runnable;
 import com.getl.model.MG.MGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import static com.getl.constant.CommonConstant.RDF_FILES_BASE_URL;
 
-public class MGRDF2PG {
+public class MGRDF2PG extends Runnable {
     public static void main(String[] args) {
+        new MGRDF2PG().accept();
+    }
+
+    @Override
+    protected void run() {
         String RDF_URL = RDF_FILES_BASE_URL;
-        DebugUtil.DebugInfo("BEGIN TO TEST RDF2PG by MG");
+        logger.debugInfo("BEGIN TO TEST RDF2PG by MG");
         long begin = System.currentTimeMillis();
         Graph graph = new Graph();
         File resource = new File(RDF_URL);
@@ -26,15 +32,20 @@ public class MGRDF2PG {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         RDFMapper RDFMapper = new RDFMapper(new MGraph());
         RDFMapper.addRDFModelToMG(graph.getRdfModel());
-        DebugUtil.DebugInfo("RDF 2 MG END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF 2 MG END " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         PGMapperI pgMapper = new PGMapperR4j(RDFMapper.getMGraph());
         org.apache.tinkerpop.gremlin.structure.Graph resultGraph = pgMapper.createGraphFromMG();
         System.out.println("MG2PG END " + (System.currentTimeMillis() - begin));
         System.out.println("Vertices count: " + resultGraph.traversal().V().toList().size());
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("MGRDF2PG");
     }
 }

@@ -7,7 +7,7 @@ import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 
 import java.util.HashMap;
@@ -21,14 +21,14 @@ public class Q4 extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
-            DebugUtil.DebugInfo("BEGIN TO TEST Q4");
-            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles();
+            logger.debugInfo("BEGIN TO TEST Q4");
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles(logger);
             long begin = System.currentTimeMillis();
             //GC
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
@@ -38,10 +38,10 @@ public class Q4 extends Runnable {
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             lpgGraph.traversal().V().hasLabel("Person").as("person1")
                     .in("comment_hasCreator_person").as("comment")
@@ -54,25 +54,30 @@ public class Q4 extends Runnable {
                     .to("person2")
                     //  .select("person1", "comment", "post", "person2")
                     .toList();
-            DebugUtil.DebugInfo("query end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("query end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             unifiedGraph = (new LPGGraphConverter(null, lpgGraph, new HashMap<>())).createUGMFromLPGGraph();
-            DebugUtil.DebugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             lpgGraph = null;
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             System.out.println("Pairs: " + unifiedGraph.getCache().size());
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open(unifiedGraph);
             graphAPI.refreshRDF();
-            DebugUtil.DebugInfo("UGM2RDF end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2RDF end " + (System.currentTimeMillis() - begin));
             System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("QUERY 4");
     }
 }

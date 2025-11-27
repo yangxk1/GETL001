@@ -16,7 +16,7 @@ import com.getl.model.RM.MysqlSessions;
 import com.getl.model.RM.RMGraph;
 import com.getl.model.RM.Schema;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.HashMap;
@@ -28,25 +28,25 @@ public class Q7 extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
             System.out.println("BEGIN TO TEST Q7 time: " + System.currentTimeMillis());
             UnifiedGraph unifiedGraph = new UnifiedGraph();
             long begin = System.currentTimeMillis();
-            LDBC2UGUtil.loadFromRM(unifiedGraph);
+            LDBC2UGUtil.loadFromRM(unifiedGraph, logger);
             Runtime.getRuntime().gc();
-            LDBC2UGUtil.loadFromRDF(unifiedGraph);
+            LDBC2UGUtil.loadFromRDF(unifiedGraph, logger);
             Runtime.getRuntime().gc();
-            LDBC2UGUtil.loadFromPG(unifiedGraph);
+            LDBC2UGUtil.loadFromPG(unifiedGraph, logger);
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("load time: " + (System.currentTimeMillis() - begin) + " ms");
+            logger.debugInfo("load time: " + (System.currentTimeMillis() - begin) + " ms");
             System.out.println("ug count: " + unifiedGraph.getCache().size());
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
             graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
-            DebugUtil.DebugInfo("ug 2 lpg end: " + (System.currentTimeMillis() - begin) + " ms");
+            logger.debugInfo("ug 2 lpg end: " + (System.currentTimeMillis() - begin) + " ms");
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
             graphAPI = null;
             unifiedGraph = null;
@@ -76,12 +76,12 @@ public class Q7 extends Runnable {
             Runtime.getRuntime().gc();
             begin = System.currentTimeMillis();
             unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
-            DebugUtil.DebugInfo("lpg result 2 ugm end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg result 2 ugm end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             resultGraph = null;
             lpgGraph = null;
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             RMGraph rmGraph = new RMGraph();
             rmGraph.addSchema(new Schema("recommend", "Person1", "Person", "Person2", "Person").addColumn("post", Schema.SMALL_TEXT));
@@ -92,15 +92,20 @@ public class Q7 extends Runnable {
                     addColumn("creationDate", Schema.DATE).addColumn("email", Schema.MID_LARGE_TEXT));
             RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
             rmConverter.addUGMToRMModel();
-            DebugUtil.DebugInfo("ugm 2 RM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("ugm 2 RM end " + (System.currentTimeMillis() - begin));
             System.out.println("Lines: " + rmGraph.getLines().size());
             begin = System.currentTimeMillis();
             MysqlSessions sessions = new MysqlSessions(CommonConstant.LDBC_JDBC_RESULT, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
             MysqlOp.createSchema(sessions);
             MysqlOp.write(sessions, rmGraph);
-            DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("Write RM end " + (System.currentTimeMillis() - begin));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("QUERY 7");
     }
 }

@@ -6,7 +6,7 @@ import com.getl.constant.RdfDataFormat;
 import com.getl.converter.PropertiesGraphConfig;
 import com.getl.converter.RDFConverter;
 import com.getl.example.Runnable;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
@@ -23,9 +23,9 @@ public class RDF2UGTest extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         String RDF_URL = CommonConstant.RDF_FILES_BASE_URL;
-        DebugUtil.DebugInfo("BEGIN TO TEST RDF 2 UGM");
+        logger.debugInfo("BEGIN TO TEST RDF 2 UGM");
         Graph graph = new Graph();
         long begin = System.currentTimeMillis();
         PropertiesGraphConfig.PropertiesGraphConfigRegister register = new PropertiesGraphConfig.PropertiesGraphConfigRegister();
@@ -38,21 +38,21 @@ public class RDF2UGTest extends Runnable {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END ", (System.currentTimeMillis() - begin));
         System.out.println(graph.getRdfModel().size());
         begin = System.currentTimeMillis();
         long l = System.currentTimeMillis();
         graph.handleRDFModel();
-        DebugUtil.DebugInfo("RDF 2 URG END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF 2 URG END " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.setRdfModel(null);
         graph.setRdfConverter(new RDFConverter(graph.getUnifiedGraph()));
         Runtime.getRuntime().gc();
-        DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+        logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.setRdfModel(null);
         graph.refreshRDF();
-        DebugUtil.DebugInfo("URG 2 RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("URG 2 RDF END " , (System.currentTimeMillis() - begin));
         System.out.println(System.currentTimeMillis());
         System.out.println("RDF SIZE : " + graph.getRdfModel().size());
         System.out.println(System.currentTimeMillis());
@@ -69,5 +69,10 @@ public class RDF2UGTest extends Runnable {
         }
         writer.endRDF();
         System.out.println("convert to rdf " + (System.currentTimeMillis() - l));
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("RDF2UGTest");
     }
 }

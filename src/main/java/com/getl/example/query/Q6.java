@@ -15,7 +15,7 @@ import com.getl.model.RM.MysqlOp;
 import com.getl.model.RM.MysqlSessions;
 import com.getl.model.RM.RMGraph;
 import com.getl.model.RM.Schema;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.*;
@@ -79,12 +79,12 @@ public class Q6 extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
-            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRDFFile();
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRDFFile(logger);
             long begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
@@ -94,12 +94,12 @@ public class Q6 extends Runnable {
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
             System.out.println("result vertex count: " + lpgGraph.getVertices().size());
             System.out.println("result edge count: " + lpgGraph.getEdges().size());
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphTraversalSource g = lpgGraph.traversal();// Initialize your GraphTraversalSource
 // Q3: Select vertices with a degree greater than 20 and the edges between them
@@ -111,7 +111,7 @@ public class Q6 extends Runnable {
                     .select("n1", "e1", "n2")
                     .dedup("e1") // 移除重复的边
                     .toList();
-            DebugUtil.DebugInfo("query (degree > 20) end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("query (degree > 20) end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             LPGGraph resultGraph = new LPGGraph();
             for (Map<String, Object> result : results) {
@@ -123,33 +123,38 @@ public class Q6 extends Runnable {
                 LPGEdge lpgEdge = new LPGEdge(resultGraph, n1V, n2V, e1.label());
                 lpgEdge.setId(e1.id());
             }
-            DebugUtil.DebugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
             System.out.println("vertices count: " + resultGraph.getVertices().size());
             System.out.println("edge count: " + resultGraph.getEdges().size());
             begin = System.currentTimeMillis();
             computeComponents(resultGraph);
-            DebugUtil.DebugInfo("cc end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("cc end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             unifiedGraph = (new TinkerPopConverter(null, resultGraph, new HashMap<>())).createUGMFromTinkerPopGraph();
-            DebugUtil.DebugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             RMGraph rmGraph = new RMGraph();
             rmGraph.addSchema(new Schema("IRI").addColumn("origin_label", Schema.MID_TEXT).addColumn("cc", Schema.INT));
             rmGraph.addSchema(new Schema("predicate", "IRI1", "IRI2"));
             RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
             rmConverter.addUGMToRMModel();
-            DebugUtil.DebugInfo("UGM 2 RM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM 2 RM end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             MysqlSessions sessions = new MysqlSessions(CommonConstant.RESULT_JDBC_URL_6, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
             MysqlOp.createSchema(sessions);
             MysqlOp.write(sessions, rmGraph);
-            DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("Write RM end " + (System.currentTimeMillis() - begin));
             System.out.println("Lines: " + rmGraph.getLines().size());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("QUERY 6");
     }
 }

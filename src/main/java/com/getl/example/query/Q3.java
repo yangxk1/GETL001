@@ -9,7 +9,7 @@ import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGVertex;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -27,13 +27,13 @@ public class Q3 extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
-            DebugUtil.DebugInfo("BEGIN TO TEST Q3");
-            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRDFFile();
+            logger.debugInfo("BEGIN TO TEST Q3");
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRDFFile(logger);
             long begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
@@ -43,10 +43,10 @@ public class Q3 extends Runnable {
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
 
             GraphTraversalSource g = lpgGraph.traversal();// Initialize your GraphTraversalSource
@@ -60,7 +60,7 @@ public class Q3 extends Runnable {
                     .select("n1", "e1", "n2")
                     .dedup("e1")
                     .toList();
-            DebugUtil.DebugInfo("query end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("query end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             //  System.out.println(results.size());
             LPGGraph resultGraph = new LPGGraph();
@@ -73,24 +73,29 @@ public class Q3 extends Runnable {
                 LPGEdge lpgEdge = new LPGEdge(resultGraph, n1V, n2V, e1.label());
                 lpgEdge.setId(e1.id());
             }
-            DebugUtil.DebugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
             lpgGraph = null;
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
-            DebugUtil.DebugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
             graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             lpgGraph = graphAPI.getGraph().getLpgGraph();
-            DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
             System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
             System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("QUERY 3");
     }
 }

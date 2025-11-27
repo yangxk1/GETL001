@@ -6,7 +6,7 @@ import com.getl.converter.TinkerPopConverter;
 import com.getl.example.Runnable;
 import com.getl.io.LPGParser;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 
 
 public class UGPG2RDF extends Runnable {
@@ -15,8 +15,8 @@ public class UGPG2RDF extends Runnable {
     }
 
     @Override
-    public void accept() {
-        DebugUtil.DebugInfo("BEGIN TO TEST Q2");
+    protected void run() {
+        logger.debugInfo("BEGIN TO TEST Q2");
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser();
         long begin = System.currentTimeMillis();
@@ -60,7 +60,7 @@ public class UGPG2RDF extends Runnable {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
 
-        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " , (System.currentTimeMillis() - begin));
         try{
             Thread.sleep(5000);
             System.gc();
@@ -70,7 +70,7 @@ public class UGPG2RDF extends Runnable {
         }
         begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = (new TinkerPopConverter(null, lpgParser.getGraph())).createUGMFromTinkerPopGraph();
-        DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("PG2UGM end " , (System.currentTimeMillis() - begin));
         try{
             Thread.sleep(5000);
         }catch (InterruptedException e){
@@ -92,17 +92,23 @@ public class UGPG2RDF extends Runnable {
         }catch (InterruptedException e){
 
         }
-        System.out.println("RDF SIZE : " + graphAPI.getGraph()).size());
-        DebugUtil.DebugInfo("PG2UGM end " + (System.currentTimeMillis() - begin));
+        System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
+        logger.debugInfo("PG2UGM end " , (System.currentTimeMillis() - begin));
         try{
             Thread.sleep(5000);
         }catch (InterruptedException e){
 
         }
         begin = System.currentTimeMillis();
-        GraphAPI graphAPI = GraphAPI.open(unifiedGraph);
+        graphAPI = GraphAPI.open(unifiedGraph);
         graphAPI.refreshRDF();
-        DebugUtil.DebugInfo("UGM2RDF end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("UGM2RDF end " , (System.currentTimeMillis() - begin));
         System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
     }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("UGPG2RDF");
+    }
+
 }

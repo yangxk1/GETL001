@@ -13,7 +13,7 @@ import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGVertex;
 import com.getl.query.step.MultiLabelP;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -30,13 +30,13 @@ public class Q2 extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
-            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles();
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles(logger);
             long begin = System.currentTimeMillis();
             //GC
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
@@ -46,10 +46,10 @@ public class Q2 extends Runnable {
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             //查询给2010-05月份发表的帖子回复的用户和其评论
             List<Map<String, Object>> commentsAndPersons = lpgGraph.traversal().V()
@@ -64,7 +64,7 @@ public class Q2 extends Runnable {
                     .out("comment_hasCreator_person") // 获取Comment的创建者
                     .as("person")
                     .select("person", "comment", "post", "forum").toList();
-            DebugUtil.DebugInfo("query end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("query end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             // 遍历查询结果，将用户及评论添加到新图中
             LPGGraph resultGraph = new LPGGraph();
@@ -82,18 +82,18 @@ public class Q2 extends Runnable {
                 new LPGEdge(resultGraph, commentV, postV, "comment_replyOf_post");
                 new LPGEdge(resultGraph, personV, commentV, "comment_hasCreator_person");
             }
-            DebugUtil.DebugInfo("collect result to lpg end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("collect result to lpg end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             lpgGraph = null;
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
-            DebugUtil.DebugInfo("lpg result 2 ugm end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg result 2 ugm end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             resultGraph = null;
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             RMGraph rmGraph = new RMGraph();
             rmGraph.addSchema(new Schema("comment_hasCreator_person", "Comment", "Person"));
@@ -113,15 +113,20 @@ public class Q2 extends Runnable {
                     addColumn("creationDate", Schema.DATE).addColumn("email", Schema.MID_LARGE_TEXT));
             RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
             rmConverter.addUGMToRMModel();
-            DebugUtil.DebugInfo("ugm 2 RM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("ugm 2 RM end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             MysqlSessions sessions = new MysqlSessions(CommonConstant.RESULT_JDBC_URL_2, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
             MysqlOp.createSchema(sessions);
             MysqlOp.write(sessions, rmGraph);
-            DebugUtil.DebugInfo("Write RM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("Write RM end " + (System.currentTimeMillis() - begin));
             System.out.println("Lines: " + rmGraph.getLines().size());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("QUERY 2");
     }
 }
