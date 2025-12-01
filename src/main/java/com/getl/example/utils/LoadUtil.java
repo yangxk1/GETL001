@@ -66,11 +66,11 @@ public class LoadUtil {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasCreator_person_0_0.csv", "post_hasCreator_person", "Post", "Person").commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag").commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place").commit2Converter();
-        logger.debugInfo("load pg files end " + (System.currentTimeMillis() - begin) + " ms");
+        logger.debugInfo("load pg files end ", (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin) + " ms");
+        logger.debugInfo("commit pg end ", (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
-        logger.debugInfo("pg to ugm end " + (System.currentTimeMillis() - begin) + " ms");
+        logger.debugInfo("pg to ugm end ", (System.currentTimeMillis() - begin));
         return lpgParser.getAsyncPG2UMG().getUnifiedGraph();
     }
 
@@ -81,11 +81,11 @@ public class LoadUtil {
         MysqlSessions sessions = new MysqlSessions(CommonConstant.JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         long begin = System.currentTimeMillis();
         MysqlOp.query(sessions, rmConverter.rmGraph);
-        logger.debugInfo("load RM end " + (System.currentTimeMillis() - begin) + " ms");
+        logger.debugInfo("load RM end ", (System.currentTimeMillis() - begin));
         MysqlOp.waitAll();
-        logger.debugInfo("commit RM end " + (System.currentTimeMillis() - begin) + " ms");
+        logger.debugInfo("commit RM end ", (System.currentTimeMillis() - begin));
         MysqlOp.asyncRM2UMG.shutdown();
-        logger.debugInfo("RM 2 ugm END " + (System.currentTimeMillis() - begin) + " ms");
+        logger.debugInfo("RM 2 ugm END ", (System.currentTimeMillis() - begin));
         schema = rmConverter.rmGraph.getSchemas();
         return MysqlOp.asyncRM2UMG.getUnifiedGraph();
     }
@@ -102,11 +102,11 @@ public class LoadUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logger.debugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.labelPredicate("http://dbpedia.org/ontology/type");
         graph.handleRDFModel();
-        logger.debugInfo("RDF 2 ugm END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF 2 ugm END " , (System.currentTimeMillis() - begin));
         return graph.getUnifiedGraph();
     }
 

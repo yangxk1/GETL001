@@ -32,11 +32,11 @@ public class MGRDF2PG extends Runnable {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        logger.debugInfo("READ RDF END " , (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END ", (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         RDFMapper RDFMapper = new RDFMapper(new MGraph());
         RDFMapper.addRDFModelToMG(graph.getRdfModel());
-        logger.debugInfo("RDF 2 MG END " , (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF 2 MG END ", (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         PGMapperI pgMapper = new PGMapperR4j(RDFMapper.getMGraph());
         org.apache.tinkerpop.gremlin.structure.Graph resultGraph = pgMapper.createGraphFromMG();

@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class Q3 extends Runnable {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         new Q3().accept();
     }
 
@@ -33,7 +33,7 @@ public class Q3 extends Runnable {
             UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRDFFile(logger);
             long begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
@@ -43,10 +43,10 @@ public class Q3 extends Runnable {
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            logger.debugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2LPG end ", System.currentTimeMillis() - begin);
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC", System.currentTimeMillis() - begin);
             begin = System.currentTimeMillis();
 
             GraphTraversalSource g = lpgGraph.traversal();// Initialize your GraphTraversalSource
@@ -60,7 +60,7 @@ public class Q3 extends Runnable {
                     .select("n1", "e1", "n2")
                     .dedup("e1")
                     .toList();
-            logger.debugInfo("query end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("query end " , System.currentTimeMillis() - begin);
             begin = System.currentTimeMillis();
             //  System.out.println(results.size());
             LPGGraph resultGraph = new LPGGraph();
@@ -73,20 +73,20 @@ public class Q3 extends Runnable {
                 LPGEdge lpgEdge = new LPGEdge(resultGraph, n1V, n2V, e1.label());
                 lpgEdge.setId(e1.id());
             }
-            logger.debugInfo("collect to lpg end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("collect to lpg end " , (System.currentTimeMillis() - begin));
             lpgGraph = null;
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" , System.currentTimeMillis() - begin);
             begin = System.currentTimeMillis();
             unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
-            logger.debugInfo("lpg result 2 UGM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg result 2 UGM end " , System.currentTimeMillis() - begin);
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
             graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             lpgGraph = graphAPI.getGraph().getLpgGraph();
-            logger.debugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("result UGM 2 LPG end " , System.currentTimeMillis() - begin);
             System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
             System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
         } catch (Exception e) {

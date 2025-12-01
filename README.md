@@ -33,10 +33,10 @@ A part of runnable example classes are shown below:
 
 | Abbreviation | Full class name                      |
 | :------------: | :------------------------------------: |
-| q1           | com.getl.example.query.Q1            |
-| q2           | com.getl.example.query.Q2            |
+| q1           | com.getl.example.query.UG.Q1            |
+| q2           | com.getl.example.query.UG.Q2            |
 | ...          | ...                                  |
-| q7           | com.getl.example.query.Q7            |
+| q7           | com.getl.example.query.UG.Q7            |
 | pg2ug        | com.getl.example.converter.PG2UGTest |
 | rm2ug        | com.getl.example.converter.RM2UGTest |
 | ...          | ...                                  |

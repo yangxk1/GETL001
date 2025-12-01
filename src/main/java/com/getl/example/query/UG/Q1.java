@@ -21,11 +21,11 @@ public class Q1 extends Runnable {
             System.out.println("Pairs: " + unifiedGraph.getCache().size());
             long begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open(unifiedGraph);
             graphAPI.refreshRDF();
-            logger.debugInfo("UGM2RDF end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2RDF end " , (System.currentTimeMillis() - begin));
             System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
         } catch (SQLException | ClassNotFoundException | InterruptedException e) {
             throw new RuntimeException(e);

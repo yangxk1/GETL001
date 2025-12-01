@@ -46,10 +46,10 @@ public class LDBCStatistics {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logger.debugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.handleRDFModel();
-        logger.debugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF2UGM END " , (System.currentTimeMillis() - begin));
         System.out.println("RDF count: " + graph.getRdfModel().size());
     }
 
@@ -70,7 +70,7 @@ public class LDBCStatistics {
         long t2 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
         System.out.println("RM 2 ugm END [" + t2 + "ms]");
-        logger.debugInfo("rm pipeline " + (System.currentTimeMillis() - beginall));
+        logger.debugInfo("rm pipeline " , (System.currentTimeMillis() - beginall));
         System.out.println("RM lines(rows) count: " + rmGraph.getLines().size());
         int i = 0;
         for (Line value : rmGraph.getLines().values()) {
@@ -109,11 +109,11 @@ public class LDBCStatistics {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT).commit2Converter();
-        logger.debugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " , (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("commit pg end " , (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
-        logger.debugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to ugm end " , (System.currentTimeMillis() - begin));
         org.apache.tinkerpop.gremlin.structure.Graph graph = lpgParser.getGraph();
         System.out.println("Vertices count: " + graph.traversal().V().count().next());
         int i = 0;

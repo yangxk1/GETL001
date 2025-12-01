@@ -48,7 +48,7 @@ public class RDF2UGTest extends Runnable {
         graph.setRdfModel(null);
         graph.setRdfConverter(new RDFConverter(graph.getUnifiedGraph()));
         Runtime.getRuntime().gc();
-        logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
+        logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.setRdfModel(null);
         graph.refreshRDF();

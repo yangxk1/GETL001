@@ -57,10 +57,10 @@ public class LDBC2UGUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logger.debugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.handleRDFModel();
-        logger.debugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF2UGM END " , (System.currentTimeMillis() - begin));
     }
 
     public static void loadFromRM(UnifiedGraph unifiedGraph,GetlLogger logger) throws SQLException, ClassNotFoundException {
@@ -80,7 +80,7 @@ public class LDBC2UGUtil {
         long t2 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
         System.out.println("RM 2 ugm END [" + t2 + "ms]");
-        logger.debugInfo("rm pipeline " + (System.currentTimeMillis() - beginall));
+        logger.debugInfo("rm pipeline " , (System.currentTimeMillis() - beginall));
     }
 
     public static void loadFromPG(UnifiedGraph unifiedGraph,GetlLogger logger) throws InterruptedException {
@@ -113,10 +113,10 @@ public class LDBC2UGUtil {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT).commit2Converter();
-        logger.debugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " , (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("commit pg end " , (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
-        logger.debugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to ugm end " , (System.currentTimeMillis() - begin));
     }
 }
