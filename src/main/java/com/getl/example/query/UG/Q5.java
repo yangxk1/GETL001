@@ -1,4 +1,4 @@
-package com.getl.example.query;
+package com.getl.example.query.UG;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.getl.api.GraphAPI;

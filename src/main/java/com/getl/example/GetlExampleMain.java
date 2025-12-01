@@ -40,13 +40,13 @@ public class GetlExampleMain  {
         CommonConstant.LDBC_RDF_FILES_URL = yamlGet(obj, "rdf.url.ldbc");
 
         classMap = new HashMap<>();
-        classMap.put("q1", "com.getl.example.query.Q1");
-        classMap.put("q2", "com.getl.example.query.Q2");
-        classMap.put("q3", "com.getl.example.query.Q3");
-        classMap.put("q4", "com.getl.example.query.Q4");
-        classMap.put("q5", "com.getl.example.query.Q5");
-        classMap.put("q6", "com.getl.example.query.Q6");
-        classMap.put("q7", "com.getl.example.query.Q7");
+        classMap.put("q1", "com.getl.example.query.UG.Q1");
+        classMap.put("q2", "com.getl.example.query.UG.Q2");
+        classMap.put("q3", "com.getl.example.query.UG.Q3");
+        classMap.put("q4", "com.getl.example.query.UG.Q4");
+        classMap.put("q5", "com.getl.example.query.UG.Q5");
+        classMap.put("q6", "com.getl.example.query.UG.Q6");
+        classMap.put("q7", "com.getl.example.query.UG.Q7");
         classMap.put("pg2ug", "com.getl.example.converter.PG2UGTest");
         classMap.put("rm2ug", "com.getl.example.converter.RM2UGTest");
         classMap.put("rdf2ug", "com.getl.example.converter.RDF2UGTest");

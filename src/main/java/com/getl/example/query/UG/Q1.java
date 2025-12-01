@@ -1,4 +1,4 @@
-package com.getl.example.query;
+package com.getl.example.query.UG;
 
 import com.getl.api.GraphAPI;
 import com.getl.example.Runnable;
