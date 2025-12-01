@@ -12,7 +12,7 @@ import com.getl.model.RM.MysqlOp;
 import com.getl.model.RM.MysqlSessions;
 import com.getl.model.RM.RMGraph;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerEdge;
@@ -25,17 +25,18 @@ import java.util.Iterator;
 
 public class LDBCStatistics {
     public static void main(String[] args) throws InterruptedException, SQLException, ClassNotFoundException {
-        loadFromRM(new UnifiedGraph());
+        GetlLogger ldbcStatisticsLogger = new GetlLogger("LDBCStatistics");
+        loadFromRM(new UnifiedGraph(), ldbcStatisticsLogger);
         Runtime.getRuntime().gc();
-        loadFromRDF(new UnifiedGraph());
+        loadFromRDF(new UnifiedGraph(), ldbcStatisticsLogger);
         Runtime.getRuntime().gc();
-        loadFromPG(new UnifiedGraph());
+        loadFromPG(new UnifiedGraph(), ldbcStatisticsLogger);
         Runtime.getRuntime().gc();
     }
 
-    public static void loadFromRDF(UnifiedGraph unifiedGraph) {
+    public static void loadFromRDF(UnifiedGraph unifiedGraph, GetlLogger logger) {
         String RDF_URL = CommonConstant.LDBC_RDF_FILES_URL;
-        DebugUtil.DebugInfo("BEGIN TO LOAD RDF");
+        logger.debugInfo("BEGIN TO LOAD RDF");
         Graph graph = new Graph(unifiedGraph);
         long begin = System.currentTimeMillis();
         File resource = new File(RDF_URL);
@@ -45,15 +46,15 @@ public class LDBCStatistics {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        DebugUtil.DebugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("READ RDF END " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         graph.handleRDFModel();
-        DebugUtil.DebugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("RDF2UGM END " + (System.currentTimeMillis() - begin));
         System.out.println("RDF count: " + graph.getRdfModel().size());
     }
 
-    public static void loadFromRM(UnifiedGraph unifiedGraph) throws SQLException, ClassNotFoundException {
-        DebugUtil.DebugInfo("BEGIN TO LOAD RM");
+    public static void loadFromRM(UnifiedGraph unifiedGraph, GetlLogger logger) throws SQLException, ClassNotFoundException {
+        logger.debugInfo("BEGIN TO LOAD RM");
         RMGraph rmGraph = new RMGraph();
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
         MysqlOp.asyncRM2UMG = new AsyncRM2UMG(rmConverter);
@@ -63,13 +64,13 @@ public class LDBCStatistics {
         MysqlOp.query(sessions, rmGraph);
         long t1 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
-        DebugUtil.DebugInfo("QUERY FROM MYSQL END [" + t1 + "ms]");
+        logger.debugInfo("QUERY FROM MYSQL END [" + t1 + "ms]");
         System.out.println("Line Size " + rmGraph.getLines().size());
         MysqlOp.asyncRM2UMG.shutdown();
         long t2 = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
         System.out.println("RM 2 ugm END [" + t2 + "ms]");
-        DebugUtil.DebugInfo("rm pipeline " + (System.currentTimeMillis() - beginall));
+        logger.debugInfo("rm pipeline " + (System.currentTimeMillis() - beginall));
         System.out.println("RM lines(rows) count: " + rmGraph.getLines().size());
         int i = 0;
         for (Line value : rmGraph.getLines().values()) {
@@ -78,8 +79,8 @@ public class LDBCStatistics {
         System.out.println("RM  rows * columns count: " + i);
     }
 
-    public static void loadFromPG(UnifiedGraph unifiedGraph) throws InterruptedException {
-        DebugUtil.DebugInfo("BEGIN TO LOAD PG");
+    public static void loadFromPG(UnifiedGraph unifiedGraph, GetlLogger logger) throws InterruptedException {
+        logger.debugInfo("BEGIN TO LOAD PG");
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(unifiedGraph, null));
         long begin = System.currentTimeMillis();
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
@@ -108,11 +109,11 @@ public class LDBCStatistics {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT).commit2Converter();
-        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
-        DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
         org.apache.tinkerpop.gremlin.structure.Graph graph = lpgParser.getGraph();
         System.out.println("Vertices count: " + graph.traversal().V().count().next());
         int i = 0;

@@ -10,7 +10,7 @@ import com.getl.model.RM.MysqlSessions;
 import com.getl.model.RM.RMGraph;
 import com.getl.model.RM.Schema;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.eclipse.rdf4j.model.Statement;
@@ -25,9 +25,10 @@ import java.util.stream.Collectors;
 
 public class DistributeDataset {
     public static void main(String[] args) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
-        Convert2PG();
-        Convert2RDF();
-        Convert2RM();
+        GetlLogger distributeDatasetLogger = new GetlLogger("DistributeDataset");
+        Convert2PG(distributeDatasetLogger);
+        Convert2RDF(distributeDatasetLogger);
+        Convert2RM(distributeDatasetLogger);
     }
 
     public static void statistics(String[] args) {
@@ -90,8 +91,8 @@ public class DistributeDataset {
         }
     }
 
-    private static void Convert2RDF() throws InterruptedException, IOException {
-        DebugUtil.DebugInfo("" + System.currentTimeMillis());
+    private static void Convert2RDF(GetlLogger logger) throws InterruptedException, IOException {
+        logger.debugInfo("" + System.currentTimeMillis());
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(new UnifiedGraph(), null));
         long begin = System.currentTimeMillis();
@@ -112,29 +113,29 @@ public class DistributeDataset {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasCreator_person_0_0.csv", "post_hasCreator_person", "Post", "Person").commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag").commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place").commit2Converter();
-        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
         System.out.println("pg vertices count:" + lpgParser.getGraph().traversal().V().count().next());
         System.out.println("pg edges count:" + lpgParser.getGraph().traversal().E().count().next());
-        DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = lpgParser.getAsyncPG2UMG().getUnifiedGraph();
         lpgParser.setGraph(null);
         lpgParser.setAsyncPG2UMG(null);
         lpgParser = null;
         Runtime.getRuntime().gc();
-        DebugUtil.DebugInfo("gc: " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("gc: " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         GraphAPI graphAPI = GraphAPI.open(unifiedGraph);
         try {
             graphAPI.refreshRDF();
         } catch (OutOfMemoryError e) {
-            DebugUtil.DebugInfo("oom");
+            logger.debugInfo("oom");
             throw new RuntimeException(e);
         }
-        DebugUtil.DebugInfo("convert to rdf end: " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to rdf end: " + (System.currentTimeMillis() - begin));
         System.out.println(graphAPI.getRDF().size());
         org.eclipse.rdf4j.rio.RDFWriter writer = new NTriplesWriter(new FileOutputStream(CommonConstant.LDBC_RDF_FILES_URL));
         writer.startRDF();
@@ -145,8 +146,8 @@ public class DistributeDataset {
         System.out.println("write end: " + (System.currentTimeMillis() - begin));
     }
 
-    private static void Convert2RM() throws InterruptedException, IOException, SQLException, ClassNotFoundException {
-        DebugUtil.DebugInfo("" + System.currentTimeMillis());
+    private static void Convert2RM(GetlLogger logger) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
+        logger.debugInfo("" + System.currentTimeMillis());
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(new UnifiedGraph(), null));
         long begin = System.currentTimeMillis();
@@ -158,20 +159,20 @@ public class DistributeDataset {
         lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.MILLI, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
         lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "imageFile", LPGParser.STRING, "creationDate", LPGParser.MILLI, "language", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
-        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin));
         lpgParser.getAsyncPG2UMG().shutdown();
         System.out.println("pg vertices count:" + lpgParser.getGraph().traversal().V().count().next());
         System.out.println("pg edges count:" + lpgParser.getGraph().traversal().E().count().next());
-        DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = lpgParser.getAsyncPG2UMG().getUnifiedGraph();
         lpgParser.setGraph(null);
         lpgParser.setAsyncPG2UMG(null);
         lpgParser = null;
         Runtime.getRuntime().gc();
-        DebugUtil.DebugInfo("gc: " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("gc: " + (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         RMGraph rmGraph = new RMGraph();
         rmGraph.addSchema(new Schema("Forum").addColumn("title", Schema.MID_LARGE_TEXT).addColumn("creationDate", Schema.DATE));
@@ -195,7 +196,7 @@ public class DistributeDataset {
         System.out.println("write rm end: " + (System.currentTimeMillis() - begin));
     }
 
-    private static void Convert2PG() throws InterruptedException, IOException, SQLException, ClassNotFoundException {
+    private static void Convert2PG(GetlLogger logger) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
         LPGParser lpgParser = new LPGParser(new TinkerPopConverter(new UnifiedGraph(), null));
         long begin = System.currentTimeMillis();
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
@@ -210,14 +211,14 @@ public class DistributeDataset {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT).commit2Converter();
-        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " + (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
-        DebugUtil.DebugInfo("commit pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("commit pg end " + (System.currentTimeMillis() - begin));
         System.out.println("pg count:" + lpgParser.getGraph().traversal().V().count().next());
         System.out.println(lpgParser.getGraph().traversal().E().count().next());
         Set<Object> set1 = lpgParser.getGraph().traversal().E().id().toSet().stream().map(i -> i.toString()).collect(Collectors.toSet());
         System.out.println(set1.size());
         lpgParser.getAsyncPG2UMG().shutdown();
-        DebugUtil.DebugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("convert to ugm end " + (System.currentTimeMillis() - begin));
     }
 }

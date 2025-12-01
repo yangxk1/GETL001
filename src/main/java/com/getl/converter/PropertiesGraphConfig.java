@@ -22,6 +22,7 @@ public class PropertiesGraphConfig {
      */
     //Map<String,String>
     private final DualHashBidiMap iriToEdgeLabel = new DualHashBidiMap();
+    //TODO use namespaceID
     private final List<String> edgeNamesapceList = new ArrayList<>();
     /**
      * the property label from this element
@@ -92,7 +93,7 @@ public class PropertiesGraphConfig {
         Set<String> set = new HashSet<>();
         for (IRI label : labels) {
             // edge
-            if (edgeNamesapceList.contains(label.getNameSpace())) {
+            if (edgeNamesapceList.contains(label.getNameSpaceId())) {
                 set.add(label.getLocalName());
             } else if (iriToEdgeLabel.containsKey(label.getLocalName())) {
                 set.add((String) iriToEdgeLabel.get(label.getLocalName()));
@@ -168,7 +169,7 @@ public class PropertiesGraphConfig {
 
             @Override
             public IRI IDtoIRI(Object id, UnifiedGraph unifiedGraph) {
-                return unifiedGraph.getOrRegisterBaseIRI(IRINamespace.IRI_NAMESPACE, id.toString());
+                return unifiedGraph.getOrRegisterIDIRI(id.toString());
             }
         }
     }
@@ -199,10 +200,10 @@ public class PropertiesGraphConfig {
     }
 
     public boolean withEdgeNamespace(IRI popIRI) {
-        if (edgeNamesapceList.contains(popIRI.getNameSpace())) {
+        if (edgeNamesapceList.contains(popIRI.getNameSpaceId())) {
             return true;
         }
-        if (StringUtils.isNotBlank(popIRI.getNameSpace())) {
+        if (StringUtils.isNotBlank(popIRI.getNameSpaceId())) {
             return false;
         }
         for (String namespace : edgeNamesapceList) {

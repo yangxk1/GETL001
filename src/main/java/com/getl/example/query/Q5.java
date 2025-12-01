@@ -2,26 +2,17 @@ package com.getl.example.query;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.getl.api.GraphAPI;
-import com.getl.constant.CommonConstant;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.LPGGraphConverter;
-import com.getl.converter.RMConverter;
 import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
-import com.getl.model.LPG.LPGElement;
-import com.getl.model.LPG.LPGVertex;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.Subgraph;
-import com.getl.model.RM.MysqlOp;
-import com.getl.model.RM.MysqlSessions;
-import com.getl.model.RM.RMGraph;
 import com.getl.query.step.MultiLabelP;
-import com.getl.util.DebugUtil;
-import com.mysql.cj.util.LogUtils;
+import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.structure.*;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -34,7 +25,7 @@ public class Q5 extends Runnable {
         new Q5().accept();
     }
 
-    private static void subGraph(LPGGraph graph) {
+    private void subGraph(LPGGraph graph) {
         Subgraph.SubGraphBuilder subGraphBuilder = new Subgraph.SubGraphBuilder(graph, "classify_by_tag");
         subGraphBuilder.groupBy("tag", movie -> {
             Iterator<Edge> edges = movie.edges(Direction.BOTH, "genome-scores");
@@ -52,7 +43,7 @@ public class Q5 extends Runnable {
         });
         subGraphBuilder.traversal(graph.traversal().V().has(label, "movie").toList());
         List<Subgraph> subgraphs = subGraphBuilder.getSubGraphs();
-        DebugUtil.DebugInfo("group end subGraph number: " + subgraphs.size());
+        logger.debugInfo("group end subGraph number: " + subgraphs.size());
         subGraphBuilder.addV(((subgraph, vertex) -> {
             vertex.vertices(Direction.BOTH, "genome-scores").forEachRemaining(subgraph::addVertex);
             vertex.edges(Direction.BOTH, "ratings").forEachRemaining(edge -> {
@@ -62,7 +53,7 @@ public class Q5 extends Runnable {
                 }
             });
         }));
-        DebugUtil.DebugInfo("addV end ");
+        logger.debugInfo("addV end ");
         Map<Object, Set<Object>> userInSubGraph = new ConcurrentHashMap<>();
         ExecutorService executorPool = Subgraph.SubGraphBuilder.getExecutorPool();
         CountDownLatch countDownLatch = new CountDownLatch(subgraphs.size());
@@ -81,7 +72,7 @@ public class Q5 extends Runnable {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        DebugUtil.DebugInfo("agg user end: ");
+        logger.debugInfo("agg user end: ");
         for (int i = 0; i < subgraphs.size() - 1; i++) {
             Subgraph a = subgraphs.get(i);
             Set<Object> u1 = userInSubGraph.get(a.id());
@@ -106,47 +97,52 @@ public class Q5 extends Runnable {
             }
         }
         subgraphs.forEach(Subgraph::complete);
-        DebugUtil.DebugInfo("addE end: ");
+        logger.debugInfo("addE end: ");
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
-            DebugUtil.DebugInfo("BEGIN TO TEST Q5");
-            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
+            logger.debugInfo("BEGIN TO TEST Q5");
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset(logger);
             long begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
-            DebugUtil.DebugInfo("GC" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
-            DebugUtil.DebugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("UGM2LPG end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             subGraph(lpgGraph);
-            DebugUtil.DebugInfo("SUBGRAPH end" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("SUBGRAPH end" + (System.currentTimeMillis() - begin));
             System.out.println("add Edge count:" + lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).toList().size());
             begin = System.currentTimeMillis();
             LPGGraph resultGraph = new LPGGraph();
             lpgGraph.traversal().V().has(label, MultiLabelP.of("classify_by_tag")).forEachRemaining(resultGraph::addVertices);
             lpgGraph.traversal().E().has(label, MultiLabelP.of("same_user_count")).forEachRemaining(resultGraph::addEdge);
-            DebugUtil.DebugInfo("collect result" + (System.currentTimeMillis() - begin));
+            logger.debugInfo("collect result" + (System.currentTimeMillis() - begin));
             unifiedGraph = (new LPGGraphConverter(null, resultGraph, new HashMap<>())).createUGMFromLPGGraph();
-            DebugUtil.DebugInfo("lpg 2 UGM end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("lpg 2 UGM end " + (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
-            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             lpgGraph = graphAPI.getGraph().getLpgGraph();
-            DebugUtil.DebugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
+            logger.debugInfo("result UGM 2 LPG end " + (System.currentTimeMillis() - begin));
             System.out.println("lpg vertex count: " + lpgGraph.getVertices().size());
             System.out.println("lpg edge count: " + lpgGraph.getEdges().size());
             Subgraph.SubGraphBuilder.getExecutorPool().shutdown();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("QUERY 5");
     }
 }

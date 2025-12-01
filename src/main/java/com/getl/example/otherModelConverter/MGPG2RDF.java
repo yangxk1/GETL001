@@ -4,14 +4,20 @@ import com.getl.constant.CommonConstant;
 import com.getl.converter.mg.PGMapperI;
 import com.getl.converter.mg.PGMapperR4j;
 import com.getl.converter.mg.RDFMapper;
+import com.getl.example.Runnable;
 import com.getl.io.LPGParser;
 import com.getl.model.MG.MGraph;
-import com.getl.util.DebugUtil;
+import com.getl.util.GetlLogger;
 import org.eclipse.rdf4j.model.Model;
 
-public class MGPG2RDF {
+public class MGPG2RDF extends Runnable {
     public static void main(String[] args) {
-        DebugUtil.DebugInfo("BEGIN TO TEST PG2RDF by MG");
+        new MGPG2RDF().accept();
+    }
+
+    @Override
+    protected void run() {
+        logger.debugInfo("BEGIN TO TEST PG2RDF by MG");
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser();
         long begin = System.currentTimeMillis();
@@ -56,15 +62,20 @@ public class MGPG2RDF {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
 
-        DebugUtil.DebugInfo("load pg end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("load pg end " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         MGraph mGraph = new MGraph();
         PGMapperI pgMapper = new PGMapperR4j(mGraph);
         pgMapper.addPGToMG(lpgParser.getGraph());
-        DebugUtil.DebugInfo("PG2MG end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("PG2MG end " , (System.currentTimeMillis() - begin));
         RDFMapper RDFMapper = new RDFMapper(mGraph);
         Model rdfModelFromMG = RDFMapper.createRDFModelFromMG();
-        DebugUtil.DebugInfo("UGM2RDF end " + (System.currentTimeMillis() - begin));
+        logger.debugInfo("UGM2RDF end " , (System.currentTimeMillis() - begin));
         System.out.println("RDF SIZE : " + rdfModelFromMG.size());
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("MGPG2RDF");
     }
 }

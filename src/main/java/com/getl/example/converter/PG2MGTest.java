@@ -7,6 +7,7 @@ import com.getl.io.LPGParser;
 import com.getl.model.MG.MGraph;
 
 public class PG2MGTest {
+
     public static void main(String[] args) {
         System.out.println("BEGIN TO TEST PG 2 MG， time: " + System.currentTimeMillis());
         System.out.println(System.currentTimeMillis());

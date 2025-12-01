@@ -5,9 +5,7 @@ import com.getl.example.Runnable;
 import com.getl.example.utils.LoadUtil;
 import com.getl.model.RM.*;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.util.DebugUtil;
-
-import java.sql.SQLException;
+import com.getl.util.GetlLogger;
 
 public class RM2UGTest extends Runnable {
     public static void main(String[] args) {
@@ -15,16 +13,21 @@ public class RM2UGTest extends Runnable {
     }
 
     @Override
-    public void accept() {
+    protected void run() {
         try {
-            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset();
+            UnifiedGraph unifiedGraph = LoadUtil.loadUGFromRMDataset(logger);
             long begin = System.currentTimeMillis();
             RMConverter rmConverter = new RMConverter(unifiedGraph, new RMGraph().setSchemas(LoadUtil.schema));
             rmConverter.addUGMToRMModel();
-            DebugUtil.DebugInfo("ugm 2 rm time: " + (System.currentTimeMillis() - begin) + " ms");
+            logger.debugInfo("ugm 2 rm ", (System.currentTimeMillis() - begin));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected GetlLogger initLogger() {
+        return new GetlLogger("RM2UGTest");
     }
 }

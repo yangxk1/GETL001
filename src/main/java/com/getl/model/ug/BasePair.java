@@ -1,7 +1,6 @@
 package com.getl.model.ug;
 
 import com.getl.constant.IRINamespace;
-import com.getl.model.LPG.LPGElement;
 import com.getl.model.LPG.LPGProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +20,7 @@ public class BasePair implements Pair, Vertex, Edge {
 
     @Setter
     @Getter
-    private Set<IRI> labels;
+    private Set<IRI> labels = new HashSet<>();
     @Setter
     @Getter
     private IRI valueIRI;
@@ -59,7 +58,7 @@ public class BasePair implements Pair, Vertex, Edge {
     }
 
     public boolean hasLabel(IRI label) {
-        return labels != null && labels.contains(label);
+        return labels.contains(label);
     }
 
     @Override
@@ -91,7 +90,7 @@ public class BasePair implements Pair, Vertex, Edge {
         Iterator basePairIterator;
         basePairIterator = relations.stream().filter(pair -> {
             if (hashSet.isEmpty()) {
-                return IRINamespace.EDGE_NAMESPACE.equals(pair.from().getLabels().stream().findFirst().map(IRI::getNameSpace).orElse(""));
+                return IRINamespace.EDGE_NAMESPACE_ID.equals(pair.from().getLabels().stream().findFirst().map(IRI::getNameSpaceId).orElse(""));
             } else {
                 return hashSet.contains(pair.from().label());
             }
@@ -135,8 +134,8 @@ public class BasePair implements Pair, Vertex, Edge {
     public Iterator<LPGProperty> properties(String... propertyKeys) {
         Set<String> hashSet = new HashSet<>(List.of(propertyKeys));
         return relations.stream().map(pair -> {
-            String label = pair.from().labels.stream().findFirst().map(IRI::getNameSpace).orElse("");
-            if ((propertyKeys.length == 0 && !IRINamespace.PROPERTIES_NAMESPACE.equals(label)) || hashSet.contains(label)) {
+            String label = pair.from().labels.stream().findFirst().map(IRI::getLocalName).orElse("");
+            if ((propertyKeys.length == 0 && !IRINamespace.PROPERTIES_NAMESPACE_ID.equals(label)) || hashSet.contains(label)) {
                 return null;
             }
             Object value = Optional.of(pair).map(NestedPair::to).map(NestedPair.RelationPair::to).map(Pair::to).orElse(null);

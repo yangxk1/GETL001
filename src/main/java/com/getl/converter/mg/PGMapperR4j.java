@@ -53,7 +53,7 @@ public class PGMapperR4j implements PGMapperI {
         if (inIRI == null) {
             inIRI = addVertexToMG(inVertex, idMapper);
         }
-        IRI predicate = createIRI(IRINamespace.EDGE_NAMESPACE, edge.label());
+        IRI predicate = createIRI(IRINamespace.EDGE_NAMESPACE_ID, edge.label());
         Statement statement = new Statement(outIRI, predicate, inIRI);
         statement.setId(edge.id());
         mGraph.add(statement);
@@ -70,7 +70,7 @@ public class PGMapperR4j implements PGMapperI {
         if (resource != null) {
             return resource;
         }
-        IRI vertexIRI = createIRI(IRINamespace.IRI_NAMESPACE, vertex.id().toString());
+        IRI vertexIRI = createIRI(IRINamespace.IRI_NAMESPACE_ID, vertex.id().toString());
         idMapper.put(vertex.id(), vertexIRI);
         Iterator<VertexProperty<Object>> properties = vertex.properties();
         while (properties.hasNext()) {
@@ -87,7 +87,7 @@ public class PGMapperR4j implements PGMapperI {
     private void addPopToMG(Property property, Resource source) {
         String key = property.key();
         Object value = property.value();
-        IRI predicate = createIRI(IRINamespace.PROPERTIES_NAMESPACE, key);
+        IRI predicate = createIRI(IRINamespace.PROPERTIES_NAMESPACE_ID, key);
         Literal literal = LiteralConverter.convertToLiteral(value);
         Statement statement = new Statement(source, predicate, literal);
         mGraph.add(statement);

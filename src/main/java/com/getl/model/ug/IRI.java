@@ -2,16 +2,16 @@ package com.getl.model.ug;
 
 public class IRI implements CharSequence {
 
-    private final String nameSpace;
+    private final String nameSpaceId;
     private final Object localName;
 
-    public IRI(String nameSpace, Object localName) {
-        this.nameSpace = nameSpace;
+    public IRI(String nameSpaceId, Object localName) {
+        this.nameSpaceId = nameSpaceId;
         this.localName = localName;
     }
 
-    public String getNameSpace() {
-        return nameSpace;
+    public String getNameSpaceId() {
+        return nameSpaceId;
     }
 
     public String getLocalName() {
@@ -20,22 +20,23 @@ public class IRI implements CharSequence {
     public Object getLocalID() {return this.localName;}
 
     public String toString() {
-        return nameSpace + localName;
+        //TODO
+        return nameSpaceId +"$$"+ localName;
     }
 
     @Override
     public int length() {
-        return nameSpace.length() + localName.toString().length();
+        return nameSpaceId.length() + localName.toString().length();
     }
 
     @Override
     public char charAt(int index) {
-        return (nameSpace + localName).charAt(index);
+        return (nameSpaceId + localName).charAt(index);
     }
 
     @Override
     public CharSequence subSequence(int start, int end) {
-        return (nameSpace + localName).subSequence(start, end);
+        return (nameSpaceId + localName).subSequence(start, end);
     }
 
 }

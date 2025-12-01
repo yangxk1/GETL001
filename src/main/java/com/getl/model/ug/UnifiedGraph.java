@@ -24,6 +24,7 @@ public class UnifiedGraph implements Graph {
     private List<NestedPair> cache = new ArrayList<>();
     private Map<String, IRI> labels = new ConcurrentHashMap<>();
     private Map<String, IRI> s2IRI = new ConcurrentHashMap<>();
+    private NamespacePool nsPool = NamespacePool.getInstance();
 
     public Collection<NestedPair> getPairs() {
         return cache;
@@ -35,22 +36,30 @@ public class UnifiedGraph implements Graph {
 
     public IRI getOrRegisterLabel(String namespace, String label) {
         assert label != null;
-        return labels.computeIfAbsent(label, i -> new IRI(namespace, label));
+        String namespaceId = nsPool.getNamespaceId(namespace);
+        return labels.computeIfAbsent(label, i -> new IRI(namespaceId, label));
     }
 
     public IRI getOrRegisterLabel(String labelIRI) {
         assert labelIRI != null;
-        return labels.computeIfAbsent(labelIRI, i -> new IRI(IRINamespace.LABEL_NAMESPACE, labelIRI));
+        return labels.computeIfAbsent(labelIRI, i -> new IRI(IRINamespace.LABEL_NAMESPACE_ID, labelIRI));
     }
 
-    public IRI getOrRegisterPopIRI(String iri) {
-        assert iri != null;
-        return s2IRI.computeIfAbsent(iri, i -> new IRI(IRINamespace.PROPERTIES_NAMESPACE, iri));
+    public IRI getOrRegisterPopIRI(String propertyName) {
+        assert propertyName != null;
+        return s2IRI.computeIfAbsent(propertyName, i -> new IRI(IRINamespace.PROPERTIES_NAMESPACE_ID, propertyName));
+    }
+
+    public IRI getOrRegisterIDIRI(String localName) {
+        String namespaceId = IRINamespace.IRI_NAMESPACE_ID;
+        String url = namespaceId + "$$" + localName;
+        return s2IRI.computeIfAbsent(url, i -> new IRI(IRINamespace.IRI_NAMESPACE_ID, localName));
     }
 
     public IRI getOrRegisterBaseIRI(String namespace, String localName) {
-        String url = namespace + localName;
-        return s2IRI.computeIfAbsent(url, i -> new IRI(namespace, localName));
+        String namespaceId = nsPool.getNamespaceId(namespace);
+        String url = namespaceId + "$$" + localName;
+        return s2IRI.computeIfAbsent(url, i -> new IRI(namespaceId, localName));
     }
 
     public BasePair getOrRegisterBasePair(String iri) {
@@ -60,14 +69,14 @@ public class UnifiedGraph implements Graph {
 
     public BasePair getOrRegisterIdIRI(String iri) {
         assert iri != null;
-        return getOrRegisterBasePair(IRINamespace.IRI_NAMESPACE, iri);
+        return getOrRegisterBasePair(IRINamespace.IRI_NAMESPACE_ID, iri);
     }
 
 
     public BasePair getOrRegisterBasePair(String baseURI, String IRIId) {
         assert IRIId != null;
         String url = baseURI + IRIId;
-        IRI IRIInstant = s2IRI.computeIfAbsent(url, i -> new IRI(baseURI, IRIId));
+        IRI IRIInstant = getOrRegisterBaseIRI(baseURI, IRIId);
         return IRI2BasePair.computeIfAbsent(IRIInstant, i -> new BasePair(new HashSet<>(), i));
     }
 
@@ -144,7 +153,7 @@ public class UnifiedGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
-        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getNameSpace).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE)).iterator();
+        Iterator basePairIterator = this.IRI2BasePair.values().stream().filter(basePair -> basePair.getLabels().stream().map(IRI::getLocalName).collect(Collectors.toList()).contains(IRINamespace.LABEL_NAMESPACE_ID)).iterator();
         return basePairIterator;
     }
 
