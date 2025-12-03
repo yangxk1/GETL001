@@ -89,6 +89,9 @@ public class PropertyGraphTest extends Runnable {
             graphData = asyncParser.getGraph();
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
+        } finally {
+            // 关键修复：必须关闭 AsyncLPGParser 以终止后台线程
+            asyncParser.shutdown();
         }
     }
 

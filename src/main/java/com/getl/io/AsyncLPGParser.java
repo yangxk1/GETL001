@@ -143,7 +143,7 @@ public class AsyncLPGParser {
                 @Override
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r, "LPG-Reader-" + counter.incrementAndGet());
-                    t.setDaemon(false);
+                    t.setDaemon(true); // 设置为守护线程，防止阻止JVM退出
                     return t;
                 }
             });
@@ -153,7 +153,7 @@ public class AsyncLPGParser {
                 @Override
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r, "LPG-Writer-" + counter.incrementAndGet());
-                    t.setDaemon(false);
+                    t.setDaemon(true); // 设置为守护线程，防止阻止JVM退出
                     return t;
                 }
             });
