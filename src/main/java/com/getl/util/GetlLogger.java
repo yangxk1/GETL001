@@ -6,12 +6,15 @@ import lombok.Getter;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 public class GetlLogger {
     @Getter
     private String logfileName = "debug.md";
+
+    // Cache for storing time and memory consumption for each info type
+    private final Map<String, List<Long>> infoTimeCache = new HashMap<>();
+    private final Map<String, List<Long>> infoMemoryCache = new HashMap<>();
 
     public GetlLogger(String logfileName) {
         this.logfileName = logfileName + ".md";
@@ -32,6 +35,16 @@ public class GetlLogger {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         simpleDateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT+8"));
         String formattedDate = simpleDateFormat.format(date);
+
+        // Calculate memory usage
+        long totalMemory = Runtime.getRuntime().totalMemory();
+        long free = Runtime.getRuntime().freeMemory();
+        long used = totalMemory - free;
+
+        // Cache time and memory data for this info type
+        infoTimeCache.computeIfAbsent(info, k -> new ArrayList<>()).add(time);
+        infoMemoryCache.computeIfAbsent(info, k -> new ArrayList<>()).add(used);
+
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\n## ");
         stringBuilder.append(info);
@@ -40,14 +53,117 @@ public class GetlLogger {
         stringBuilder.append("\nused time: ").append(NumberFormat.getInstance(Locale.US).format(time)).append(" ms");
         long max = Runtime.getRuntime().maxMemory();
         stringBuilder.append("\nJVM max Memory (Byte): ").append(NumberFormat.getInstance(Locale.US).format(max)).append(" B");
-        long totalMemory = Runtime.getRuntime().totalMemory();
         stringBuilder.append("\nJVM current total Memory (Byte): ").append(NumberFormat.getInstance(Locale.US).format(totalMemory)).append(" B");
-        long free = Runtime.getRuntime().freeMemory();
         stringBuilder.append("\nJVM current free Memory (Byte): ").append(NumberFormat.getInstance(Locale.US).format(free)).append(" B");
-        long used = totalMemory - free;
         stringBuilder.append("\nUsed Memory (Byte): ").append(NumberFormat.getInstance(Locale.US).format(used)).append(" B");
         stringBuilder.append("\n```");
         System.out.println(stringBuilder.toString());
         FileUtil.appendUtf8String(stringBuilder.toString() + "\n\n", CommonConstant.LOG_FILE_PATH + this.logfileName);
+    }
+
+    /**
+     * Calculate and output statistics for all cached info logs.
+     * This method should be called when logging is complete (similar to a destructor).
+     */
+    public void close() {
+        if (infoTimeCache.isEmpty()) {
+            return;
+        }
+
+        StringBuilder statistics = new StringBuilder();
+        statistics.append("\n---\n========================\n# Statistics Summary\n========================\n");
+
+        // Sort info types alphabetically for consistent output
+        List<String> sortedInfoTypes = new ArrayList<>(infoTimeCache.keySet());
+        Collections.sort(sortedInfoTypes);
+
+        for (String info : sortedInfoTypes) {
+            List<Long> times = infoTimeCache.get(info);
+            List<Long> memories = infoMemoryCache.get(info);
+
+            if (times == null || times.isEmpty()) {
+                continue;
+            }
+
+            // Calculate statistics for time
+            long totalTime = 0;
+            long minTime = Long.MAX_VALUE;
+            long maxTime = Long.MIN_VALUE;
+            for (Long time : times) {
+                totalTime += time;
+                minTime = Math.min(minTime, time);
+                maxTime = Math.max(maxTime, time);
+            }
+            double avgTime = (double) totalTime / times.size();
+
+            // Calculate statistics for memory
+            long totalMemory = 0;
+            long minMemory = Long.MAX_VALUE;
+            long maxMemory = Long.MIN_VALUE;
+            for (Long memory : memories) {
+                totalMemory += memory;
+                minMemory = Math.min(minMemory, memory);
+                maxMemory = Math.max(maxMemory, memory);
+            }
+            double avgMemory = (double) totalMemory / memories.size();
+
+            // Build statistics output
+            statistics.append("## ").append(info).append("\n");
+            statistics.append("```\n");
+            statistics.append("Execution count: ").append(times.size()).append("\n");
+            statistics.append("\nTime Statistics:\n");
+            statistics.append("  Average time: ").append(NumberFormat.getInstance(Locale.US).format((long) avgTime)).append(" ms\n");
+            statistics.append("  Min time: ").append(NumberFormat.getInstance(Locale.US).format(minTime)).append(" ms\n");
+            statistics.append("  Max time: ").append(NumberFormat.getInstance(Locale.US).format(maxTime)).append(" ms\n");
+            statistics.append("  Total time: ").append(NumberFormat.getInstance(Locale.US).format(totalTime)).append(" ms\n");
+            statistics.append("\nMemory Statistics:\n");
+            statistics.append("  Average memory: ").append(NumberFormat.getInstance(Locale.US).format((long) avgMemory)).append(" B\n");
+            statistics.append("  Min memory: ").append(NumberFormat.getInstance(Locale.US).format(minMemory)).append(" B\n");
+            statistics.append("  Max memory: ").append(NumberFormat.getInstance(Locale.US).format(maxMemory)).append(" B\n");
+            statistics.append("  Max memory (MB): ").append(String.format("%.2f", maxMemory / (1024.0 * 1024.0))).append(" MB\n");
+            statistics.append("```\n\n");
+        }
+
+        System.out.println(statistics.toString());
+        FileUtil.appendUtf8String(statistics.toString(), CommonConstant.LOG_FILE_PATH + this.logfileName);
+
+        // Clear caches
+        infoTimeCache.clear();
+        infoMemoryCache.clear();
+    }
+
+    /**
+     * Get statistics for a specific info type.
+     * @param info The info type to get statistics for
+     * @return A map containing "avgTime", "avgMemory", "count", or null if no data exists
+     */
+    public Map<String, Object> getStatistics(String info) {
+        List<Long> times = infoTimeCache.get(info);
+        List<Long> memories = infoMemoryCache.get(info);
+
+        if (times == null || times.isEmpty()) {
+            return null;
+        }
+
+        long totalTime = 0;
+        for (Long time : times) {
+            totalTime += time;
+        }
+        double avgTime = (double) totalTime / times.size();
+
+        long totalMemory = 0;
+        for (Long memory : memories) {
+            totalMemory += memory;
+        }
+        double avgMemory = (double) totalMemory / memories.size();
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("avgTime", avgTime);
+        stats.put("avgMemory", avgMemory);
+        stats.put("count", times.size());
+        stats.put("totalTime", totalTime);
+        stats.put("totalMemory", totalMemory);
+
+        return stats;
     }
 }

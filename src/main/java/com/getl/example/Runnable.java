@@ -19,6 +19,7 @@ public abstract class Runnable {
             System.err.println("Sleep interrupted: " + e.getMessage());
         }
         run();
+        logger.close();
     }
 
     protected abstract void run();
