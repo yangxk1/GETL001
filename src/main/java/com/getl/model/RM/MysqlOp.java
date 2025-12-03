@@ -16,6 +16,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MysqlOp {
 
@@ -354,6 +357,114 @@ public class MysqlOp {
                 }
             }).start();
         }
+    }
+
+    public static void loadRMGraph(MysqlSessions session, RMGraph graph) throws SQLException, InterruptedException {
+        querySchema(session, graph);
+
+        // 获取可用处理器数量，创建线程池
+        int nThreads = Math.max(4, Runtime.getRuntime().availableProcessors());
+        ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+        countDownLatch = new CountDownLatch(graph.getSchemas().entrySet().size());
+
+        try {
+            for (Map.Entry<String, Schema> entry : graph.getSchemas().entrySet()) {
+                // 为每个表创建一个异步任务
+                executorService.submit(() -> {
+                    try {
+                        loadTableData(session, graph, entry.getKey(), entry.getValue());
+                    } catch (SQLException e) {
+                        System.err.println("Failed to load table: " + entry.getKey());
+                        e.printStackTrace();
+                        throw new RuntimeException("Failed to load table: " + entry.getKey(), e);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+            }
+
+            // 等待所有任务完成
+            countDownLatch.await();
+        } finally {
+            executorService.shutdown();
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        }
+    }
+
+    /**
+     * 加载单个表的数据（线程安全）
+     */
+    private static void loadTableData(MysqlSessions session, RMGraph graph, String tableName, Schema schema) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM `");
+        sql.append(tableName).append("`");
+//        sql.append("Limit 20");
+        String select = sql.toString();
+
+        ArrayList<Line> lines = new ArrayList<>();
+        ResultSet resultSet = session.select(select, lines);
+
+        System.out.println(Thread.currentThread().getName() + " loading table: " + tableName +
+                          " (" + (schema.isNode() ? "node" : "edge") + ")");
+
+        while (resultSet.next()) {
+            Line line = new Line();
+            line.setTableName(tableName);
+            String id = null;
+            if (schema.getHasId() == 0) {
+                id = resultSet.getString(Schema.KEY);
+            }
+            if (StringUtils.isBlank(id)) {
+                id = schema.getTableName() + ":" + UnifiedGraph.getNextID();
+            } else if (id.charAt(0) <= '9' && id.charAt(0) >= '0') {
+                id = schema.getTableName() + ":" + id;
+            }
+            line.setId(id);
+            Map<String, Object> values = new HashMap<>();
+            if (!schema.isNode()) {
+                String in = resultSet.getString(schema.getIn());
+                values.put(schema.getIn(), in);
+                String out = resultSet.getString(schema.getOut());
+                values.put(schema.getOut(), out);
+            }
+            for (Map.Entry<String, String> columns : schema.getColumns().entrySet()) {
+                Object value = null;
+                switch (columns.getValue()) {
+                    case Schema.BIGINT:
+                        value = resultSet.getLong(columns.getKey());
+                        break;
+                    case Schema.INT:
+                        value = resultSet.getInt(columns.getKey());
+                        break;
+                    case Schema.NUMERIC:
+                        value = resultSet.getDouble(columns.getKey());
+                        break;
+                    case Schema.HUGE_TEXT:
+                    case Schema.MID_LARGE_TEXT:
+                    case Schema.LARGE_TEXT:
+                    case Schema.MID_TEXT:
+                    case Schema.SMALL_TEXT:
+                    case Schema.VERY_HUGE_TEXT:
+                        value = resultSet.getString(columns.getKey());
+                        break;
+                    case Schema.DATE:
+                        value = resultSet.getDate(columns.getKey());
+                }
+                boolean b = resultSet.wasNull();
+                if (!b) {
+                    values.put(columns.getKey(), value);
+                }
+            }
+            line.setValues(values);
+            // ConcurrentHashMap.put() 是线程安全的，可以并发写入
+            graph.getLines().put(id, line);
+            lines.add(line);
+        }
+
+        System.out.println(Thread.currentThread().getName() + " completed table: " + tableName +
+                          " (loaded " + lines.size() + " lines)");
     }
 
     public static void waitAll() throws InterruptedException {

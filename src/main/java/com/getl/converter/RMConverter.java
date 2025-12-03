@@ -83,9 +83,6 @@ public class RMConverter {
             //edge
             IRI edgeLabel = unifiedGraph.getOrRegisterBaseIRI(EDGE_NAMESPACE_ID, schema.getTableName());
             String outId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getOut())).map(id -> schema.getOutLabel() + ":" + id).orElse(null);
-            if (outId == null) {
-                return null;
-            }
             Line out = Optional.of(outId).map(rmGraph.getLines()::get).orElse(null);
             if (out == null) {
                 out = new Line();
@@ -93,9 +90,6 @@ public class RMConverter {
                 out.setTableName(schema.getOutLabel());
             }
             String inId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getIn())).map(id -> schema.getInLabel() + ":" + id).orElse(null);
-            if (inId == null) {
-                return null;
-            }
             Line in = Optional.of(inId).map(rmGraph.getLines()::get).orElse(null);
             if (in == null) {
                 in = new Line();

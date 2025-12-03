@@ -59,9 +59,10 @@ public class RMMGConverter {
         if (schema == null || schema.isNode()) {
             IRI subject = createIRI(IRINamespace.IRI_NAMESPACE, line.getId());
             idMapper.put(line.getId(), subject);
-
+            Map<String, Object> values = line.getValues();
+            values = values != null ? values : Collections.emptyMap();
             // Properties from columns
-            for (Map.Entry<String, Object> e : line.getValues().entrySet()) {
+            for (Map.Entry<String, Object> e : values.entrySet()) {
                 if (e.getKey() == null || e.getValue() == null) continue;
                 IRI pred = createIRI(IRINamespace.PROPERTIES_NAMESPACE, e.getKey());
                 Literal lit = LiteralConverter.convertToLiteral(e.getValue());

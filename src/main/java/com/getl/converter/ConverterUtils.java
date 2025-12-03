@@ -8,9 +8,12 @@ import com.getl.converter.mg.RDFMapper;
 import com.getl.converter.mg.RMMGConverter;
 import com.getl.model.MG.MGraph;
 import com.getl.model.RM.RMGraph;
+import com.getl.model.RM.Schema;
 import com.getl.model.ug.UnifiedGraph;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.rdf4j.model.Model;
+
+import java.util.Map;
 
 public class ConverterUtils {
     public static Graph buildTinkerPopGraphFromUG(UnifiedGraph unifiedGraph) {
@@ -36,8 +39,9 @@ public class ConverterUtils {
         return rdfConverter.getUnifiedGraph();
     }
 
-    public static RMGraph buildRMFromUGGraph(UnifiedGraph unifiedGraph) {
+    public static RMGraph buildRMFromUGGraph(UnifiedGraph unifiedGraph, Map<String, Schema> schemas) {
         RMGraph rmGraph = new RMGraph();
+        rmGraph.setSchemas(schemas);
         RMConverter converter = new RMConverter(unifiedGraph, rmGraph);
         converter.addUGMToRMModel();
         return rmGraph;
@@ -81,8 +85,9 @@ public class ConverterUtils {
         return mGraph;
     }
 
-    public static RMGraph buildRMFromMG(MGraph mGraph) {
+    public static RMGraph buildRMFromMG(MGraph mGraph, Map<String, Schema> schemas) {
         RMGraph rmGraph = new RMGraph();
+        rmGraph.setSchemas(schemas);
         RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
         converter.addMGToRM();
         return rmGraph;
