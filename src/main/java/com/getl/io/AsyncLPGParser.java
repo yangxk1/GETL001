@@ -50,8 +50,12 @@ public class AsyncLPGParser {
     private final AtomicInteger activeReaders = new AtomicInteger(0);
     private final AtomicInteger activeTasks = new AtomicInteger(0);
 
+    // 顶点缓存 - 关键性能优化
+    private final ConcurrentHashMap<String, Vertex> vertexCache = new ConcurrentHashMap<>();
+    private GraphTraversalSource g; // 重用GraphTraversalSource
+
     // 性能配置
-    private static final int BATCH_SIZE = 1000; // 批量写入大小
+    private static final int BATCH_SIZE = 5000; // 批量写入大小（优化：从1000增加到5000）
     private static final int QUEUE_CAPACITY = 100; // 队列容量
     private static final int DEFAULT_READER_THREADS = Runtime.getRuntime().availableProcessors();
     private static final int WRITER_THREADS = 1; // 写入线程数（建议单线程避免竞争）
@@ -132,6 +136,7 @@ public class AsyncLPGParser {
      */
     public AsyncLPGParser(int readerThreads) {
         this.graph = TinkerGraph.open();
+        this.g = AnonymousTraversalSource.traversal().withEmbedded(graph); // 初始化GraphTraversalSource
         this.fileReaderExecutor = Executors.newFixedThreadPool(readerThreads,
             new ThreadFactory() {
                 private final AtomicInteger counter = new AtomicInteger(0);
@@ -167,6 +172,7 @@ public class AsyncLPGParser {
     public AsyncLPGParser(Graph graph, int readerThreads) {
         this(readerThreads);
         this.graph = graph;
+        this.g = AnonymousTraversalSource.traversal().withEmbedded(graph); // 重新初始化
     }
 
     /**
@@ -436,6 +442,30 @@ public class AsyncLPGParser {
     }
 
     /**
+     * 从缓存获取或创建顶点（关键性能优化）
+     */
+    private Vertex getOrCreateVertex(String vertexId, String label) {
+        // 先从缓存获取
+        Vertex vertex = vertexCache.get(vertexId);
+        if (vertex != null) {
+            return vertex;
+        }
+
+        // 缓存未命中，从图中查找或创建
+        Iterator<Vertex> iter = graph.vertices(vertexId);
+        if (iter.hasNext()) {
+            vertex = iter.next();
+        } else {
+            vertex = g.addV(label).property(T.id, vertexId).next();
+            vertexCount.incrementAndGet();
+        }
+
+        // 放入缓存
+        vertexCache.put(vertexId, vertex);
+        return vertex;
+    }
+
+    /**
      * 图写入线程
      */
     private class GraphWriter implements Runnable {
@@ -465,26 +495,14 @@ public class AsyncLPGParser {
         }
 
         /**
-         * 批量写入顶点
+         * 批量写入顶点（优化版：使用缓存）
          */
         private void writeVertexBatch(List<VertexData> vertices) {
             graphLock.writeLock().lock();
             try {
-                GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
-
                 for (VertexData vertexData : vertices) {
-                    // 检查顶点是否已存在
-                    Iterator<Vertex> existingVertices = graph.vertices(vertexData.getId());
-                    Vertex vertex;
-
-                    if (existingVertices.hasNext()) {
-                        vertex = existingVertices.next();
-                    } else {
-                        GraphTraversal<Vertex, Vertex> addV = g.addV(vertexData.getLabel());
-                        addV.property(T.id, vertexData.getId());
-                        vertex = addV.next();
-                        vertexCount.incrementAndGet();
-                    }
+                    // 使用缓存获取或创建顶点
+                    Vertex vertex = getOrCreateVertex(vertexData.getId(), vertexData.getLabel());
 
                     // 添加属性
                     for (Map.Entry<String, Object> prop : vertexData.getProperties().entrySet()) {
@@ -497,37 +515,17 @@ public class AsyncLPGParser {
         }
 
         /**
-         * 批量写入边
+         * 批量写入边（优化版：使用顶点缓存）
          */
         private void writeEdgeBatch(List<EdgeData> edges) {
             graphLock.writeLock().lock();
             try {
-                GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(graph);
-
                 for (EdgeData edgeData : edges) {
-                    // 获取或创建from顶点
-                    Vertex fromVertex;
-                    Iterator<Vertex> fromIter = graph.vertices(edgeData.getFromId());
-                    if (fromIter.hasNext()) {
-                        fromVertex = fromIter.next();
-                    } else {
-                        fromVertex = g.addV(edgeData.getFromLabel())
-                            .property(T.id, edgeData.getFromId())
-                            .next();
-                        vertexCount.incrementAndGet();
-                    }
+                    // 使用缓存获取或创建from顶点（关键优化：避免重复查找）
+                    Vertex fromVertex = getOrCreateVertex(edgeData.getFromId(), edgeData.getFromLabel());
 
-                    // 获取或创建to顶点
-                    Vertex toVertex;
-                    Iterator<Vertex> toIter = graph.vertices(edgeData.getToId());
-                    if (toIter.hasNext()) {
-                        toVertex = toIter.next();
-                    } else {
-                        toVertex = g.addV(edgeData.getToLabel())
-                            .property(T.id, edgeData.getToId())
-                            .next();
-                        vertexCount.incrementAndGet();
-                    }
+                    // 使用缓存获取或创建to顶点（关键优化：避免重复查找）
+                    Vertex toVertex = getOrCreateVertex(edgeData.getToId(), edgeData.getToLabel());
 
                     // 创建边
                     GraphTraversal<Edge, Edge> addE = g.addE(edgeData.getLabel())
@@ -612,8 +610,15 @@ public class AsyncLPGParser {
      * 获取统计信息
      */
     public String getStatistics() {
-        return String.format("Vertices: %d, Edges: %d, Active Readers: %d, Queue Size: %d",
-            vertexCount.get(), edgeCount.get(), activeReaders.get(), writeQueue.size());
+        return String.format("Vertices: %d, Edges: %d, Cached: %d, Active Readers: %d, Queue Size: %d",
+            vertexCount.get(), edgeCount.get(), vertexCache.size(), activeReaders.get(), writeQueue.size());
+    }
+
+    /**
+     * 清空缓存（在需要时释放内存）
+     */
+    public void clearCache() {
+        vertexCache.clear();
     }
 }
 

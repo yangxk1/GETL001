@@ -1,12 +1,9 @@
 package com.getl.example.converter;
 
 import com.getl.constant.CommonConstant;
-import com.getl.converter.mg.PGMapperI;
-import com.getl.converter.mg.PGMapperR4j;
 import com.getl.example.Runnable;
 import com.getl.io.AsyncLPGParser;
 import com.getl.io.LPGParser;
-import com.getl.model.MG.MGraph;
 import com.getl.util.GetlLogger;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +23,8 @@ public class LPGLoaderTest extends Runnable {
         testSyncVersion();
     }
 
-    private static void testSyncVersion() {
+    private void testSyncVersion() {
+        System.out.println("\n========== 同步版本测试（基准）==========");
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
         LPGParser lpgParser = new LPGParser();
         long begin = System.currentTimeMillis();
@@ -71,18 +69,25 @@ public class LPGLoaderTest extends Runnable {
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_hasTag_tag_0_0.csv", "post_hasTag_tag", "Post", "Tag");
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
 
-        System.out.println("load pg end " + (System.currentTimeMillis() - begin));
-        System.out.println(lpgParser.getGraph().traversal().V().count().next());
-        System.out.println(lpgParser.getGraph().traversal().E().count().next());
+        long totalTime = System.currentTimeMillis() - begin;
+        long vCount = lpgParser.getGraph().traversal().V().count().next();
+        long eCount = lpgParser.getGraph().traversal().E().count().next();
+
+        logger.debugInfo("load pg end (sync) " , totalTime);
+        System.out.println("顶点数: " + vCount);
+        System.out.println("边数: " + eCount);
+        System.out.println("性能: " + String.format("%.0f", (vCount + eCount) * 1000.0 / totalTime) + " 元素/秒");
     }
 
-    private static void testAsyncVersion() {
+    private void testAsyncVersion() {
+        System.out.println("\n========== 异步版本测试（优化后）==========");
         String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
 
         // 创建异步解析器，使用所有CPU核心
         AsyncLPGParser asyncParser = new AsyncLPGParser();
 
         long begin = System.currentTimeMillis();
+        long startTime = begin;
         String BASE_URL_STATIC = BASE_URL + "static/";
         String BASE_URL_DYNAMIC = BASE_URL + "dynamic/";
 
@@ -129,14 +134,29 @@ public class LPGLoaderTest extends Runnable {
             );
 
             // 等待所有文件读取任务完成
+            long fileReadTime = System.currentTimeMillis();
             CompletableFuture.allOf(vertexFutures, edgeFutures).join();
+            long fileReadDuration = System.currentTimeMillis() - fileReadTime;
+
+            System.out.println("文件读取完成，耗时: " + fileReadDuration + "ms");
+            System.out.println("当前统计: " + asyncParser.getStatistics());
 
             // 等待所有数据写入完成
+            long writeStartTime = System.currentTimeMillis();
             asyncParser.awaitCompletion();
+            long writeDuration = System.currentTimeMillis() - writeStartTime;
 
-            System.out.println("load pg end (async) " + (System.currentTimeMillis() - begin));
-            System.out.println(asyncParser.getGraph().traversal().V().count().next());
-            System.out.println(asyncParser.getGraph().traversal().E().count().next());
+            long totalTime = System.currentTimeMillis() - startTime;
+
+            System.out.println("数据写入完成，耗时: " + writeDuration + "ms");
+            logger.debugInfo("load pg end (async) " + totalTime + "ms");
+            System.out.println("最终统计: " + asyncParser.getStatistics());
+
+            long vCount = asyncParser.getGraph().traversal().V().count().next();
+            long eCount = asyncParser.getGraph().traversal().E().count().next();
+            System.out.println("顶点数: " + vCount);
+            System.out.println("边数: " + eCount);
+            System.out.println("性能: " + String.format("%.0f", (vCount + eCount) * 1000.0 / totalTime) + " 元素/秒");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
