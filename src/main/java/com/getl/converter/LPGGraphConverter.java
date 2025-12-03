@@ -130,7 +130,7 @@ public class LPGGraphConverter {
         }
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
         String edgeLabel = propertiesGraphConfig.getEdge(lpgEdge.label);
-        IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE_ID, edgeLabel);
+        IRI edge = unifiedGraph.getOrRegisterEdgeLabel(edgeLabel);
         return unifiedGraph.add(edge, lpgEdge.getId(), outV, inV).from();
     }
 

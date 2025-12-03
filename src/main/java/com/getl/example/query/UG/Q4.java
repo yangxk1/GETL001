@@ -25,23 +25,27 @@ public class Q4 extends Runnable {
         try {
             logger.debugInfo("BEGIN TO TEST Q4");
             UnifiedGraph unifiedGraph = LoadUtil.loadUGFromPGFiles(logger);
+
             long begin = System.currentTimeMillis();
             //GC
             Runtime.getRuntime().gc();
             logger.debugInfo("GC " , (System.currentTimeMillis() - begin));
+
             begin = System.currentTimeMillis();
             GraphAPI graphAPI = GraphAPI.open();
             graphAPI.setUGMGraph(unifiedGraph);
             graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
+
+            logger.debugInfo("UGM2LPG end " , (System.currentTimeMillis() - begin));
+            begin = System.currentTimeMillis();
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            logger.debugInfo("UGM2LPG end " , (System.currentTimeMillis() - begin));
-            begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
             logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
+
             begin = System.currentTimeMillis();
             lpgGraph.traversal().V().hasLabel("Person").as("person1")
                     .in("comment_hasCreator_person").as("comment")
@@ -55,17 +59,21 @@ public class Q4 extends Runnable {
                     //  .select("person1", "comment", "post", "person2")
                     .toList();
             logger.debugInfo("query end " , (System.currentTimeMillis() - begin));
+
             begin = System.currentTimeMillis();
             unifiedGraph = (new LPGGraphConverter(null, lpgGraph, new HashMap<>())).createUGMFromLPGGraph();
             logger.debugInfo("lpg result 2 UGM end " , (System.currentTimeMillis() - begin));
+
             begin = System.currentTimeMillis();
             lpgGraph = null;
             Runtime.getRuntime().gc();
             logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
             System.out.println("Pairs: " + unifiedGraph.getCache().size());
+
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
             logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
+
             begin = System.currentTimeMillis();
             graphAPI = GraphAPI.open(unifiedGraph);
             graphAPI.refreshRDF();

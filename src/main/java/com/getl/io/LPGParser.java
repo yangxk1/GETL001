@@ -2,6 +2,7 @@ package com.getl.io;
 
 import com.getl.converter.TinkerPopConverter;
 import com.getl.converter.async.AsyncPG2UMG;
+import com.getl.model.LPG.LPGGraph;
 import lombok.Data;
 import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
@@ -43,7 +44,7 @@ public class LPGParser {
     }
 
     public LPGParser() {
-        graph = TinkerGraph.open();
+        graph = new LPGGraph();
     }
 
     public LPGParser(TinkerPopConverter tinkerPopConverter) {

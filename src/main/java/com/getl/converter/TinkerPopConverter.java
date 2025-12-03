@@ -45,7 +45,7 @@ public class TinkerPopConverter {
         Map<Object, Pair> vertexes = new HashMap<>();
         // Adds statements for the vertices
         lpgGraph.vertices().forEachRemaining(vertex -> transElementToUGMIRI(this.unifiedGraph, this.lpgGraph, vertexes, vertex));
-        lpgGraph.edges().forEachRemaining(edge -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge));
+//        lpgGraph.edges().forEachRemaining(edge -> transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge));
         return unifiedGraph;
     }
 
@@ -54,14 +54,17 @@ public class TinkerPopConverter {
             return vertexes.get(element.id());
         }
         //处理element的公共属性
-        Pair result = null;
+        Pair result;
         if (element instanceof Vertex) {
             Vertex vertex = (Vertex) element;
             result = transVerticesToUGMIRI(unifiedGraph, lpgGraph, vertexes, vertex);
             vertexes.put(element.id(), result);
+            vertex.edges(Direction.OUT).forEachRemaining(edge -> transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge, result));
         } else if (element instanceof Edge) {
             result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (Edge) element);
             vertexes.put(element.id(), result);
+        } else {
+            result = null;
         }
         Iterator<? extends Property<Object>> properties = element.properties();
         while (properties.hasNext()) {
@@ -108,6 +111,26 @@ public class TinkerPopConverter {
         }
         return pair;
     }
+
+    private Pair transEdgeToUGMIRI(UnifiedGraph unifiedGraph, Graph lpgGraph, Map<Object, Pair> vertexes, Edge lpgEdge, Pair outV) throws ConverterException {
+        // Get the LPG vertices that correspond to the lpg vertices.
+        if (outV == null) {
+            outV = transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.outVertex());
+        }
+        Pair inV = vertexes.get(lpgEdge.inVertex().id());
+        if (inV == null) {
+            inV = transElementToUGMIRI(unifiedGraph, lpgGraph, vertexes, lpgEdge.inVertex());
+        }
+        String label = lpgEdge.label();
+        PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
+        String edge1 = propertiesGraphConfig.getEdge(label);
+        IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edge1);
+        Pair pair = unifiedGraph.add(edge, lpgEdge.id(), outV, inV).from();
+        vertexes.put(lpgEdge.id(), pair);
+        return pair;
+    }
+
+
 
     Map<Object, Pair> vertexes = new HashMap<>();
 

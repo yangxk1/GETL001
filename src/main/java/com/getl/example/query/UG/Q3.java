@@ -40,10 +40,12 @@ public class Q3 extends Runnable {
             graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
             graphAPI.refreshLPG();
             LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
+            logger.debugInfo("graph customization 2 LPG end ", System.currentTimeMillis() - begin);
+            System.out.println("lpg vertex count: " + lpgGraph.traversal().V().count().next());
+            System.out.println("lpg edge count: " + lpgGraph.traversal().E().count().next());
             graphAPI.setGraph(null);
             unifiedGraph = null;
             graphAPI = null;
-            logger.debugInfo("UGM2LPG end ", System.currentTimeMillis() - begin);
             begin = System.currentTimeMillis();
             Runtime.getRuntime().gc();
             logger.debugInfo("GC", System.currentTimeMillis() - begin);

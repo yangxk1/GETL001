@@ -82,7 +82,7 @@ public class GraphTransaction {
 
     public Iterator<Vertex> queryVertices(Object... vertexIds) {
         Set<Object> vIds = Arrays.stream(vertexIds).collect(Collectors.toSet());
-        Iterator iterator = Optional.ofNullable(vIds).orElse(new HashSet<>()).stream().map(lpgGraph::getVertex).collect(Collectors.toList()).iterator();
+        Iterator iterator = Optional.ofNullable(vIds).orElse(new HashSet<>()).stream().map(lpgGraph::getVertex).filter(Objects::nonNull).collect(Collectors.toList()).iterator();
         return iterator;
 //        return this.lpgGraph.getVertices().stream()
 ////                .filter(i -> vIds.contains(i.id()))

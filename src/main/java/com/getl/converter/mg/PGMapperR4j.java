@@ -1,6 +1,7 @@
 package com.getl.converter.mg;
 
 import com.getl.constant.IRINamespace;
+import com.getl.model.LPG.LPGGraph;
 import com.getl.model.MG.MGraph;
 import com.getl.model.MG.Statement;
 import com.getl.model.RDF.LiteralConverter;
@@ -104,7 +105,7 @@ public class PGMapperR4j implements PGMapperI {
     }
 
     public Graph createGraphFromMG() {
-        TinkerGraph graph = TinkerGraph.open();
+        Graph graph = new LPGGraph();
         Map<String, Element> idMapper = new HashMap<>();
         for (Statement statement : mGraph) {
             createElementFromStatement(graph, statement, idMapper);
@@ -112,7 +113,7 @@ public class PGMapperR4j implements PGMapperI {
         return graph;
     }
 
-    private Element createElementFromStatement(TinkerGraph graph, Statement statement, Map<String, Element> idMapper) {
+    private Element createElementFromStatement(Graph graph, Statement statement, Map<String, Element> idMapper) {
         Element element = idMapper.get(statement.stringValue());
         if (element != null) {
             return element;
@@ -164,7 +165,7 @@ public class PGMapperR4j implements PGMapperI {
         }
     }
 
-    private Element getElement(TinkerGraph graph, Map<String, Element> idMapper, Resource resource) {
+    private Element getElement(Graph graph, Map<String, Element> idMapper, Resource resource) {
         Element element = idMapper.get(resource.stringValue());
         if (element != null) {
             return element;

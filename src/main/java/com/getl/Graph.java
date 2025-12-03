@@ -82,7 +82,7 @@ public class Graph {
     }
 
     public void refreshRDF() {
-        this.rdfConverter.unifiedGraph = this.unifiedGraph;
+        this.rdfConverter.setUnifiedGraph(this.unifiedGraph);
         this.rdfModel = this.rdfConverter.createRDFModelFromUG();
     }
 

@@ -1,31 +1,24 @@
 package com.getl.example.query.MG;
 
 import com.getl.Graph;
-import com.getl.api.GraphAPI;
-import com.getl.constant.IRINamespace;
 import com.getl.constant.RdfDataFormat;
-import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.mg.PGMapperI;
 import com.getl.converter.mg.PGMapperR4j;
 import com.getl.converter.mg.RDFMapper;
 import com.getl.example.Runnable;
-import com.getl.example.utils.LoadUtil;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGVertex;
 import com.getl.model.MG.MGraph;
-import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.eclipse.rdf4j.model.Model;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +35,8 @@ public class Q3 extends Runnable {
         try {
             logger.debugInfo("BEGIN TO TEST Q3");
             String RDF_URL = RDF_FILES_BASE_URL;
-            long begin = System.currentTimeMillis();
             Graph graph = new Graph();
+            long begin = System.currentTimeMillis();
             File resource = new File(RDF_URL);
             try {
                 System.out.println("File: " + RDF_URL);
@@ -54,16 +47,27 @@ public class Q3 extends Runnable {
             logger.debugInfo("READ RDF END ", (System.currentTimeMillis() - begin));
 
             begin = System.currentTimeMillis();
-            RDFMapper RDFMapper = new RDFMapper(new MGraph());
-            RDFMapper.addRDFModelToMG(graph.getRdfModel());
+            RDFMapper rdfMapper = new RDFMapper(new MGraph());
+            rdfMapper.addRDFModelToMG(graph.getRdfModel());
+            MGraph mGraph = rdfMapper.getMGraph();
             logger.debugInfo("RDF 2 MG END ", (System.currentTimeMillis() - begin));
 
             begin = System.currentTimeMillis();
-            PGMapperI pgMapper = new PGMapperR4j(RDFMapper.getMGraph());
-            org.apache.tinkerpop.gremlin.structure.Graph lpgGraph = pgMapper.createGraphFromMG();
-            System.out.println("MG2PG END " + (System.currentTimeMillis() - begin));
+            graph = null;
+            rdfMapper = null;
+            Runtime.getRuntime().gc();
+            logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
 
             begin = System.currentTimeMillis();
+            PGMapperI pgMapper = new PGMapperR4j(mGraph);
+            org.apache.tinkerpop.gremlin.structure.Graph lpgGraph = pgMapper.createGraphFromMG();
+            logger.debugInfo("graph customization 2 LPG end ", System.currentTimeMillis() - begin);
+            System.out.println("lpg vertex count: " + lpgGraph.traversal().V().count().next());
+            System.out.println("lpg edge count: " + lpgGraph.traversal().E().count().next());
+
+            begin = System.currentTimeMillis();
+            mGraph = null;
+            pgMapper = null;
             Runtime.getRuntime().gc();
             logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
@@ -98,12 +102,12 @@ public class Q3 extends Runnable {
             Runtime.getRuntime().gc();
             logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
-            MGraph mGraph = new MGraph();
+            mGraph = new MGraph();
             pgMapper = new PGMapperR4j(mGraph);
             pgMapper.addPGToMG(resultGraph);
             logger.debugInfo("PG2MG end ", (System.currentTimeMillis() - begin));
             lpgGraph = pgMapper.createGraphFromMG();
-            logger.debugInfo("result UGM 2 LPG end " , (System.currentTimeMillis() - begin));
+            logger.debugInfo("result MG 2 LPG end " , (System.currentTimeMillis() - begin));
             System.out.println("lpg vertex count: " + lpgGraph.traversal().V().count().next());
             System.out.println("lpg edge count: " + lpgGraph.traversal().E().count().next());
         } catch (Exception e) {

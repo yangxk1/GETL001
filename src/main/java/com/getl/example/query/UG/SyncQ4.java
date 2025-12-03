@@ -1,30 +1,31 @@
-package com.getl.example.query.MG;
+package com.getl.example.query.UG;
 
+import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
+import com.getl.constant.IRINamespace;
+import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.TinkerPopConverter;
-import com.getl.converter.mg.PGMapperI;
-import com.getl.converter.mg.PGMapperR4j;
-import com.getl.converter.mg.RDFMapper;
 import com.getl.example.Runnable;
+import com.getl.example.utils.LoadUtil;
 import com.getl.io.LPGParser;
-import com.getl.model.MG.MGraph;
+import com.getl.model.LPG.LPGGraph;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.eclipse.rdf4j.model.Model;
+
+import java.util.HashMap;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
 
-public class Q4 extends Runnable {
-    public static void main(String[] args) {
-        new Q4().accept();
+public class SyncQ4 extends Runnable {
+    public static void main(String[] args){
+        new SyncQ4().accept();
     }
 
     @Override
     protected void run() {
         try {
-            logger.debugInfo("BEGIN TO TEST Q4");
             String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
             LPGParser lpgParser = new LPGParser();
             long begin = System.currentTimeMillis();
@@ -69,29 +70,31 @@ public class Q4 extends Runnable {
             lpgParser.loadEdge(BASE_URL_DYNAMIC + "post_isLocatedIn_place_0_0.csv", "post_isLocatedIn_place", "Post", "Place");
             logger.debugInfo("load pg files end ", (System.currentTimeMillis() - begin));
 
-            begin = System.currentTimeMillis();
-            MGraph mGraph = new MGraph();
-            PGMapperI pgMapper = new PGMapperR4j(mGraph);
-            pgMapper.addPGToMG(lpgParser.getGraph());
-            logger.debugInfo("PG2MG end ", (System.currentTimeMillis() - begin));
 
+            begin = System.currentTimeMillis();
+            UnifiedGraph unifiedGraph = (new LPGGraphConverter(null, (LPGGraph) lpgParser.getGraph(), new HashMap<>())).createUGMFromLPGGraph();
+            logger.debugInfo("PG 2 UGM END " , (System.currentTimeMillis() - begin));
+
+            begin = System.currentTimeMillis();
             //GC
-            begin = System.currentTimeMillis();
-            pgMapper = null;
-            lpgParser = null;
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC " , (System.currentTimeMillis() - begin));
 
             begin = System.currentTimeMillis();
-            pgMapper = new PGMapperR4j(mGraph);
-            org.apache.tinkerpop.gremlin.structure.Graph lpgGraph = pgMapper.createGraphFromMG();
-            logger.debugInfo("graph customization 2 LPG end ", System.currentTimeMillis() - begin);
+            GraphAPI graphAPI = GraphAPI.open();
+            graphAPI.setUGMGraph(unifiedGraph);
+            graphAPI.getDefaultConfig().addEdgeNamespaceList(IRINamespace.EDGE_NAMESPACE_ID);
+            graphAPI.refreshLPG();
+            LPGGraph lpgGraph = graphAPI.getGraph().getLpgGraph();
 
+            logger.debugInfo("UGM2LPG end " , (System.currentTimeMillis() - begin));
             begin = System.currentTimeMillis();
-            mGraph = null;
-            pgMapper = null;
+            graphAPI.setGraph(null);
+            unifiedGraph = null;
+            graphAPI = null;
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC", (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
+
             begin = System.currentTimeMillis();
             lpgGraph.traversal().V().hasLabel("Person").as("person1")
                     .in("comment_hasCreator_person").as("comment")
@@ -104,25 +107,27 @@ public class Q4 extends Runnable {
                     .to("person2")
                     //  .select("person1", "comment", "post", "person2")
                     .toList();
-            logger.debugInfo("query end ", (System.currentTimeMillis() - begin));
+            logger.debugInfo("query end " , (System.currentTimeMillis() - begin));
 
             begin = System.currentTimeMillis();
-            mGraph = new MGraph();
-            pgMapper = new PGMapperR4j(mGraph);
-            pgMapper.addPGToMG(lpgGraph);
-            logger.debugInfo("lpg result 2 MG end ", (System.currentTimeMillis() - begin));
+            unifiedGraph = (new LPGGraphConverter(null, lpgGraph, new HashMap<>())).createUGMFromLPGGraph();
+            logger.debugInfo("lpg result 2 UGM end " , (System.currentTimeMillis() - begin));
 
             begin = System.currentTimeMillis();
             lpgGraph = null;
-            pgMapper = null;
             Runtime.getRuntime().gc();
-            logger.debugInfo("GC", (System.currentTimeMillis() - begin));
+            logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
+            System.out.println("Pairs: " + unifiedGraph.getCache().size());
 
             begin = System.currentTimeMillis();
-            RDFMapper RDFMapper = new RDFMapper(mGraph);
-            Model rdfModelFromMG = RDFMapper.createRDFModelFromMG();
-            logger.debugInfo("MG2RDF end " , (System.currentTimeMillis() - begin));
-            System.out.println("RDF SIZE : " + rdfModelFromMG.size());
+            Runtime.getRuntime().gc();
+            logger.debugInfo("GC" , (System.currentTimeMillis() - begin));
+
+            begin = System.currentTimeMillis();
+            graphAPI = GraphAPI.open(unifiedGraph);
+            graphAPI.refreshRDF();
+            logger.debugInfo("UGM2RDF end " , (System.currentTimeMillis() - begin));
+            System.out.println("RDF SIZE : " + graphAPI.getRDF().size());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -130,6 +135,6 @@ public class Q4 extends Runnable {
 
     @Override
     protected GetlLogger initLogger() {
-        return new GetlLogger("MG QUERY 4");
+        return new GetlLogger("QUERY 4");
     }
 }

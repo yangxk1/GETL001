@@ -40,6 +40,10 @@ public class UnifiedGraph implements Graph {
         return labels.computeIfAbsent(label, i -> new IRI(namespaceId, label));
     }
 
+    public IRI getOrRegisterEdgeLabel(String label) {
+        return labels.computeIfAbsent(label, i -> new IRI(IRINamespace.EDGE_NAMESPACE_ID, label));
+    }
+
     public IRI getOrRegisterLabel(String labelIRI) {
         assert labelIRI != null;
         return labels.computeIfAbsent(labelIRI, i -> new IRI(IRINamespace.LABEL_NAMESPACE_ID, labelIRI));

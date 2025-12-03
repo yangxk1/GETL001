@@ -6,7 +6,9 @@ import com.getl.model.ug.*;
 import com.getl.io.ParserException;
 import com.getl.io.RDFParser;
 import com.getl.model.RDF.LiteralConverter;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -21,7 +23,8 @@ public class RDFConverter {
 
     private Set<com.getl.model.ug.IRI> typedIRI = new HashSet<>();
     private IRI labelPredicate = RDF.TYPE;
-    public UnifiedGraph unifiedGraph;
+    @Getter@Setter
+    private UnifiedGraph unifiedGraph;
 
     public RDFConverter(@NonNull UnifiedGraph UnifiedGraph) {
         this.unifiedGraph = UnifiedGraph;
