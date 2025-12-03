@@ -55,14 +55,14 @@ public class TinkerPopConverter {
         }
         //处理element的公共属性
         Pair result;
-        if (element instanceof Vertex) {
+        if (element instanceof Edge) {
+            result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (Edge) element);
+            vertexes.put(element.id(), result);
+        } else if (element instanceof Vertex) {
             Vertex vertex = (Vertex) element;
             result = transVerticesToUGMIRI(unifiedGraph, lpgGraph, vertexes, vertex);
             vertexes.put(element.id(), result);
             vertex.edges(Direction.OUT).forEachRemaining(edge -> transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, edge, result));
-        } else if (element instanceof Edge) {
-            result = transEdgeToUGMIRI(unifiedGraph, lpgGraph, vertexes, (Edge) element);
-            vertexes.put(element.id(), result);
         } else {
             result = null;
         }

@@ -175,7 +175,11 @@ public class MysqlOp {
                 sql.append("('").append(line.getId()).append("'");
                 for (String key : columns) {
                     sql.append(" , ");
-                    Object value = line.getValues().get(key);
+                    Map<String, Object> values = line.getValues();
+                    if (values == null) {
+                        continue;
+                    }
+                    Object value = values.get(key);
                     if (value instanceof String) {
                         value = "'" + ((String) value).replace("\\", "\\\\").replace("'", "\\'") + "'";
                     } else if (value instanceof Date) {

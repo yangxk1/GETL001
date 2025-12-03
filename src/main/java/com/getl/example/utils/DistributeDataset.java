@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 public class DistributeDataset {
     public static void main(String[] args) throws InterruptedException, IOException, SQLException, ClassNotFoundException {
         GetlLogger distributeDatasetLogger = new GetlLogger("DistributeDataset");
-        Convert2PG(distributeDatasetLogger);
-        Convert2RDF(distributeDatasetLogger);
+//        Convert2PG(distributeDatasetLogger);
+//        Convert2RDF(distributeDatasetLogger);
         Convert2RM(distributeDatasetLogger);
     }
 
@@ -153,12 +153,13 @@ public class DistributeDataset {
         long begin = System.currentTimeMillis();
         String BASE_URL_STATIC = BASE_URL + "static/";
         String BASE_URL_DYNAMIC = BASE_URL + "dynamic/";
-        lpgParser.latchSize(5);
+        lpgParser.latchSize(1);
         lpgParser.loadVertex(BASE_URL_STATIC + "organisation_0_0.csv", "Organisation").commit2Converter();
-        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "person_0_0.csv", "Person", "firstName", LPGParser.STRING, "lastName", LPGParser.STRING, "gender", LPGParser.STRING, "birthday", LPGParser.MILLI, "creationDate", LPGParser.MILLI).commit2Converter();
-        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.MILLI, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
-        lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.MILLI).commit2Converter();
-        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "imageFile", LPGParser.STRING, "creationDate", LPGParser.MILLI, "language", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
+        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "person_0_0.csv", "Person", "firstName", LPGParser.STRING, "lastName", LPGParser.STRING, "gender", LPGParser.STRING, "birthday", LPGParser.STRING, "creationDate", LPGParser.STRING).commit2Converter();
+        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "comment_0_0.csv", "Comment", "creationDate", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
+        lpgParser.loadVertex(BASE_URL_DYNAMIC + "forum_0_0.csv", "Forum", "creationDate", LPGParser.STRING).commit2Converter();
+        lpgParser.loadVertexWithPro(BASE_URL_DYNAMIC + "post_0_0.csv", "Post", "imageFile", LPGParser.STRING, "creationDate", LPGParser.STRING, "language", LPGParser.STRING, "content", LPGParser.STRING, "length", LPGParser.INT).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.STRING).commit2Converter();
         logger.debugInfo("load pg end " , (System.currentTimeMillis() - begin));
         lpgParser.waitAll();
         logger.debugInfo("commit pg end " , (System.currentTimeMillis() - begin));
@@ -175,16 +176,17 @@ public class DistributeDataset {
         logger.debugInfo("gc: " , (System.currentTimeMillis() - begin));
         begin = System.currentTimeMillis();
         RMGraph rmGraph = new RMGraph();
-        rmGraph.addSchema(new Schema("Forum").addColumn("title", Schema.MID_LARGE_TEXT).addColumn("creationDate", Schema.DATE));
-        rmGraph.addSchema(new Schema("Post").addColumn("imageFile", Schema.MID_LARGE_TEXT).addColumn("creationDate", Schema.DATE)
+        rmGraph.addSchema(new Schema("Forum").addColumn("title", Schema.MID_LARGE_TEXT).addColumn("creationDate", Schema.SMALL_TEXT));
+        rmGraph.addSchema(new Schema("Post").addColumn("imageFile", Schema.MID_LARGE_TEXT).addColumn("creationDate", Schema.SMALL_TEXT)
                 .addColumn("length", Schema.INT).addColumn("browserUsed", Schema.SMALL_TEXT).addColumn("content", Schema.VERY_HUGE_TEXT));
-        rmGraph.addSchema(new Schema("Comment").addColumn("length", Schema.INT).addColumn("creationDate", Schema.DATE)
+        rmGraph.addSchema(new Schema("Comment").addColumn("length", Schema.INT).addColumn("creationDate", Schema.SMALL_TEXT)
                 .addColumn("content", Schema.VERY_HUGE_TEXT));
-        rmGraph.addSchema(new Schema("Person").addColumn("birthday", Schema.DATE)
+        rmGraph.addSchema(new Schema("Person").addColumn("birthday", Schema.SMALL_TEXT)
                 .addColumn("firstName", Schema.SMALL_TEXT).addColumn("lastName", Schema.SMALL_TEXT).
-                addColumn("gender", Schema.SMALL_TEXT).addColumn("creationDate", Schema.DATE));
+                addColumn("gender", Schema.SMALL_TEXT).addColumn("creationDate", Schema.SMALL_TEXT));
         rmGraph.addSchema(new Schema("Organisation").addColumn("type", Schema.MID_TEXT)
                 .addColumn("name", Schema.MID_TEXT).addColumn("url", Schema.LARGE_TEXT));
+        rmGraph.addSchema(new Schema("person_likes_post", "Person", "Post").addColumn("creationDate", Schema.SMALL_TEXT));
         RMConverter rmConverter = new RMConverter(unifiedGraph, rmGraph);
         rmConverter.addUGMToRMModel();
         System.out.println("convert 2 rm end: " + (System.currentTimeMillis() - begin));
@@ -205,10 +207,10 @@ public class DistributeDataset {
         //EDGE
         lpgParser.latchSize(7);
         lpgParser.loadEdge(BASE_URL_STATIC + "organisation_isLocatedIn_place_0_0.csv", "organisation_isLocatedIn_place", "Organisation", "Place").commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasMember_person_0_0.csv", "forum_hasMember_person", "Forum", "Person", "joinDate", LPGParser.MILLI).commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_knows_person_0_0.csv", "person_knows_person", "Person", "Person", "creationDate", LPGParser.MILLI).commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_comment_0_0.csv", "person_likes_comment", "Person", "Comment", "creationDate", LPGParser.MILLI).commit2Converter();
-        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.MILLI).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "forum_hasMember_person_0_0.csv", "forum_hasMember_person", "Forum", "Person", "joinDate", LPGParser.STRING).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_knows_person_0_0.csv", "person_knows_person", "Person", "Person", "creationDate", LPGParser.STRING).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_comment_0_0.csv", "person_likes_comment", "Person", "Comment", "creationDate", LPGParser.STRING).commit2Converter();
+        lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_likes_post_0_0.csv", "person_likes_post", "Person", "Post", "creationDate", LPGParser.STRING).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_studyAt_organisation_0_0.csv", "person_studyAt_organisation", "Person", "Organisation", "classYear", LPGParser.INT).commit2Converter();
         lpgParser.loadEdge(BASE_URL_DYNAMIC + "person_workAt_organisation_0_0.csv", "person_workAt_organisation", "Person", "Organisation", "workFrom", LPGParser.INT).commit2Converter();
         logger.debugInfo("load pg end " , (System.currentTimeMillis() - begin));

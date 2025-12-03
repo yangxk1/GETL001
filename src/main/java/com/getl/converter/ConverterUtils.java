@@ -5,7 +5,9 @@ import com.getl.constant.IRINamespace;
 import com.getl.converter.mg.PGMapperI;
 import com.getl.converter.mg.PGMapperR4j;
 import com.getl.converter.mg.RDFMapper;
+import com.getl.converter.mg.RMMGConverter;
 import com.getl.model.MG.MGraph;
+import com.getl.model.RM.RMGraph;
 import com.getl.model.ug.UnifiedGraph;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.rdf4j.model.Model;
@@ -34,6 +36,20 @@ public class ConverterUtils {
         return rdfConverter.getUnifiedGraph();
     }
 
+    public static RMGraph buildRMFromUGGraph(UnifiedGraph unifiedGraph) {
+        RMGraph rmGraph = new RMGraph();
+        RMConverter converter = new RMConverter(unifiedGraph, rmGraph);
+        converter.addUGMToRMModel();
+        return rmGraph;
+    }
+
+    public static UnifiedGraph buildUGGraphFromRM(RMGraph rmGraph) {
+        UnifiedGraph unifiedGraph = new UnifiedGraph();
+        RMConverter converter = new RMConverter(unifiedGraph, rmGraph);
+        converter.addRMModelToUGM();
+        return unifiedGraph;
+    }
+
     public static Graph buildTinkerPopGraphFromMG(MGraph mGraph) {
         PGMapperI pgMapper = new PGMapperR4j(mGraph);
         return pgMapper.createGraphFromMG();
@@ -56,5 +72,19 @@ public class ConverterUtils {
         RDFMapper RDFMapper = new RDFMapper(new MGraph());
         RDFMapper.addRDFModelToMG(rdfGraph);
         return mGraph;
+    }
+
+    public static MGraph buildMGFromRM(RMGraph rmGraph) {
+        MGraph mGraph = new MGraph();
+        RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
+        converter.addRMToMG();
+        return mGraph;
+    }
+
+    public static RMGraph buildRMFromMG(MGraph mGraph) {
+        RMGraph rmGraph = new RMGraph();
+        RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
+        converter.addMGToRM();
+        return rmGraph;
     }
 }
