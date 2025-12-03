@@ -77,7 +77,7 @@ public class ConverterUtils {
 
     public static MGraph buildMGGraphFromRDF(Model rdfGraph) {
         MGraph mGraph = new MGraph();
-        RDFMapper RDFMapper = new RDFMapper(new MGraph());
+        RDFMapper RDFMapper = new RDFMapper(mGraph);
         RDFMapper.addRDFModelToMG(rdfGraph);
         return mGraph;
     }
