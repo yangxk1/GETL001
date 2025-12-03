@@ -10,7 +10,7 @@ import com.getl.model.onegraph.statements.OGPropertyStatement;
 import com.getl.model.onegraph.statements.OGRelationshipStatement;
 import com.getl.model.onegraph.statements.OGStatement;
 import com.getl.model.onegraph.statements.OGTripleStatement;
-import com.getl.model.LPG.LPGVertex;
+import com.getl.model.onegraph.LPG.LPGVertex;
 import com.getl.model.onegraph.statements.OGMembershipStatement;
 import com.google.common.collect.Iterables;
 import lombok.NonNull;

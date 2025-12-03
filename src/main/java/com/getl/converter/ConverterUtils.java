@@ -2,6 +2,8 @@ package com.getl.converter;
 
 import com.getl.api.GraphAPI;
 import com.getl.constant.IRINamespace;
+import com.getl.converter.SG.LPGMapper;
+import com.getl.converter.SG.LPGMappingConfiguration;
 import com.getl.converter.mg.PGMapperI;
 import com.getl.converter.mg.PGMapperR4j;
 import com.getl.converter.mg.RDFMapper;
@@ -10,6 +12,8 @@ import com.getl.model.MG.MGraph;
 import com.getl.model.RM.RMGraph;
 import com.getl.model.RM.Schema;
 import com.getl.model.ug.UnifiedGraph;
+import com.getl.model.onegraph.dataset.OGDataset;
+import com.getl.model.onegraph.LPG.LPGGraph;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.rdf4j.model.Model;
 
@@ -91,5 +95,56 @@ public class ConverterUtils {
         RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
         converter.addMGToRM();
         return rmGraph;
+    }
+
+
+    public static Graph buildTinkerPopGraphFromSG(OGDataset ogDataset) {
+        com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate anonDelegate = new com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate() {
+            @Override
+            public void unsupportedValueFound(String infoString) {
+            }
+
+            @Override
+            public void metaPropertyFound(String infoString) {
+            }
+
+            @Override
+            public void multiLabeledVertexFound(String infoString) {
+            }
+        };
+        LPGMapper mapper = new LPGMapper(ogDataset, LPGMappingConfiguration.defaultConfiguration());
+        LPGGraph lpgGraph = mapper.createLPGFromOGDataset();
+        return (new com.getl.converter.SG.TinkerPopConverter(anonDelegate)).convertLPGToTinkerGraph(lpgGraph);
+    }
+
+    public static OGDataset buildSGFromTinkerPopGraph(Graph graph) {
+        com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate anonDelegate = new com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate() {
+            @Override
+            public void unsupportedValueFound(String infoString) {
+            }
+
+            @Override
+            public void metaPropertyFound(String infoString) {
+            }
+
+            @Override
+            public void multiLabeledVertexFound(String infoString) {
+            }
+        };
+        LPGGraph lpgGraph = (new com.getl.converter.SG.TinkerPopConverter(anonDelegate)).convertTinkerGraphToLPG(graph);
+        LPGMapper mapper = new LPGMapper(LPGMappingConfiguration.defaultConfiguration());
+        mapper.addLPGToOGDataset(lpgGraph);
+        return mapper.dataset;
+    }
+
+    public static Model buildRDFGraphFromSG(OGDataset ogDataset) {
+        com.getl.converter.SG.RDFMapper rdfMapper = new com.getl.converter.SG.RDFMapper(ogDataset);
+        return rdfMapper.createRDFModelFromOGDataset();
+    }
+
+    public static OGDataset buildSGFromRDF(Model rdfGraph) {
+        com.getl.converter.SG.RDFMapper rdfMapper = new com.getl.converter.SG.RDFMapper();
+        rdfMapper.addRDFModelToOG(rdfGraph);
+        return rdfMapper.dataset;
     }
 }
