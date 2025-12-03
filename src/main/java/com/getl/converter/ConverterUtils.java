@@ -151,4 +151,20 @@ public class ConverterUtils {
         rdfMapper.addRDFModelToOG(rdfGraph);
         return rdfMapper.dataset;
     }
+
+    // SG (OneGraph) <-> RM conversions
+    public static OGDataset buildSGFromRM(RMGraph rmGraph) {
+        OGDataset ogDataset = new OGDataset();
+        com.getl.converter.SG.RMSGConverter converter = new com.getl.converter.SG.RMSGConverter(rmGraph, ogDataset);
+        converter.addRMToSG();
+        return ogDataset;
+    }
+
+    public static RMGraph buildRMFromSG(OGDataset ogDataset, Map<String, Schema> schemas) {
+        RMGraph rmGraph = new RMGraph();
+        rmGraph.setSchemas(schemas);
+        com.getl.converter.SG.RMSGConverter converter = new com.getl.converter.SG.RMSGConverter(rmGraph, ogDataset);
+        converter.addSGToRM();
+        return rmGraph;
+    }
 }
