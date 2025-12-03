@@ -99,6 +99,7 @@ public class ConverterUtils {
 
 
     public static Graph buildTinkerPopGraphFromSG(OGDataset ogDataset) {
+        long currentTimeMillis = System.currentTimeMillis();
         com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate anonDelegate = new com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate() {
             @Override
             public void unsupportedValueFound(String infoString) {
@@ -114,6 +115,7 @@ public class ConverterUtils {
         };
         LPGMapper mapper = new LPGMapper(ogDataset, LPGMappingConfiguration.defaultConfiguration());
         LPGGraph lpgGraph = mapper.createLPGFromOGDataset();
+        System.out.println("LPG construction time: " + (System.currentTimeMillis() - currentTimeMillis) + " ms");
         return (new com.getl.converter.SG.TinkerPopConverter(anonDelegate)).convertLPGToTinkerGraph(lpgGraph);
     }
 
@@ -132,8 +134,10 @@ public class ConverterUtils {
             }
         };
         LPGGraph lpgGraph = (new com.getl.converter.SG.TinkerPopConverter(anonDelegate)).convertTinkerGraphToLPG(graph);
+        long currentTimeMillis = System.currentTimeMillis();
         LPGMapper mapper = new LPGMapper(LPGMappingConfiguration.defaultConfiguration());
         mapper.addLPGToOGDataset(lpgGraph);
+        System.out.println("OGDataset construction time: " + (System.currentTimeMillis() - currentTimeMillis) + " ms");
         return mapper.dataset;
     }
 
