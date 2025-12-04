@@ -107,8 +107,8 @@ public class UGPG2RDF extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("UGPG2RDF");
+    protected String loggerName() {
+        return "UGPG2RDF";
     }
 
 }

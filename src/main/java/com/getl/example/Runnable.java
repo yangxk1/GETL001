@@ -7,10 +7,7 @@ public abstract class Runnable {
     protected GetlLogger logger;
 
     public void accept() {
-        logger = initLogger();
-        if (logger == null) {
-            logger = new GetlLogger();
-        }
+        logger = new GetlLogger(loggerName());
         System.out.println("BEGIN TO RUN QUERY");
         System.out.println("WRITE LOG TO " + logger.getLogfileName());
         try {
@@ -24,5 +21,5 @@ public abstract class Runnable {
 
     protected abstract void run();
 
-    protected abstract GetlLogger initLogger();
+    protected abstract String loggerName();
 }

@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import com.getl.constant.CommonConstant;
 import lombok.Getter;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

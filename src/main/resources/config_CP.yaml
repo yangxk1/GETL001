@@ -1,9 +1,9 @@
 jdbc:
   username: root
-  password: MyPass123!
+  password: 123
   url: jdbc:mysql://localhost:3306/
   database:
-    base: ldbc_snb_distribute
+    base: rm_data
     ldbc:
       source: movie_q7_1
       target: movie_q7_2
@@ -11,10 +11,10 @@ jdbc:
     q6: result_data_6
 lpg:
   url:
-    base: /Users/yangxk/data/social_network-csv_basic-sf0.1/
+    base: /home/graphdata/social_network-csv_basic-longdateformatter-sf1/
 rdf:
   url:
     base:
-      source: /Users/yangxk/data/limit_mappingbased-objects_lang=en.ttl/
-      target: /Users/yangxk/data/output.ttl
+      source: /home/graphdata/RDF/mapping_en.ttl
+      target: /home/graphdata/output.ttl
     ldbc: /home/graphdata/RDF/LDBC_RDF.ttl

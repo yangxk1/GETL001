@@ -154,7 +154,7 @@ public class Q6 extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 6");
+    protected String loggerName() {
+        return "QUERY 6";
     }
 }

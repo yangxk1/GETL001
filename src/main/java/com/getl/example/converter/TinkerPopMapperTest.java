@@ -327,8 +327,8 @@ public class TinkerPopMapperTest extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("TinkerPopMapperTest");
+    protected String loggerName() {
+        return "TinkerPopMapperTest";
     }
 
     private Graph loadData() {

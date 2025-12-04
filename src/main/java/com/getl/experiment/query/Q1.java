@@ -12,8 +12,12 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.rdf4j.model.Model;
 
 public class Q1 extends ExperimentRunner {
+    public Q1(String name) {
+        super(name);
+    }
+
     public static void main(String[] args) {
-        new Q1().accept();
+        new Q1("UG").accept();
     }
 
     private RMGraph graphData;
@@ -39,7 +43,8 @@ public class Q1 extends ExperimentRunner {
         logger.debugInfo("transFromRM-UG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -55,7 +60,8 @@ public class Q1 extends ExperimentRunner {
         logger.debugInfo("transFromRM-MG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -71,7 +77,8 @@ public class Q1 extends ExperimentRunner {
         logger.debugInfo("transFromRM-SG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -86,7 +93,7 @@ public class Q1 extends ExperimentRunner {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG14-QUERY-1");
+    protected String loggerName() {
+        return "FIG14-QUERY-1";
     }
 }

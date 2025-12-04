@@ -102,7 +102,7 @@ def plot_box_plots(df):
     plt.tight_layout()
     plt.savefig('performance_box_plots.png', dpi=300, bbox_inches='tight')
     print("箱形图已保存为: performance_box_plots.png")
-    plt.show()
+    plt.close()
 
 def main(arg=None):
     """主函数"""

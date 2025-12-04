@@ -27,7 +27,7 @@ public class RM2UGTest extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("RM2UGTest");
+    protected String loggerName() {
+        return "RM2UGTest";
     }
 }

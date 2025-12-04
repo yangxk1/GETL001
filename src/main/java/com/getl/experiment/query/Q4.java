@@ -1,58 +1,43 @@
 package com.getl.experiment.query;
 
-import com.getl.api.GraphAPI;
-import com.getl.constant.IRINamespace;
 import com.getl.converter.ConverterUtils;
-import com.getl.converter.LPGGraphConverter;
-import com.getl.example.Runnable;
-import com.getl.example.utils.LoadUtil;
 import com.getl.experiment.DataLoadUtils;
-import com.getl.experiment.ExperimentRunner;
-import com.getl.model.LPG.LPGEdge;
-import com.getl.model.LPG.LPGGraph;
-import com.getl.model.LPG.LPGVertex;
 import com.getl.model.MG.MGraph;
-import com.getl.model.RM.RMGraph;
 import com.getl.model.onegraph.dataset.OGDataset;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.query.step.MultiLabelP;
 import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.apache.tinkerpop.gremlin.structure.T;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.rdf4j.model.Model;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
 
 public class Q4 extends QueryRunner {
-    public static void main(String[] args) {
-        new Q4().accept();
+    public Q4(String name) {
+        super(name);
     }
 
-    private Graph graph;
+    public static void main(String[] args) {
+        new Q4("UG").accept();
+    }
+
+    private Graph graphData;
 
     @Override
     protected void loadData() {
-        this.graph = DataLoadUtils.loadTinkerPopGraph();
+        this.graphData = DataLoadUtils.loadTinkerPopGraph();
     }
 
     @Override
     protected void UG() {
         long begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = ConverterUtils.buildUGFromTinkerPopGraph(graph);
+        UnifiedGraph unifiedGraph = ConverterUtils.buildUGFromTinkerPopGraph(graphData);
         logger.debugInfo("transFromLPG-UG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -89,11 +74,12 @@ public class Q4 extends QueryRunner {
     @Override
     protected void SG() {
         long begin = System.currentTimeMillis();
-        OGDataset ogDataset = ConverterUtils.buildSGFromTinkerPopGraph(graph);
+        OGDataset ogDataset = ConverterUtils.buildSGFromTinkerPopGraph(graphData);
         logger.debugInfo("transFromLPG-SG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -131,11 +117,12 @@ public class Q4 extends QueryRunner {
     @Override
     protected void MG() {
         long begin = System.currentTimeMillis();
-        MGraph mGraph = ConverterUtils.buildMGFromTinkerPopGraph(graph);
+        MGraph mGraph = ConverterUtils.buildMGFromTinkerPopGraph(graphData);
         logger.debugInfo("transFromLPG-MG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -188,7 +175,7 @@ public class Q4 extends QueryRunner {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG14-QUERY-4");
+    protected String loggerName() {
+        return "FIG14-QUERY-4";
     }
 }

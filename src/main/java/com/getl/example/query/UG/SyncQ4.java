@@ -134,7 +134,7 @@ public class SyncQ4 extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 4");
+    protected String loggerName() {
+        return "QUERY 4";
     }
 }

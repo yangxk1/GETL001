@@ -13,8 +13,12 @@ public class RM extends ExperimentRunner {
 
     private RMGraph rmGraph;
 
+    public RM(String name) {
+        super(name);
+    }
+
     public static void main(String[] args) {
-        new RM().accept();
+        new RM("UG").accept();
     }
 
     @Override
@@ -27,6 +31,8 @@ public class RM extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = ConverterUtils.buildUGGraphFromRM(rmGraph);
         logger.debugInfo("RM2UG", System.currentTimeMillis() - begin);
+        rmGraph = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         RMGraph rmGraph1 = ConverterUtils.buildRMFromUGGraph(unifiedGraph, rmGraph.getSchemas());
         logger.debugInfo("UG2RM", System.currentTimeMillis() - begin);
@@ -37,6 +43,8 @@ public class RM extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         MGraph mGraph = ConverterUtils.buildMGGraphFromRM(rmGraph);
         logger.debugInfo("RM2MG", System.currentTimeMillis() - begin);
+        rmGraph = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         RMGraph rmGraph1 = ConverterUtils.buildRMFromMG(mGraph, rmGraph.getSchemas());
         logger.debugInfo("MG2RM", System.currentTimeMillis() - begin);
@@ -47,13 +55,15 @@ public class RM extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         OGDataset ogDataset = ConverterUtils.buildSGFromRM(rmGraph);
         logger.debugInfo("RM2MG", System.currentTimeMillis() - begin);
+        rmGraph = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         RMGraph rmGraph1 = ConverterUtils.buildRMFromSG(ogDataset, rmGraph.getSchemas());
         logger.debugInfo("MG2RM", System.currentTimeMillis() - begin);
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG13-RM");
+    protected String loggerName() {
+        return "FIG13-RM";
     }
 }

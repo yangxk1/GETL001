@@ -1,16 +1,11 @@
 package com.getl.experiment.query;
 
-import com.getl.api.GraphAPI;
 import com.getl.constant.CommonConstant;
-import com.getl.constant.IRINamespace;
 import com.getl.converter.ConverterUtils;
-import com.getl.converter.LPGGraphConverter;
 import com.getl.converter.RMConverter;
-import com.getl.example.Runnable;
 import com.getl.example.utils.LDBC2UGUtil;
 import com.getl.example.utils.RandomWalk;
 import com.getl.experiment.DataLoadUtils;
-import com.getl.experiment.ExperimentRunner;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGVertex;
@@ -21,24 +16,20 @@ import com.getl.model.RM.RMGraph;
 import com.getl.model.RM.Schema;
 import com.getl.model.onegraph.dataset.OGDataset;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.query.step.MultiLabelP;
-import com.getl.util.GetlLogger;
-import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.rdf4j.model.Model;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Q7 extends QueryRunner {
+    public Q7(String name) {
+        super(name);
+    }
+
     public static void main(String[] args) {
-        new Q7().accept();
+        new Q7("UG").accept();
     }
 
     private Graph tinkerPopGraph;
@@ -98,7 +89,10 @@ public class Q7 extends QueryRunner {
         logger.debugInfo("transFromLPG_RDF_RM-UG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        rdfModel = null;
+        tinkerPopGraph = null;
+        rmGraph = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -141,7 +135,10 @@ public class Q7 extends QueryRunner {
         logger.debugInfo("transFromLPG_RDF_RM-SG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        rdfModel = null;
+        tinkerPopGraph = null;
+        rmGraph = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -185,7 +182,10 @@ public class Q7 extends QueryRunner {
         logger.debugInfo("transFromLPG_RDF_RM-MG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        rdfModel = null;
+        tinkerPopGraph = null;
+        rmGraph = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -254,7 +254,7 @@ public class Q7 extends QueryRunner {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG14-QUERY-7");
+    protected String loggerName() {
+        return "FIG14-QUERY-7";
     }
 }

@@ -15,8 +15,12 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import java.util.concurrent.CompletableFuture;
 
 public class LPG extends ExperimentRunner {
+    public LPG(String name) {
+        super(name);
+    }
+
     public static void main(String[] args) {
-        new LPG().accept();
+        new LPG("UG").accept();
     }
 
     private Graph graphData;
@@ -31,6 +35,8 @@ public class LPG extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = ConverterUtils.buildUGFromTinkerPopGraph(graphData);
         logger.debugInfo("TinkerPopGraph2UG", System.currentTimeMillis() - begin);
+        graphData = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         Graph graph = ConverterUtils.buildTinkerPopGraphFromUG(unifiedGraph);
         logger.debugInfo("UG2TinkerPopGraph", System.currentTimeMillis() - begin);
@@ -41,6 +47,8 @@ public class LPG extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         MGraph mGraph = ConverterUtils.buildMGFromTinkerPopGraph(graphData);
         logger.debugInfo("TinkerPopGraph2MG", System.currentTimeMillis() - begin);
+        graphData = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         Graph graph = ConverterUtils.buildTinkerPopGraphFromMG(mGraph);
         logger.debugInfo("MG2TinkerPopGraph", System.currentTimeMillis() - begin);
@@ -51,13 +59,15 @@ public class LPG extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         OGDataset ogDataset = ConverterUtils.buildSGFromTinkerPopGraph(graphData);
         logger.debugInfo("TinkerPopGraph2SG", System.currentTimeMillis() - begin);
+        graphData = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         Graph graph = ConverterUtils.buildTinkerPopGraphFromSG(ogDataset);
         logger.debugInfo("SG2TinkerPopGraph", System.currentTimeMillis() - begin);
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG13-LPG");
+    protected String loggerName() {
+        return "FIG13-LPG";
     }
 }

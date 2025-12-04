@@ -129,7 +129,7 @@ public class Q4 extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("MG QUERY 4");
+    protected String loggerName() {
+        return "MG QUERY 4";
     }
 }

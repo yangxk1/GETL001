@@ -74,7 +74,7 @@ public class RDFTest extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("PropertyGraphTest");
+    protected String loggerName() {
+        return "PropertyGraphTest";
     }
 }

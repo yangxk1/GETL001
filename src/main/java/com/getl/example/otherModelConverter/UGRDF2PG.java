@@ -123,7 +123,7 @@ public class UGRDF2PG extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("UGRDF2PG");
+    protected String loggerName() {
+        return "UGRDF2PG";
     }
 }

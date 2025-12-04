@@ -33,7 +33,7 @@ public class Q1 extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 1");
+    protected String loggerName() {
+        return "QUERY 1";
     }
 }

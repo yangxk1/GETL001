@@ -16,8 +16,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class RDF extends ExperimentRunner {
+    public RDF(String name) {
+        super(name);
+    }
+
     public static void main(String[] args) {
-        new RDF().accept();
+        new RDF("UG").accept();
     }
 
     private Model graphData;
@@ -32,6 +36,8 @@ public class RDF extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         UnifiedGraph unifiedGraph = ConverterUtils.buildUGGraphFromRDF(graphData);
         logger.debugInfo("RDF2UG", System.currentTimeMillis() - begin);
+        graphData = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         Model graph = ConverterUtils.buildRDFGraphFromUG(unifiedGraph);
         logger.debugInfo("UG2RDF", System.currentTimeMillis() - begin);
@@ -42,6 +48,8 @@ public class RDF extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         MGraph mGraph = ConverterUtils.buildMGGraphFromRDF(graphData);
         logger.debugInfo("RDF2MG", System.currentTimeMillis() - begin);
+        graphData = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         Model graph = ConverterUtils.buildRDFGraphFromMG(mGraph);
         logger.debugInfo("MG2RDF", System.currentTimeMillis() - begin);
@@ -52,13 +60,15 @@ public class RDF extends ExperimentRunner {
         long begin = System.currentTimeMillis();
         OGDataset ogDataset = ConverterUtils.buildSGFromRDF(graphData);
         logger.debugInfo("RDF2SG", System.currentTimeMillis() - begin);
+        graphData = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         Model graph = ConverterUtils.buildRDFGraphFromSG(ogDataset);
         logger.debugInfo("SG2RDF", System.currentTimeMillis() - begin);
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG13-RDF");
+    protected String loggerName() {
+        return "FIG13-RDF";
     }
 }

@@ -75,7 +75,7 @@ public class MGPG2RDF extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("MGPG2RDF");
+    protected String loggerName() {
+        return "MGPG2RDF";
     }
 }

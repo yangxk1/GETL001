@@ -39,7 +39,7 @@ public class PG2UGTest extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("PG2UGTest");
+    protected String loggerName() {
+        return "PG2UGTest";
     }
 }

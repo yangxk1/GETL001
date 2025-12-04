@@ -24,11 +24,15 @@ import java.util.List;
 import java.util.Map;
 
 public class Q2 extends QueryRunner {
-    public static void main(String[] args) {
-        new Q2().accept();
+    public Q2(String name) {
+        super(name);
     }
 
-    private Graph graph;
+    public static void main(String[] args) {
+        new Q2("UG").accept();
+    }
+
+    private Graph graphData;
 
     private Map<String, Schema> buildRMSchema() {
         RMGraph rmGraph = new RMGraph();
@@ -52,17 +56,18 @@ public class Q2 extends QueryRunner {
 
     @Override
     protected void loadData() {
-        this.graph = DataLoadUtils.loadTinkerPopGraph();
+        this.graphData = DataLoadUtils.loadTinkerPopGraph();
     }
 
     @Override
     protected void UG() {
         long begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = ConverterUtils.buildUGFromTinkerPopGraph(graph);
+        UnifiedGraph unifiedGraph = ConverterUtils.buildUGFromTinkerPopGraph(graphData);
         logger.debugInfo("transFromLPG-UG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -102,11 +107,12 @@ public class Q2 extends QueryRunner {
     @Override
     protected void SG() {
         long begin = System.currentTimeMillis();
-        OGDataset ogDataset = ConverterUtils.buildSGFromTinkerPopGraph(graph);
+        OGDataset ogDataset = ConverterUtils.buildSGFromTinkerPopGraph(graphData);
         logger.debugInfo("transFromLPG-SG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -143,11 +149,12 @@ public class Q2 extends QueryRunner {
     @Override
     protected void MG() {
         long begin = System.currentTimeMillis();
-        MGraph mGraph = ConverterUtils.buildMGFromTinkerPopGraph(graph);
+        MGraph mGraph = ConverterUtils.buildMGFromTinkerPopGraph(graphData);
         logger.debugInfo("transFromLPG-MG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -221,8 +228,8 @@ public class Q2 extends QueryRunner {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG14-QUERY-2");
+    protected String loggerName() {
+        return "FIG14-QUERY-2";
     }
 
 }

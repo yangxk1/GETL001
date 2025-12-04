@@ -72,7 +72,7 @@ public class RDF2UGTest extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("RDF2UGTest");
+    protected String loggerName() {
+        return "RDF2UGTest";
     }
 }

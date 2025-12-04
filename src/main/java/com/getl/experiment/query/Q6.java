@@ -1,45 +1,34 @@
 package com.getl.experiment.query;
 
-import com.getl.api.GraphAPI;
-import com.getl.constant.CommonConstant;
-import com.getl.constant.IRINamespace;
 import com.getl.converter.ConverterUtils;
-import com.getl.converter.RMConverter;
-import com.getl.converter.TinkerPopConverter;
-import com.getl.example.Runnable;
-import com.getl.example.utils.LoadUtil;
 import com.getl.experiment.DataLoadUtils;
-import com.getl.experiment.ExperimentRunner;
 import com.getl.model.LPG.LPGEdge;
 import com.getl.model.LPG.LPGGraph;
 import com.getl.model.LPG.LPGVertex;
 import com.getl.model.MG.MGraph;
-import com.getl.model.RM.MysqlOp;
-import com.getl.model.RM.MysqlSessions;
 import com.getl.model.RM.RMGraph;
 import com.getl.model.RM.Schema;
 import com.getl.model.onegraph.dataset.OGDataset;
 import com.getl.model.ug.UnifiedGraph;
-import com.getl.query.step.MultiLabelP;
-import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.eclipse.rdf4j.model.Model;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.bothE;
 
 public class Q6 extends QueryRunner {
 
-    private Model graph;
+    private Model graphData;
+
+    public Q6(String name) {
+        super(name);
+    }
 
     public static void main(String[] args) {
-        new Q6().accept();
+        new Q6("UG").accept();
     }
 
     public static Set<Integer> computeComponents(Graph lpgGraph) {
@@ -101,17 +90,18 @@ public class Q6 extends QueryRunner {
 
     @Override
     protected void loadData() {
-        this.graph = DataLoadUtils.loadRDFModel();
+        this.graphData = DataLoadUtils.loadRDFModel();
     }
 
     @Override
     protected void UG() {
         long begin = System.currentTimeMillis();
-        UnifiedGraph unifiedGraph = ConverterUtils.buildUGGraphFromRDF(graph);
+        UnifiedGraph unifiedGraph = ConverterUtils.buildUGGraphFromRDF(graphData);
         logger.debugInfo("transFromRDF-UG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -151,11 +141,12 @@ public class Q6 extends QueryRunner {
     @Override
     protected void SG() {
         long begin = System.currentTimeMillis();
-        OGDataset ogDataset = ConverterUtils.buildSGFromRDF(graph);
+        OGDataset ogDataset = ConverterUtils.buildSGFromRDF(graphData);
         logger.debugInfo("transFromRDF-SG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -192,11 +183,12 @@ public class Q6 extends QueryRunner {
     @Override
     protected void MG() {
         long begin = System.currentTimeMillis();
-        MGraph mGraph = ConverterUtils.buildMGGraphFromRDF(graph);
+        MGraph mGraph = ConverterUtils.buildMGGraphFromRDF(graphData);
         logger.debugInfo("transFromRDF-MG", System.currentTimeMillis() - begin);
 
         begin = System.currentTimeMillis();
-        Runtime.getRuntime().gc();
+        graphData = null;
+        super.forceGC();
         logger.debugInfo("GC ", (System.currentTimeMillis() - begin));
 
         begin = System.currentTimeMillis();
@@ -257,7 +249,7 @@ public class Q6 extends QueryRunner {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("FIG14-QUERY-6");
+    protected String loggerName() {
+        return "FIG14-QUERY-6";
     }
 }

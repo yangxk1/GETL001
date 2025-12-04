@@ -165,8 +165,8 @@ public class LPGLoaderTest extends Runnable {
     }
 
     @Override
-    protected GetlLogger initLogger() {
-        return new GetlLogger("LPGLoaderTest");
+    protected String loggerName() {
+        return "LPGLoaderTest";
     }
 
 }
