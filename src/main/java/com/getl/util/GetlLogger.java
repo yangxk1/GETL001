@@ -91,12 +91,20 @@ public class GetlLogger {
             return;
         }
 
-        StringBuilder statistics = new StringBuilder();
-        statistics.append("\n---\n========================\n# Statistics Summary\n========================\n");
+        // Generate CSV summary file
+        String csvFileName = this.logfileName.replace(".md", "_summary.csv");
+        StringBuilder csvContent = new StringBuilder();
+
+        // CSV header
+        csvContent.append("Info,Execution Count,Average Time (ms),Min Time (ms),Max Time (ms),Total Time (ms),Average Memory (B),Min Memory (B),Max Memory (B),Max Memory (MB)\n");
 
         // Sort info types alphabetically for consistent output
         List<String> sortedInfoTypes = new ArrayList<>(infoTimeCache.keySet());
         Collections.sort(sortedInfoTypes);
+
+        // Generate markdown statistics
+        StringBuilder statistics = new StringBuilder();
+        statistics.append("\n---\n========================\n# Statistics Summary\n========================\n");
 
         for (String info : sortedInfoTypes) {
             List<Long> times = infoTimeCache.get(info);
@@ -128,7 +136,23 @@ public class GetlLogger {
             }
             double avgMemory = (double) totalMemory / memories.size();
 
-            // Build statistics output
+            // Add CSV row (escape commas in info string)
+            String escapedInfo = info.replace("\"", "\"\"");
+            if (escapedInfo.contains(",")) {
+                escapedInfo = "\"" + escapedInfo + "\"";
+            }
+            csvContent.append(escapedInfo).append(",")
+                    .append(times.size()).append(",")
+                    .append((long) avgTime).append(",")
+                    .append(minTime).append(",")
+                    .append(maxTime).append(",")
+                    .append(totalTime).append(",")
+                    .append((long) avgMemory).append(",")
+                    .append(minMemory).append(",")
+                    .append(maxMemory).append(",")
+                    .append(String.format("%.2f", maxMemory / (1024.0 * 1024.0))).append("\n");
+
+            // Build statistics output (markdown format)
             statistics.append("## ").append(info).append("\n");
             statistics.append("```\n");
             statistics.append("Execution count: ").append(times.size()).append("\n");
@@ -143,6 +167,14 @@ public class GetlLogger {
             statistics.append("  Max memory: ").append(NumberFormat.getInstance(Locale.US).format(maxMemory)).append(" B\n");
             statistics.append("  Max memory (MB): ").append(String.format("%.2f", maxMemory / (1024.0 * 1024.0))).append(" MB\n");
             statistics.append("```\n\n");
+        }
+
+        // Write CSV file
+        try {
+            Files.write(Paths.get(csvFileName), csvContent.toString().getBytes("UTF-8"));
+            System.out.println("CSV summary written to: " + csvFileName);
+        } catch (IOException e) {
+            System.err.println("Error writing CSV summary: " + e.getMessage());
         }
 
         System.out.println(statistics.toString());

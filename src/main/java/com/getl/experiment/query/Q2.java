@@ -222,7 +222,7 @@ public class Q2 extends QueryRunner {
 
     @Override
     protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 2");
+        return new GetlLogger("FIG14-QUERY-2");
     }
 
 }

@@ -255,6 +255,6 @@ public class Q7 extends QueryRunner {
 
     @Override
     protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 7");
+        return new GetlLogger("FIG14-QUERY-7");
     }
 }

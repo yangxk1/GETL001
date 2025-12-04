@@ -201,6 +201,6 @@ public class Q3 extends QueryRunner {
 
     @Override
     protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 3");
+        return new GetlLogger("FIG14-QUERY-3");
     }
 }

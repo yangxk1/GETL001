@@ -258,6 +258,6 @@ public class Q6 extends QueryRunner {
 
     @Override
     protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 6");
+        return new GetlLogger("FIG14-QUERY-6");
     }
 }

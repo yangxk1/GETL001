@@ -189,6 +189,6 @@ public class Q4 extends QueryRunner {
 
     @Override
     protected GetlLogger initLogger() {
-        return new GetlLogger("QUERY 4");
+        return new GetlLogger("FIG14-QUERY-4");
     }
 }
