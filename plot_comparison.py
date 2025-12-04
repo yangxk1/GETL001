@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 import seaborn as sns
 
 # 设置中文字体支持
@@ -25,18 +26,20 @@ def plot_box_plots(df):
     time_labels = []
     time_avg = []
     for _, row in df.iterrows():
-        time_data.append([row['Min_Time_ms'], row['Avg_Time_ms'], row['Max_Time_ms']])
-        time_labels.append(row['Operation'])
-        time_avg.append(row['Avg_Time_ms'])
+        time_data.append([row['Min Time (ms)'], row['Average Time (ms)'], row['Max Time (ms)']])
+        time_labels.append(row['Info'])
+        time_avg.append(row['Average Time (ms)'])
 
     # 准备内存数据
     memory_data = []
     memory_labels = []
     memory_avg = []
     for _, row in df.iterrows():
-        memory_data.append([row['Min_Memory_MB'], row['Avg_Memory_MB'], row['Max_Memory_MB']])
-        memory_labels.append(row['Operation'])
-        memory_avg.append(row['Avg_Memory_MB'])
+        memory_data.append([row['Min Memory (B)'] / (1024*1024),
+                           row['Average Memory (B)'] / (1024*1024),
+                           row['Max Memory (B)'] / (1024*1024)])
+        memory_labels.append(row['Info'])
+        memory_avg.append(row['Average Memory (B)'] / (1024*1024))
 
     # 绘制时间箱形图
     positions1 = np.arange(1, len(time_data) + 1)
@@ -101,14 +104,22 @@ def plot_box_plots(df):
     print("箱形图已保存为: performance_box_plots.png")
     plt.show()
 
-def main():
+def main(arg=None):
     """主函数"""
     print("=" * 60)
     print("Performance Data Visualization Tool")
     print("=" * 60)
 
+    # 获取CSV文件路径
+    if len(sys.argv) < 2:
+        csv_file = 'performance_data.csv'
+        print(f"\n未指定CSV文件，使用默认文件: {csv_file}")
+    else:
+        csv_file = sys.argv[1]
+        print(f"\n使用指定CSV文件: {csv_file}")
+
     # 加载数据
-    df = load_data()
+    df = load_data(csv_file)
     print("\n数据加载成功!")
     print(df.to_string(index=False))
     print("\n" + "=" * 60)
