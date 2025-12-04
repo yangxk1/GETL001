@@ -71,7 +71,7 @@ public class GetlExperimentMain {
         String className = classMap.get(cmd.getOptionValue("c").toLowerCase()) == null ? cmd.getOptionValue("c") : classMap.get(cmd.getOptionValue("c").toLowerCase());
         String modelName = cmd.hasOption("m") ? cmd.getOptionValue("m").toUpperCase() : "UG";
         Class clazz = Class.forName(className);
-        com.getl.example.Runnable queryInstance = (Runnable) clazz.getDeclaredConstructor(String.class).newInstance(modelName);
+        ExperimentRunner queryInstance = (ExperimentRunner) clazz.getDeclaredConstructor(String.class).newInstance(modelName);
         queryInstance.accept();
     }
 }

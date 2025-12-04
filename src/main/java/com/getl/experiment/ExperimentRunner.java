@@ -17,7 +17,7 @@ public abstract class ExperimentRunner extends Runnable {
             logger = new GetlLogger(loggerName() + "_" + name);
         }
         System.out.println("WRITE LOG TO " + logger.getLogfileName());
-        run();
+        run(name);
         logger.close();
     }
 
@@ -39,6 +39,8 @@ public abstract class ExperimentRunner extends Runnable {
                 logger.debugInfo("Load Data", System.currentTimeMillis() - beginLoadData);
                 MG();
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown test name: " + name);
         }
     }
 

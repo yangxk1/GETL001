@@ -22,17 +22,6 @@ public class Q1 extends ExperimentRunner {
 
     private RMGraph graphData;
 
-    @Override
-    protected void run() {
-        loadData();
-        int times = 3;
-        while (times-- > 0) {
-            UG();
-            SG();
-            MG();
-        }
-    }
-
     protected void loadData() {
         this.graphData = DataLoadUtils.loadRMGraph();
     }
