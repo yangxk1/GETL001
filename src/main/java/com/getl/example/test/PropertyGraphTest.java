@@ -30,6 +30,10 @@ public class PropertyGraphTest extends Runnable {
         UG();
         MG();
         SG();
+        System.out.println("================================");
+        UG();
+        MG();
+        SG();
     }
 
     private void loadData() {

@@ -4,25 +4,34 @@ import cn.hutool.core.io.FileUtil;
 import com.getl.constant.CommonConstant;
 import lombok.Getter;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class GetlLogger {
     @Getter
-    private String logfileName = "debug.md";
+    private String logfileName = CommonConstant.LOG_FILE_PATH + "debug.md";
 
     // Cache for storing time and memory consumption for each info type
     private final Map<String, List<Long>> infoTimeCache = new HashMap<>();
     private final Map<String, List<Long>> infoMemoryCache = new HashMap<>();
 
     public GetlLogger(String logfileName) {
-        this.logfileName = logfileName + ".md";
-        FileUtil.appendUtf8String("# new " + logfileName + " log\n", CommonConstant.LOG_FILE_PATH + this.logfileName);
+        this.logfileName = CommonConstant.LOG_FILE_PATH + logfileName + ".md";
+        try {
+            Files.write(Paths.get(this.logfileName), new byte[0]);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        FileUtil.appendUtf8String("# new " + logfileName + " log\n", this.logfileName);
     }
 
     public GetlLogger() {
-        FileUtil.appendUtf8String("# new " + logfileName + " log\n", CommonConstant.LOG_FILE_PATH + this.logfileName);
+        FileUtil.appendUtf8String("# new " + logfileName + " log\n", this.logfileName);
     }
 
     public void debugInfo(String info) {
@@ -58,7 +67,7 @@ public class GetlLogger {
         stringBuilder.append("\nUsed Memory (Byte): ").append(NumberFormat.getInstance(Locale.US).format(used)).append(" B");
         stringBuilder.append("\n```");
         System.out.println(stringBuilder.toString());
-        FileUtil.appendUtf8String(stringBuilder.toString() + "\n\n", CommonConstant.LOG_FILE_PATH + this.logfileName);
+        FileUtil.appendUtf8String(stringBuilder.toString() + "\n\n", this.logfileName);
     }
 
     /**
@@ -125,7 +134,7 @@ public class GetlLogger {
         }
 
         System.out.println(statistics.toString());
-        FileUtil.appendUtf8String(statistics.toString(), CommonConstant.LOG_FILE_PATH + this.logfileName);
+        FileUtil.appendUtf8String(statistics.toString(), this.logfileName);
 
         // Clear caches
         infoTimeCache.clear();
@@ -134,6 +143,7 @@ public class GetlLogger {
 
     /**
      * Get statistics for a specific info type.
+     *
      * @param info The info type to get statistics for
      * @return A map containing "avgTime", "avgMemory", "count", or null if no data exists
      */
