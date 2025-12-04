@@ -33,6 +33,10 @@ public class ConverterUtils {
         return (new TinkerPopConverter(null, tinkerPopGraph)).createUGMFromTinkerPopGraph();
     }
 
+    public static UnifiedGraph buildUGFromTinkerPopGraph(Graph tinkerPopGraph, UnifiedGraph unifiedGraph) {
+        return (new TinkerPopConverter(unifiedGraph, tinkerPopGraph)).addUGMFromTinkerPopGraph();
+    }
+
     public static Model buildRDFGraphFromUG(UnifiedGraph unifiedGraph) {
         RDFConverter rdfConverter = new RDFConverter(unifiedGraph);
         return rdfConverter.createRDFModelFromUG();
@@ -40,6 +44,12 @@ public class ConverterUtils {
 
     public static UnifiedGraph buildUGGraphFromRDF(Model rdfGraph) {
         RDFConverter rdfConverter = new RDFConverter();
+        rdfConverter.addRDFModelToUG(rdfGraph);
+        return rdfConverter.getUnifiedGraph();
+    }
+
+    public static UnifiedGraph buildUGGraphFromRDF(Model rdfGraph, UnifiedGraph unifiedGraph) {
+        RDFConverter rdfConverter = new RDFConverter(unifiedGraph);
         rdfConverter.addRDFModelToUG(rdfGraph);
         return rdfConverter.getUnifiedGraph();
     }
@@ -59,6 +69,12 @@ public class ConverterUtils {
         return unifiedGraph;
     }
 
+    public static UnifiedGraph buildUGGraphFromRM(RMGraph rmGraph, UnifiedGraph unifiedGraph) {
+        RMConverter converter = new RMConverter(unifiedGraph, rmGraph);
+        converter.addRMModelToUGM();
+        return unifiedGraph;
+    }
+
     public static Graph buildTinkerPopGraphFromMG(MGraph mGraph) {
         PGMapperI pgMapper = new PGMapperR4j(mGraph);
         return pgMapper.createGraphFromMG();
@@ -66,6 +82,12 @@ public class ConverterUtils {
 
     public static MGraph buildMGFromTinkerPopGraph(Graph tinkerPopGraph) {
         MGraph mGraph = new MGraph();
+        PGMapperI pgMapper = new PGMapperR4j(mGraph);
+        pgMapper.addPGToMG(tinkerPopGraph);
+        return mGraph;
+    }
+
+    public static MGraph buildMGFromTinkerPopGraph(Graph tinkerPopGraph, MGraph mGraph) {
         PGMapperI pgMapper = new PGMapperR4j(mGraph);
         pgMapper.addPGToMG(tinkerPopGraph);
         return mGraph;
@@ -83,7 +105,13 @@ public class ConverterUtils {
         return mGraph;
     }
 
-    public static MGraph buildMGFromRM(RMGraph rmGraph) {
+    public static MGraph buildMGGraphFromRDF(Model rdfGraph, MGraph mGraph) {
+        RDFMapper RDFMapper = new RDFMapper(mGraph);
+        RDFMapper.addRDFModelToMG(rdfGraph);
+        return mGraph;
+    }
+
+    public static MGraph buildMGGraphFromRM(RMGraph rmGraph) {
         MGraph mGraph = new MGraph();
         RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
         converter.addRMToMG();
@@ -96,6 +124,12 @@ public class ConverterUtils {
         RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
         converter.addMGToRM();
         return rmGraph;
+    }
+
+    public static MGraph buildMGGraphFromRM(RMGraph rmGraph, MGraph mGraph) {
+        RMMGConverter converter = new RMMGConverter(rmGraph, mGraph);
+        converter.addRMToMG();
+        return mGraph;
     }
 
     public static Graph buildTinkerPopGraphFromSG(OGDataset ogDataset) {
@@ -125,6 +159,12 @@ public class ConverterUtils {
 
     public static OGDataset buildSGFromTinkerPopGraph(Graph graph) {
         TinkerPopMapper tinkerPopMapper = new TinkerPopMapper();
+        tinkerPopMapper.addTinkerPopGraphToOGDataset(graph);
+        return tinkerPopMapper.dataset;
+    }
+
+    public static OGDataset buildSGFromTinkerPopGraph(Graph graph, OGDataset ogDataset) {
+        TinkerPopMapper tinkerPopMapper = new TinkerPopMapper(ogDataset);
         tinkerPopMapper.addTinkerPopGraphToOGDataset(graph);
         return tinkerPopMapper.dataset;
     }
@@ -162,9 +202,21 @@ public class ConverterUtils {
         return rdfMapper.dataset;
     }
 
+    public static OGDataset buildSGFromRDF(Model rdfGraph, OGDataset ogDataset) {
+        com.getl.converter.SG.RDFMapper rdfMapper = new com.getl.converter.SG.RDFMapper(ogDataset);
+        rdfMapper.addRDFModelToOG(rdfGraph);
+        return rdfMapper.dataset;
+    }
+
     // SG (OneGraph) <-> RM conversions
     public static OGDataset buildSGFromRM(RMGraph rmGraph) {
         OGDataset ogDataset = new OGDataset();
+        com.getl.converter.SG.RMSGConverter converter = new com.getl.converter.SG.RMSGConverter(rmGraph, ogDataset);
+        converter.addRMToSG();
+        return ogDataset;
+    }
+
+    public static OGDataset buildSGFromRM(RMGraph rmGraph, OGDataset ogDataset) {
         com.getl.converter.SG.RMSGConverter converter = new com.getl.converter.SG.RMSGConverter(rmGraph, ogDataset);
         converter.addRMToSG();
         return ogDataset;

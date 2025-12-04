@@ -39,7 +39,7 @@ public class TinkerPopConverter {
         return unifiedGraph;
     }
 
-    private UnifiedGraph addUGMFromTinkerPopGraph() {
+    public UnifiedGraph addUGMFromTinkerPopGraph() {
         assert this.lpgGraph != null;
         //element id -> IRI
         Map<Object, Pair> vertexes = new HashMap<>();

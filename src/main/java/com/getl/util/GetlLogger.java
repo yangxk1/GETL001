@@ -38,6 +38,18 @@ public class GetlLogger {
         this.debugInfo(info, 0);
     }
 
+    public void info(String info) {
+        long currentTimeMillis = System.currentTimeMillis();
+        Date date = new Date(currentTimeMillis);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        simpleDateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT+8"));
+        String formattedDate = simpleDateFormat.format(date);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(formattedDate).append("::").append(info).append("\n");
+        System.out.println(stringBuilder.toString());
+        FileUtil.appendUtf8String(stringBuilder.toString() + "\n\n", this.logfileName);
+    }
+
     public void debugInfo(String info, long time) {
         long currentTimeMillis = System.currentTimeMillis();
         Date date = new Date(currentTimeMillis);

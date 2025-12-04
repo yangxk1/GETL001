@@ -74,7 +74,7 @@ public class RelationModelTest extends Runnable {
 
     private void testMG(RMGraph rmGraph) {
         long begin = System.currentTimeMillis();
-        MGraph mGraph = ConverterUtils.buildMGFromRM(rmGraph);
+        MGraph mGraph = ConverterUtils.buildMGGraphFromRM(rmGraph);
         logger.debugInfo("RM2MG", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
         RMGraph rmGraph1 = ConverterUtils.buildRMFromMG(mGraph, rmGraph.getSchemas());
