@@ -1,5 +1,6 @@
 package com.getl.model.onegraph.dataset;
 
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import com.getl.constant.URLConstants;
 import com.getl.model.onegraph.elements.OGGraph;
@@ -40,7 +41,7 @@ public class OGDataset {
     private final HashMap<OGStatement, Set<OGGraph<?>>> statementsToGraphs = new HashMap<>();
 
     // Stores all relationship statements in this dataset
-    private final LinkedHashSet<OGRelationshipStatement> relStatements  = new LinkedHashSet<>();
+    private final LinkedHashSet<OGRelationshipStatement> relStatements = new LinkedHashSet<>();
     // Stores all property statements in this dataset
     private final LinkedHashSet<OGPropertyStatement> propStatements = new LinkedHashSet<>();
     // Stores all membership statements in this dataset
@@ -58,6 +59,7 @@ public class OGDataset {
     /**
      * Adds given triple statement to this dataset, together with a membership statement assigning the statement
      * to the {@code DEFAULT GRAPH}.
+     *
      * @param statement The statement
      */
     public void addStatementAndAddToDefaultGraph(@NonNull OGTripleStatement statement) {
@@ -68,6 +70,7 @@ public class OGDataset {
      * Adds given triple statement to this dataset, together with a membership statement assigning the statement
      * to the {@code graphName}. Will create a new {@link OGGraph} with given {@code graphName} in {@link OGDataset#getGraphs()}
      * if there was no existing graph with that name yet.
+     *
      * @param statement The statement
      * @param graphName The graph name to use in the membership statement
      */
@@ -79,6 +82,7 @@ public class OGDataset {
 
     /**
      * Retrieves all graphs a given statement is in, or the empty optional if that statement is not in a graph.
+     *
      * @param statement Optional containing the set of graphs or empty.
      * @return The set of graphs this statement is in, or the empty optional if this statement is in no graphs.
      */
@@ -92,6 +96,7 @@ public class OGDataset {
     /**
      * Adds given relationship statement to this dataset in the graph with given {@code graphName}, adds a
      * membership statement.
+     *
      * @param statement The relationship statement
      * @param graphName The name of the graph, pass {@code null} to indicate the default graph.
      */
@@ -102,6 +107,7 @@ public class OGDataset {
 
     /**
      * Adds given relationship statement to this dataset
+     *
      * @param statement The relationship statement
      */
     public void addStatement(@NonNull OGRelationshipStatement statement) {
@@ -114,6 +120,7 @@ public class OGDataset {
 
     /**
      * Gets the relationship statement tied to the given edge ID if there exists any.
+     *
      * @param edgeID The edge ID to look for.
      * @return The relationship statement or the empty optional.
      */
@@ -123,6 +130,7 @@ public class OGDataset {
 
     /**
      * Adds given triple statement to this dataset
+     *
      * @param statement The relationship statement
      */
     public void addStatement(@NonNull OGTripleStatement statement) {
@@ -135,6 +143,7 @@ public class OGDataset {
 
     /**
      * Adds given property statement to this dataset
+     *
      * @param statement The property statement
      */
     public void addStatement(@NonNull OGPropertyStatement statement) {
@@ -145,6 +154,7 @@ public class OGDataset {
 
     /**
      * Adds given membership statement to this dataset
+     *
      * @param statement The membership statement
      */
     public void addStatement(@NonNull OGMembershipStatement statement) {
@@ -156,6 +166,7 @@ public class OGDataset {
 
     /**
      * Check if the given statement is asserted in a graph in this dataset.
+     *
      * @param stat The statement.
      * @return {@code true} if the given statement is asserted in some graph, {@code false} otherwise.
      */
@@ -165,8 +176,9 @@ public class OGDataset {
 
     /**
      * Creates a new graph in the dataset with given graph name, or obtains an existing one.
+     *
      * @param graphName The name of the graph, use {@link OGGraph#DEFAULT_GRAPH_IRI} or
-     * {@code null} to indicate the default graph.
+     *                  {@code null} to indicate the default graph.
      * @return The graph with given graph name.
      */
     public OGGraph<?> createOrObtainGraph(Resource graphName) {
@@ -186,6 +198,7 @@ public class OGDataset {
 
     /**
      * Adds a new graph in the dataset.
+     *
      * @param graph The graph
      */
     public void addGraph(@NonNull OGGraph<?> graph) {
@@ -197,6 +210,7 @@ public class OGDataset {
 
     /**
      * Checks if the dataset contains a graph with given name
+     *
      * @param graphName The name of the graph, use {@link OGGraph#DEFAULT_GRAPH_IRI} to indicate the default graph.
      * @return {@code true} if the dataset contains a graph with given name, false otherwise.
      */
@@ -206,6 +220,7 @@ public class OGDataset {
 
     /**
      * Checks if the dataset contains a simple node with given component
+     *
      * @param linkedComponent The component linked to the simple node.
      * @return {@code true} if the dataset contains a simple node with given component, false otherwise.
      */
@@ -215,6 +230,7 @@ public class OGDataset {
 
     /**
      * Checks if the dataset contains a simple node with given component
+     *
      * @param linkedComponent The component linked to the simple node.
      * @return {@code true} if the dataset contains a simple node with given component, false otherwise.
      */
@@ -224,6 +240,7 @@ public class OGDataset {
 
     /**
      * Checks if the dataset contains a simple node with given component
+     *
      * @param linkedComponent The component linked to the simple node.
      * @return {@code true} if the dataset contains a simple node with given component, false otherwise.
      */
@@ -234,6 +251,7 @@ public class OGDataset {
 
     /**
      * Gets an iterable for all {@link OGMembershipStatement}s in this dataset
+     *
      * @return The iterable
      */
     public Iterable<OGMembershipStatement> getMembershipStatements() {
@@ -242,6 +260,7 @@ public class OGDataset {
 
     /**
      * Gets an iterable for all {@link OGRelationshipStatement}s in this dataset
+     *
      * @return The iterable
      */
     public Iterable<OGRelationshipStatement> getRelationshipStatements() {
@@ -250,6 +269,7 @@ public class OGDataset {
 
     /**
      * Gets an iterable for all {@link OGPropertyStatement}s in this dataset
+     *
      * @return The iterable
      */
     public Iterable<OGPropertyStatement> getPropertyStatements() {
@@ -258,6 +278,7 @@ public class OGDataset {
 
     /**
      * Gets an iterable for all {@link OGSimpleNode}s in this dataset
+     *
      * @return The iterable
      */
     public Iterable<OGSimpleNode<?>> getSimpleNodes() {
@@ -267,6 +288,7 @@ public class OGDataset {
 
     /**
      * Gets an iterable for all {@link OGGraph}s in this dataset
+     *
      * @return The iterable
      */
     public Iterable<OGGraph<?>> getGraphs() {
@@ -275,6 +297,7 @@ public class OGDataset {
 
     /**
      * Returns {@code true} if this dataset is empty, {@code false} otherwise.
+     *
      * @return {@code true} if this dataset is empty, {@code false} otherwise.
      */
     public boolean isEmpty() {
@@ -289,6 +312,7 @@ public class OGDataset {
     /**
      * Either create a new {@link OGSimpleNode} in the dataset from given {@code linkedComponent},
      * or retrieve existing {@link OGSimpleNode} that has the same {@code linkedComponent} from the dataset.
+     *
      * @param linkedComponent The {@link IRI} linked component.
      * @return Newly created or obtained simple node.
      */
@@ -299,6 +323,7 @@ public class OGDataset {
     /**
      * Either create a new {@link OGSimpleNode} in the dataset from given {@code linkedComponent},
      * or retrieve existing {@link OGSimpleNode} that has the same {@code linkedComponent} from the dataset.
+     *
      * @param vertex The {@link LPGVertex} vertex to create or obtain the simple node from.
      * @return Newly created or obtained simple node.
      */
@@ -311,6 +336,20 @@ public class OGDataset {
     /**
      * Either create a new {@link OGSimpleNode} in the dataset from given {@code linkedComponent},
      * or retrieve existing {@link OGSimpleNode} that has the same {@code linkedComponent} from the dataset.
+     *
+     * @param vertex The {@link LPGVertex} vertex to create or obtain the simple node from.
+     * @return Newly created or obtained simple node.
+     */
+    public OGSimpleNodeIRI createOrObtainSimpleNode(@NonNull Vertex vertex) {
+        // Create a vertex ID IRI from the given vertex.
+        IRI idIRI = SimpleValueFactory.getInstance().createIRI(URLConstants.ID + vertex.id());
+        return createOrObtainSimpleNode(idIRI);
+    }
+
+    /**
+     * Either create a new {@link OGSimpleNode} in the dataset from given {@code linkedComponent},
+     * or retrieve existing {@link OGSimpleNode} that has the same {@code linkedComponent} from the dataset.
+     *
      * @param linkedComponent The {@link BNode} linked component.
      * @return Newly created or obtained simple node.
      */
@@ -320,6 +359,7 @@ public class OGDataset {
 
     /**
      * Adds the simple node to the dataset, assigns the {@link OGSimpleNode#setLocalId(long)}.
+     *
      * @param sn The simple node to add.
      */
     public void addSimpleNode(@NonNull OGSimpleNodeBNode sn) {
@@ -329,6 +369,7 @@ public class OGDataset {
 
     /**
      * Adds the simple node to the dataset, assigns the {@link OGSimpleNode#setLocalId(long)}.
+     *
      * @param sn The simple node to add.
      */
     public void addSimpleNode(@NonNull OGSimpleNodeIRI sn) {
@@ -338,6 +379,7 @@ public class OGDataset {
 
     /**
      * Gets all simple nodes that have a namespace of: {@link URLConstants#ID}.
+     *
      * @return All simple nodes in this data set with the ID namespace.
      */
     public Iterable<OGSimpleNodeIRI> getVertexSimpleNodes() {

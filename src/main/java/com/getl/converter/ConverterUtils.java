@@ -4,6 +4,7 @@ import com.getl.api.GraphAPI;
 import com.getl.constant.IRINamespace;
 import com.getl.converter.SG.LPGMapper;
 import com.getl.converter.SG.LPGMappingConfiguration;
+import com.getl.converter.SG.TinkerPopMapper;
 import com.getl.converter.mg.PGMapperI;
 import com.getl.converter.mg.PGMapperR4j;
 import com.getl.converter.mg.RDFMapper;
@@ -97,8 +98,11 @@ public class ConverterUtils {
         return rmGraph;
     }
 
-
     public static Graph buildTinkerPopGraphFromSG(OGDataset ogDataset) {
+        return (new com.getl.converter.SG.TinkerPopMapper(ogDataset)).createTinkerPopGraphFromOGDataset();
+    }
+
+    public static Graph buildTinkerPopGraphFromSGWithLPG(OGDataset ogDataset) {
         long currentTimeMillis = System.currentTimeMillis();
         com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate anonDelegate = new com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate() {
             @Override
@@ -120,6 +124,12 @@ public class ConverterUtils {
     }
 
     public static OGDataset buildSGFromTinkerPopGraph(Graph graph) {
+        TinkerPopMapper tinkerPopMapper = new TinkerPopMapper();
+        tinkerPopMapper.addTinkerPopGraphToOGDataset(graph);
+        return tinkerPopMapper.dataset;
+    }
+
+    public static OGDataset buildSGFromTinkerPopGraphWithLPG(Graph graph) {
         com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate anonDelegate = new com.getl.converter.SG.TinkerPopConverter.TinkerPopConverterDelegate() {
             @Override
             public void unsupportedValueFound(String infoString) {
