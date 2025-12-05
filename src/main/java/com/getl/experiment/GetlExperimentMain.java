@@ -7,6 +7,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +39,7 @@ public class GetlExperimentMain {
         CommonConstant.LDBC_JDBC_RESULT = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "jdbc.database.ldbc.target");
         CommonConstant.LPG_FILES_BASE_URL = yamlGet(obj, "lpg.url.base");
         CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base.source");
-        CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base.target");
+        CommonConstant.RDF_FILES_BASE_RESULT_URL = yamlGet(obj, "rdf.url.base.target");
         CommonConstant.LDBC_RDF_FILES_URL = yamlGet(obj, "rdf.url.ldbc");
 
         classMap = new HashMap<>();
@@ -58,6 +60,7 @@ public class GetlExperimentMain {
         Options options = new Options();
         options.addOption("c", true, "CLASS NAME");
         options.addOption("m", true, "MODEL NAME");
+        options.addOption("s", true, "FILE SUFFIX");
         CommandLineParser parser = new DefaultParser();
         parser.parse(options, args);
         CommandLine cmd = parser.parse(options, args);
@@ -68,6 +71,13 @@ public class GetlExperimentMain {
             });
             throw new RuntimeException("Required parameters -c CLASS \n" + stringBuilder);
         }
+        String fileSuffix;
+        if (!cmd.hasOption("s")) {
+            fileSuffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        } else {
+            fileSuffix = cmd.getOptionValue("s");
+        }
+        CommonConstant.LOG_FILE_PATH = CommonConstant.LOG_FILE_PATH + fileSuffix + "/";
         String className = classMap.get(cmd.getOptionValue("c").toLowerCase()) == null ? cmd.getOptionValue("c") : classMap.get(cmd.getOptionValue("c").toLowerCase());
         String modelName = cmd.hasOption("m") ? cmd.getOptionValue("m").toUpperCase() : "UG";
         Class clazz = Class.forName(className);

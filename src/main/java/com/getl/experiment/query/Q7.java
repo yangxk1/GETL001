@@ -68,15 +68,28 @@ public class Q7 extends QueryRunner {
 
     @Override
     protected void loadData() {
-        new Thread(() -> {
+        Thread t1 = new Thread(() -> {
             tinkerPopGraph = DataLoadUtils.loadTinkerPopGraph();
-        }).start();
-        new Thread(() -> {
+        });
+        Thread t2 = new Thread(() -> {
             rdfModel = DataLoadUtils.loadRDFModel();
-        }).start();
-        new Thread(() -> {
+        });
+        Thread t3 = new Thread(() -> {
             rmGraph = DataLoadUtils.loadRMGraph();
-        }).start();
+        });
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+        try {
+            t1.join();
+            t2.join();
+            t3.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("数据加载被中断", e);
+        }
     }
 
     @Override

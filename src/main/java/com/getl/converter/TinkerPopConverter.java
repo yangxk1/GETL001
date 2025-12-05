@@ -105,7 +105,7 @@ public class TinkerPopConverter {
             PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
             String edge1 = propertiesGraphConfig.getEdge(label);
             //提速
-            IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edge1);
+            IRI edge = unifiedGraph.getOrRegisterEdgeLabel(edge1);
             pair = unifiedGraph.add(edge, lpgEdge.id(), outV, inV).from();
             vertexes.put(lpgEdge.id(), pair);
         }
@@ -124,7 +124,7 @@ public class TinkerPopConverter {
         String label = lpgEdge.label();
         PropertiesGraphConfig propertiesGraphConfig = lpgConfigs.computeIfAbsent(label, i -> defaultConfig);
         String edge1 = propertiesGraphConfig.getEdge(label);
-        IRI edge = unifiedGraph.getOrRegisterLabel(EDGE_NAMESPACE, edge1);
+        IRI edge = unifiedGraph.getOrRegisterEdgeLabel(edge1);
         Pair pair = unifiedGraph.add(edge, lpgEdge.id(), outV, inV).from();
         vertexes.put(lpgEdge.id(), pair);
         return pair;

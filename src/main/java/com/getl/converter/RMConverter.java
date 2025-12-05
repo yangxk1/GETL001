@@ -11,7 +11,6 @@ import lombok.NonNull;
 import java.util.*;
 
 import static com.getl.constant.IRINamespace.EDGE_NAMESPACE_ID;
-import static com.getl.constant.IRINamespace.IRI_NAMESPACE_ID;
 
 public class RMConverter {
 
@@ -75,13 +74,13 @@ public class RMConverter {
         }
         if (schema == null || schema.isNode()) {
             //node
-            pair = unifiedGraph.getOrRegisterBasePair(IRI_NAMESPACE_ID, line.getId());
+            pair = unifiedGraph.getOrRegisterIDBasePair(line.getId());
             if (line.getTableName() != null) {
                 unifiedGraph.addLabel((BasePair) pair, unifiedGraph.getOrRegisterLabel(line.getTableName()));
             }
         } else {
             //edge
-            IRI edgeLabel = unifiedGraph.getOrRegisterBaseIRI(EDGE_NAMESPACE_ID, schema.getTableName());
+            IRI edgeLabel = unifiedGraph.getOrRegisterEdgeLabel(schema.getTableName());
             String outId = Optional.of(line).map(Line::getValues).map(m -> m.get(schema.getOut())).map(id -> schema.getOutLabel() + ":" + id).orElse(null);
             Line out = Optional.of(outId).map(rmGraph.getLines()::get).orElse(null);
             if (out == null) {

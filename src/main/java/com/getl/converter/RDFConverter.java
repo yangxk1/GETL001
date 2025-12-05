@@ -235,7 +235,7 @@ public class RDFConverter {
     public BasePair createOrObtainSimpleNode(Resource predicate) {
         if (predicate instanceof BNode) {
             BNode bNode = (BNode) predicate;
-            BasePair orRegisterIRI = unifiedGraph.getOrRegisterIdIRI(bNode.getID());
+            BasePair orRegisterIRI = unifiedGraph.getOrRegisterIDBasePair(bNode.getID());
             unifiedGraph.addLabel(orRegisterIRI, IRINamespace.BLANK_NODE);
             return orRegisterIRI;
         } else if (predicate instanceof org.eclipse.rdf4j.model.IRI) {

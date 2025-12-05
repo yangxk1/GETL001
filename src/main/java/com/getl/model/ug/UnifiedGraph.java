@@ -68,18 +68,19 @@ public class UnifiedGraph implements Graph {
 
     public BasePair getOrRegisterBasePair(String iri) {
         assert iri != null;
-        return getOrRegisterBasePair("", iri);
+        return getOrRegisterBasePair(IRINamespace.IRI_NAMESPACE, iri);
     }
 
-    public BasePair getOrRegisterIdIRI(String iri) {
-        assert iri != null;
-        return getOrRegisterBasePair(IRINamespace.IRI_NAMESPACE_ID, iri);
+    public BasePair getOrRegisterIDBasePair(String id) {
+        String namespaceId = IRINamespace.IRI_NAMESPACE_ID;
+        String url = namespaceId + "$$" + id;
+        IRI iri1 = s2IRI.computeIfAbsent(url, i -> new IRI(IRINamespace.IRI_NAMESPACE_ID, id));
+        return IRI2BasePair.computeIfAbsent(iri1, i -> new BasePair(new HashSet<>(), i));
     }
 
 
     public BasePair getOrRegisterBasePair(String baseURI, String IRIId) {
         assert IRIId != null;
-        String url = baseURI + IRIId;
         IRI IRIInstant = getOrRegisterBaseIRI(baseURI, IRIId);
         return IRI2BasePair.computeIfAbsent(IRIInstant, i -> new BasePair(new HashSet<>(), i));
     }

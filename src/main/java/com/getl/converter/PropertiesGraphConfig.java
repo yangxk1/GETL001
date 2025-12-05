@@ -131,7 +131,7 @@ public class PropertiesGraphConfig {
             //TODO label转化的兜底方案
             return unifiedGraph.getOrRegisterLabel(label);
         }
-        return unifiedGraph.getOrRegisterLabel("", IRILabel);
+        return unifiedGraph.getOrRegisterLabel(IRILabel);
     }
 
     public PropertiesGraphConfig putMapLabel(IRI label, String lpgLabel) {

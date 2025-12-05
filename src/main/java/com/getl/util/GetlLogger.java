@@ -14,6 +14,7 @@ import java.util.*;
 public class GetlLogger {
     @Getter
     private String logfileName = CommonConstant.LOG_FILE_PATH + "debug.md";
+    private String summaryFileName = CommonConstant.LOG_FILE_PATH + "summary/" + "summary.csv";
 
     // Cache for storing time and memory consumption for each info type
     private final Map<String, List<Long>> infoTimeCache = new HashMap<>();
@@ -21,7 +22,10 @@ public class GetlLogger {
 
     public GetlLogger(String logfileName) {
         this.logfileName = CommonConstant.LOG_FILE_PATH + logfileName + ".md";
+        this.summaryFileName = CommonConstant.LOG_FILE_PATH + "summary/" + logfileName + ".csv";
         try {
+            Files.createDirectories(Paths.get(this.logfileName).getParent());
+            Files.createDirectories(Paths.get(this.summaryFileName).getParent());
             Files.write(Paths.get(this.logfileName), new byte[0]);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -30,6 +34,13 @@ public class GetlLogger {
     }
 
     public GetlLogger() {
+        try {
+            Files.createDirectories(Paths.get(this.logfileName).getParent());
+            Files.createDirectories(Paths.get(this.summaryFileName).getParent());
+            Files.write(Paths.get(this.logfileName), new byte[0]);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         FileUtil.appendUtf8String("# new " + logfileName + " log\n", this.logfileName);
     }
 
@@ -91,7 +102,6 @@ public class GetlLogger {
         }
 
         // Generate CSV summary file
-        String csvFileName = this.logfileName.replace(".md", "_summary.csv");
         StringBuilder csvContent = new StringBuilder();
 
         // CSV header
@@ -170,8 +180,8 @@ public class GetlLogger {
 
         // Write CSV file
         try {
-            Files.write(Paths.get(csvFileName), csvContent.toString().getBytes("UTF-8"));
-            System.out.println("CSV summary written to: " + csvFileName);
+            Files.write(Paths.get(summaryFileName), csvContent.toString().getBytes("UTF-8"));
+            System.out.println("CSV summary written to: " + summaryFileName);
         } catch (IOException e) {
             System.err.println("Error writing CSV summary: " + e.getMessage());
         }

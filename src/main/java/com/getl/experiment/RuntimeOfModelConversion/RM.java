@@ -5,13 +5,18 @@ import com.getl.experiment.DataLoadUtils;
 import com.getl.experiment.ExperimentRunner;
 import com.getl.model.MG.MGraph;
 import com.getl.model.RM.RMGraph;
+import com.getl.model.RM.Schema;
 import com.getl.model.onegraph.dataset.OGDataset;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.GetlLogger;
 
+import java.util.Map;
+
 public class RM extends ExperimentRunner {
 
     private RMGraph rmGraph;
+
+    private Map<String, Schema> schemaMap;
 
     public RM(String name) {
         super(name);
@@ -24,6 +29,7 @@ public class RM extends ExperimentRunner {
     @Override
     protected void loadData() {
         this.rmGraph = DataLoadUtils.loadRMGraph();
+        this.schemaMap = rmGraph.getSchemas();
     }
 
     @Override
@@ -34,7 +40,7 @@ public class RM extends ExperimentRunner {
         rmGraph = null;
         super.forceGC();
         begin = System.currentTimeMillis();
-        RMGraph rmGraph1 = ConverterUtils.buildRMFromUGGraph(unifiedGraph, rmGraph.getSchemas());
+        RMGraph rmGraph1 = ConverterUtils.buildRMFromUGGraph(unifiedGraph, this.schemaMap);
         logger.debugInfo("UG2RM", System.currentTimeMillis() - begin);
     }
 
@@ -46,7 +52,7 @@ public class RM extends ExperimentRunner {
         rmGraph = null;
         super.forceGC();
         begin = System.currentTimeMillis();
-        RMGraph rmGraph1 = ConverterUtils.buildRMFromMG(mGraph, rmGraph.getSchemas());
+        RMGraph rmGraph1 = ConverterUtils.buildRMFromMG(mGraph, this.schemaMap);
         logger.debugInfo("MG2RM", System.currentTimeMillis() - begin);
     }
 
@@ -58,7 +64,7 @@ public class RM extends ExperimentRunner {
         rmGraph = null;
         super.forceGC();
         begin = System.currentTimeMillis();
-        RMGraph rmGraph1 = ConverterUtils.buildRMFromSG(ogDataset, rmGraph.getSchemas());
+        RMGraph rmGraph1 = ConverterUtils.buildRMFromSG(ogDataset, this.schemaMap);
         logger.debugInfo("MG2RM", System.currentTimeMillis() - begin);
     }
 
