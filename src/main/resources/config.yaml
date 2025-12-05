@@ -5,8 +5,8 @@ jdbc:
   database:
     base: ldbc_snb_distribute
     ldbc:
-      source: movie_q7_1
-      target: movie_q7_2
+      source: ldbc_snb_distribute
+      target: ldbc_snb_distribute
     q2: result_data_2
     q6: result_data_6
 lpg:

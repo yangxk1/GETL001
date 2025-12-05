@@ -70,7 +70,10 @@ public class AsyncLPGParser {
     public static final String MILLI = "milli";
     public static final String STRING = "string";
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private final ThreadLocal<SimpleDateFormat> dateFormat =
+            ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+
+    private Map<String, Object> defaultValue = Map.of(INT, 0, INTEGER, 0, LONG, 0L, DOUBLE, 0.0, FLOAT, 0.0f, DATE, new Date(0), MILLI, new Date(0L), STRING, "");
 
     // 统计信息
     private final AtomicInteger vertexCount = new AtomicInteger(0);
@@ -80,7 +83,8 @@ public class AsyncLPGParser {
      * 批量数据封装
      */
     private static class BatchData {
-        enum Type { VERTEX, EDGE, POISON_PILL }
+        enum Type {VERTEX, EDGE, POISON_PILL}
+
         Type type;
         List<VertexData> vertices;
         List<EdgeData> edges;
@@ -138,25 +142,27 @@ public class AsyncLPGParser {
         this.graph = TinkerGraph.open();
         this.g = AnonymousTraversalSource.traversal().withEmbedded(graph); // 初始化GraphTraversalSource
         this.fileReaderExecutor = Executors.newFixedThreadPool(readerThreads,
-            new ThreadFactory() {
-                private final AtomicInteger counter = new AtomicInteger(0);
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r, "LPG-Reader-" + counter.incrementAndGet());
-                    t.setDaemon(true); // 设置为守护线程，防止阻止JVM退出
-                    return t;
-                }
-            });
+                new ThreadFactory() {
+                    private final AtomicInteger counter = new AtomicInteger(0);
+
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread t = new Thread(r, "LPG-Reader-" + counter.incrementAndGet());
+                        t.setDaemon(true); // 设置为守护线程，防止阻止JVM退出
+                        return t;
+                    }
+                });
         this.graphWriterExecutor = Executors.newFixedThreadPool(WRITER_THREADS,
-            new ThreadFactory() {
-                private final AtomicInteger counter = new AtomicInteger(0);
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r, "LPG-Writer-" + counter.incrementAndGet());
-                    t.setDaemon(true); // 设置为守护线程，防止阻止JVM退出
-                    return t;
-                }
-            });
+                new ThreadFactory() {
+                    private final AtomicInteger counter = new AtomicInteger(0);
+
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread t = new Thread(r, "LPG-Writer-" + counter.incrementAndGet());
+                        t.setDaemon(true); // 设置为守护线程，防止阻止JVM退出
+                        return t;
+                    }
+                });
         this.writeQueue = new LinkedBlockingQueue<>(QUEUE_CAPACITY);
         this.completionLatch = new CountDownLatch(WRITER_THREADS);
 
@@ -195,9 +201,16 @@ public class AsyncLPGParser {
      * 解析值
      */
     private Object parseValue(String value, String type) {
-        if (StringUtils.isBlank(type) || StringUtils.isBlank(value)) {
+        // 如果类型为空，直接返回原值
+        if (StringUtils.isBlank(type)) {
             return value;
         }
+
+        // 如果值为空，返回该类型的默认值
+        if (StringUtils.isBlank(value)) {
+            return defaultValue.getOrDefault(type, value);
+        }
+
         try {
             switch (type) {
                 case INT:
@@ -210,7 +223,7 @@ public class AsyncLPGParser {
                     return NumberUtils.createDouble(value);
                 case DATE:
                     try {
-                        return dateFormat.parse(value);
+                        return dateFormat.get().parse(value);
                     } catch (ParseException e) {
                         return Date.valueOf(value);
                     }
@@ -220,8 +233,8 @@ public class AsyncLPGParser {
                     return value;
             }
         } catch (Exception e) {
-            log.warn("Failed to parse value: {} as type: {}, using string", value, type);
-            return value;
+            log.warn("Failed to parse value: {} as type: {}, using default value for type: {}", value, type, defaultValue.getOrDefault(type, value));
+            return defaultValue.getOrDefault(type, value);
         }
     }
 
@@ -243,7 +256,7 @@ public class AsyncLPGParser {
      * 异步加载边文件
      */
     public CompletableFuture<Void> asyncLoadEdge(String fileName, String edgeLabel,
-                                                   String fromLabel, String toLabel, String... pops) {
+                                                 String fromLabel, String toLabel, String... pops) {
         activeTasks.incrementAndGet();
         return CompletableFuture.runAsync(() -> {
             try {
@@ -415,8 +428,8 @@ public class AsyncLPGParser {
         String t1 = toLabel + ".id";
         for (Map.Entry<String, String> entry : pop.entrySet()) {
             if (fromLabel.equals(entry.getKey()) || f1.equals(entry.getKey()) ||
-                t1.equals(entry.getKey()) || toLabel.equals(entry.getKey()) ||
-                "label".equals(entry.getKey()) || "id".equals(entry.getKey())) {
+                    t1.equals(entry.getKey()) || toLabel.equals(entry.getKey()) ||
+                    "label".equals(entry.getKey()) || "id".equals(entry.getKey())) {
                 continue;
             }
             if (StringUtils.isNotEmpty(entry.getValue())) {
@@ -529,8 +542,8 @@ public class AsyncLPGParser {
 
                     // 创建边
                     GraphTraversal<Edge, Edge> addE = g.addE(edgeData.getLabel())
-                        .from(fromVertex)
-                        .to(toVertex);
+                            .from(fromVertex)
+                            .to(toVertex);
 
                     if (StringUtils.isNotBlank(edgeData.getId())) {
                         addE.property(T.id, edgeData.getId());
@@ -611,7 +624,7 @@ public class AsyncLPGParser {
      */
     public String getStatistics() {
         return String.format("Vertices: %d, Edges: %d, Cached: %d, Active Readers: %d, Queue Size: %d",
-            vertexCount.get(), edgeCount.get(), vertexCache.size(), activeReaders.get(), writeQueue.size());
+                vertexCount.get(), edgeCount.get(), vertexCache.size(), activeReaders.get(), writeQueue.size());
     }
 
     /**

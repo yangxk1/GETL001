@@ -11,7 +11,6 @@ import com.getl.model.RM.Schema;
 import com.getl.model.onegraph.dataset.OGDataset;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.query.step.MultiLabelP;
-import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
