@@ -18,3 +18,6 @@ rdf:
       source: /Users/yangxk/data/limit_mappingbased-objects_lang=en.ttl/
       target: /Users/yangxk/data/output.ttl
     ldbc: /home/graphdata/RDF/LDBC_RDF.ttl
+
+log:
+  filePath: /Users/yangxk/data/logs/

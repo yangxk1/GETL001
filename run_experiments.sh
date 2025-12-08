@@ -51,12 +51,12 @@ run_task() {
     # 启动 Java 程序到后台，捕获 PID 并重定向输出到日志文件
     java ${JVM_MEMORY} -jar ${JAR_FILE} -c ${class} -m ${model} -s ${suffix} > "${log_file}" 2>&1 &
     local pid=$!
-    log "启动 JVM (pid=${pid})，日志: ${log_file}"
+#    log "启动 JVM (pid=${pid})，日志: ${log_file}"
 
     # 等待 JVM 退出并获取退出码
     wait ${pid}
     local exit_code=$?
-    log "JVM (pid=${pid}) 已退出，退出码: ${exit_code}"
+#    log "JVM (pid=${pid}) 已退出，退出码: ${exit_code}"
 
     # 确认没有残留与本次运行相同参数的 java 进程
     local jar_basename
