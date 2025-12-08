@@ -90,8 +90,9 @@ main() {
     for conversion in "${CONVERSIONS[@]}"; do
         for model in "${MODELS[@]}"; do
             run_task ${conversion} ${model}
+            exit_code=$?
             total=$((total + 1))
-            if [ $? -eq 0 ]; then
+            if [ $exit_code -eq 0 ]; then
                 success=$((success + 1))
             else
                 failed=$((failed + 1))

@@ -16,8 +16,12 @@ import java.util.concurrent.CompletableFuture;
 
 public class DataLoadUtils {
     public static Graph loadTinkerPopGraph() {
+        return loadTinkerPopGraph(CommonConstant.LPG_FILES_BASE_URL);
+    }
+
+    public static Graph loadTinkerPopGraph(String baseUrl) {
         AsyncLPGParser asyncParser = new AsyncLPGParser(8);
-        String BASE_URL = CommonConstant.LPG_FILES_BASE_URL;
+        String BASE_URL = baseUrl;
         long begin = System.currentTimeMillis();
         String BASE_URL_STATIC = BASE_URL + "static/";
         String BASE_URL_DYNAMIC = BASE_URL + "dynamic/";
@@ -79,8 +83,13 @@ public class DataLoadUtils {
     }
 
     public static Model loadRDFModel() {
-        com.getl.Graph graph = new com.getl.Graph();
         String RDF_URL = CommonConstant.RDF_FILES_BASE_URL;
+        return loadRDFModel(RDF_URL);
+    }
+
+    public static Model loadRDFModel(String baseUrl) {
+        com.getl.Graph graph = new com.getl.Graph();
+        String RDF_URL = baseUrl;
         File resource = new File(RDF_URL);
         try {
             System.out.println("File: " + RDF_URL);
@@ -92,10 +101,14 @@ public class DataLoadUtils {
     }
 
     public static RMGraph loadRMGraph() {
+        return loadRMGraph(CommonConstant.LDBC_JDBC_URL);
+    }
+
+    public static RMGraph loadRMGraph(String baseUrl) {
         RMGraph rmGraph = new RMGraph();
         MysqlSessions sessions = null;
         try {
-            sessions = new MysqlSessions(CommonConstant.LDBC_JDBC_URL, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
+            sessions = new MysqlSessions(baseUrl, CommonConstant.JDBC_USERNAME, CommonConstant.JDBC_PASSWORD);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
