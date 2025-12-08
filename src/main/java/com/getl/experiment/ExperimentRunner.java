@@ -20,13 +20,12 @@ public abstract class ExperimentRunner extends Runnable {
         }
         System.out.println("WRITE LOG TO " + logger.getLogfileName());
         try {
-            run();
+            run(name);
         } catch (Exception e) {
             logger.info("ERROR RUNNING EXPERIMENT: " + e.getMessage());
             PrintWriter printWriter = new PrintWriter(logger);
             e.printStackTrace(printWriter);
         }
-        run(name);
         logger.close();
     }
 
