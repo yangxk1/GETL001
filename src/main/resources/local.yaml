@@ -1,0 +1,20 @@
+jdbc:
+  username: root
+  password: MyPass123!
+  url: jdbc:mysql://localhost:3306/
+  database:
+    base: ldbc_snb_distribute
+    ldbc:
+      source: ldbc_snb_distribute
+      target: ldbc_snb_distribute
+    q2: result_data_2
+    q6: result_data_6
+lpg:
+  url:
+    base: /Users/yangxk/data/social_network-csv_basic-sf0.1/
+rdf:
+  url:
+    base:
+      source: /Users/yangxk/data/limit_mappingbased-objects_lang=en.ttl/
+      target: /Users/yangxk/data/output.ttl
+    ldbc: /home/graphdata/RDF/LDBC_RDF.ttl

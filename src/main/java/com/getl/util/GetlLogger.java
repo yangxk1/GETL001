@@ -4,14 +4,16 @@ import cn.hutool.core.io.FileUtil;
 import com.getl.constant.CommonConstant;
 import lombok.Getter;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class GetlLogger {
+public class GetlLogger extends Writer {
     @Getter
     private String logfileName = CommonConstant.LOG_FILE_PATH + "debug.md";
     private String summaryFileName = CommonConstant.LOG_FILE_PATH + "summary/" + "summary.csv";
@@ -42,6 +44,18 @@ public class GetlLogger {
             throw new RuntimeException(e);
         }
         FileUtil.appendUtf8String("# new " + logfileName + " log\n", this.logfileName);
+    }
+
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        FileWriter fw = new FileWriter(this.logfileName, true);
+        fw.write(cbuf, off, len);
+    }
+
+    @Override
+    public void flush() throws IOException {
+        FileWriter fw = new FileWriter(this.logfileName, true);
+        fw.flush();
     }
 
     public void debugInfo(String info) {

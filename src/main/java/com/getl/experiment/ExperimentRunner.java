@@ -3,6 +3,8 @@ package com.getl.experiment;
 import com.getl.example.Runnable;
 import com.getl.util.GetlLogger;
 
+import java.io.PrintWriter;
+
 public abstract class ExperimentRunner extends Runnable {
 
     private String name;
@@ -17,6 +19,13 @@ public abstract class ExperimentRunner extends Runnable {
             logger = new GetlLogger(loggerName() + "_" + name);
         }
         System.out.println("WRITE LOG TO " + logger.getLogfileName());
+        try {
+            run();
+        } catch (Exception e) {
+            logger.info("ERROR RUNNING EXPERIMENT: " + e.getMessage());
+            PrintWriter printWriter = new PrintWriter(logger);
+            e.printStackTrace(printWriter);
+        }
         run(name);
         logger.close();
     }
@@ -77,7 +86,7 @@ public abstract class ExperimentRunner extends Runnable {
         try {
             test.run();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         // 4. 执行后强制GC，清理当前测试产生的对象

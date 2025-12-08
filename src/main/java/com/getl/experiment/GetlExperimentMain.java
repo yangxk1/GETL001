@@ -5,7 +5,7 @@ import com.getl.example.Runnable;
 import org.apache.commons.cli.*;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +15,7 @@ import java.util.Map;
 public class GetlExperimentMain {
 
     private static Map<String, String> classMap;
+    static String log_file_path;
 
     public static String yamlGet(Map<String, Object> obj, String uri) {
         String[] split = uri.split("\\.");
@@ -27,7 +28,16 @@ public class GetlExperimentMain {
 
     public static void init() {
         Yaml yaml = new Yaml();
-        InputStream inputStream = GetlExperimentMain.class.getClassLoader().getResourceAsStream("config.yaml");
+        InputStream inputStream = null;
+        if (System.getenv("CONFIG_PATH") != null) {
+            try {
+                inputStream = new FileInputStream(System.getenv("CONFIG_PATH"));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            inputStream = GetlExperimentMain.class.getClassLoader().getResourceAsStream("config.yaml");
+        }
         Map<String, Object> obj = yaml.load(inputStream);
         CommonConstant.JDBC_BASE_URL = yamlGet(obj, "jdbc.url");
         CommonConstant.JDBC_USERNAME = yamlGet(obj, "jdbc.username");
@@ -41,6 +51,7 @@ public class GetlExperimentMain {
         CommonConstant.RDF_FILES_BASE_URL = yamlGet(obj, "rdf.url.base.source");
         CommonConstant.RDF_FILES_BASE_RESULT_URL = yamlGet(obj, "rdf.url.base.target");
         CommonConstant.LDBC_RDF_FILES_URL = yamlGet(obj, "rdf.url.ldbc");
+        log_file_path = yamlGet(obj, "log.filePath");
 
         classMap = new HashMap<>();
         classMap.put("q1", "com.getl.experiment.query.Q1");
@@ -77,7 +88,7 @@ public class GetlExperimentMain {
         } else {
             fileSuffix = cmd.getOptionValue("s");
         }
-        CommonConstant.LOG_FILE_PATH = CommonConstant.LOG_FILE_PATH + fileSuffix + "/";
+        CommonConstant.LOG_FILE_PATH = log_file_path + fileSuffix + "/";
         String className = classMap.get(cmd.getOptionValue("c").toLowerCase()) == null ? cmd.getOptionValue("c") : classMap.get(cmd.getOptionValue("c").toLowerCase());
         String modelName = cmd.hasOption("m") ? cmd.getOptionValue("m").toUpperCase() : "UG";
         Class clazz = Class.forName(className);
