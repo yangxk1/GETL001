@@ -123,11 +123,11 @@
             <artifactId>commons-csv</artifactId>
             <version>1.8</version>
         </dependency>
-        <dependency>
-            <groupId>software.amazon.neptune</groupId>
-            <artifactId>amazon-neptune-csv2rdf</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>software.amazon.neptune</groupId>-->
+<!--            <artifactId>amazon-neptune-csv2rdf</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>net.java.dev.javacc</groupId>
             <artifactId>javacc</artifactId>
