@@ -12,8 +12,10 @@ public class CommonConstant {
     public static String JDBC_USERNAME = "root";
     public static String JDBC_PASSWORD = "MyPass123!";
     public static String LPG_FILES_BASE_URL = DATA_BASE_URL + "social_network-csv_basic-sf0.1/";
-    public static String RDF_FILES_BASE_URL = DATA_BASE_URL + "limit_mappingbased-objects_lang=en.ttl/";
+    public static String RDF_FILES_BASE_URL = DATA_BASE_URL + "1M_limit_links_graph=wikidata-dbpedia-org_partition=owl-sameAs.ttl";
     public static String RDF_FILES_BASE_RESULT_URL;
     public static String LDBC_RDF_FILES_URL;
+    public static String RDF_TO_LPG_RESULT_BASE_URL = DATA_BASE_URL + "rdf2lpg/output/";
+    public static String RM_TO_LPG_RESULT_BASE_URL = DATA_BASE_URL + "rm2lpg/output/";
     public static String LOG_FILE_PATH = DATA_BASE_URL + "logs/";
 }

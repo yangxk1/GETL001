@@ -11,6 +11,8 @@ import com.getl.model.onegraph.dataset.OGDataset;
 import com.getl.model.ug.UnifiedGraph;
 import com.getl.util.GetlLogger;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ModelFactory;
 
 import java.util.concurrent.CompletableFuture;
 

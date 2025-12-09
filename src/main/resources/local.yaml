@@ -15,7 +15,8 @@ lpg:
 rdf:
   url:
     base:
-      source: /Users/yangxk/data/limit_mappingbased-objects_lang=en.ttl/
+#      source: /Users/yangxk/data/limit_mappingbased-objects_lang=en.ttl/
+      source: /Users/yangxk/data/1M_limit_links_graph=wikidata-dbpedia-org_partition=owl-sameAs.ttl/
       target: /Users/yangxk/data/output.ttl
     ldbc: /home/graphdata/RDF/LDBC_RDF.ttl
 

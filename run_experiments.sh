@@ -19,7 +19,7 @@ fi
 # 查询列表
 QUERIES=("q1" "q2" "q3" "q4" "q5" "q6" "q7")
 # 模型转换任务
-CONVERSIONS=("lpg" "rdf" "rm")
+CONVERSIONS=("lpg" "rdf" "rm" "RDF2LPG" "RM2LPG")
 # 模型类型
 MODELS=("ug" "mg" "sg")
 

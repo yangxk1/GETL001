@@ -64,6 +64,8 @@ public class GetlExperimentMain {
         classMap.put("lpg", "com.getl.experiment.RuntimeOfModelConversion.LPG");
         classMap.put("rdf", "com.getl.experiment.RuntimeOfModelConversion.RDF");
         classMap.put("rm", "com.getl.experiment.RuntimeOfModelConversion.RM");
+        classMap.put("rdf2lpg", "com.getl.experiment.RuntimeOfModelConversion.RDF2LPG");
+        classMap.put("rm2lpg", "com.getl.experiment.RuntimeOfModelConversion.RM2LPG");
     }
 
     public static void main(String[] args) throws ParseException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -89,6 +91,8 @@ public class GetlExperimentMain {
             fileSuffix = cmd.getOptionValue("s");
         }
         CommonConstant.LOG_FILE_PATH = log_file_path + fileSuffix + "/";
+        CommonConstant.RDF_TO_LPG_RESULT_BASE_URL = CommonConstant.LOG_FILE_PATH + "rdf2lpg/output/";
+        CommonConstant.RM_TO_LPG_RESULT_BASE_URL = CommonConstant.LOG_FILE_PATH + "rm2lpg/output/";
         String className = classMap.get(cmd.getOptionValue("c").toLowerCase()) == null ? cmd.getOptionValue("c") : classMap.get(cmd.getOptionValue("c").toLowerCase());
         String modelName = cmd.hasOption("m") ? cmd.getOptionValue("m").toUpperCase() : "UG";
         Class clazz = Class.forName(className);
