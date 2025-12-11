@@ -63,11 +63,11 @@ public class RDF2LPG extends ExperimentRunner {
         mGraph = null;
         super.forceGC();
         begin = System.currentTimeMillis();
-        try {
-            DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RDF_TO_LPG_RESULT_BASE_URL + "mg.csv");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RDF_TO_LPG_RESULT_BASE_URL + "mg.csv");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         logger.debugInfo("WRITE TO CSV", System.currentTimeMillis() - begin);
     }
 
@@ -84,11 +84,11 @@ public class RDF2LPG extends ExperimentRunner {
         ogDataset = null;
         super.forceGC();
         begin = System.currentTimeMillis();
-        try {
-            DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RDF_TO_LPG_RESULT_BASE_URL + "sg.csv");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RDF_TO_LPG_RESULT_BASE_URL + "sg.csv");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         logger.debugInfo("WRITE TO CSV", System.currentTimeMillis() - begin);
     }
 

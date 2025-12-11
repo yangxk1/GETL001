@@ -112,7 +112,7 @@ def main(arg=None):
 
     # 获取CSV文件路径
     if len(sys.argv) < 2:
-        csv_file = 'performance_data.csv'
+        csv_file = '../../../../performance_data.csv'
         print(f"\n未指定CSV文件，使用默认文件: {csv_file}")
     else:
         csv_file = sys.argv[1]
