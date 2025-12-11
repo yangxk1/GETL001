@@ -29,7 +29,7 @@ public class LPG extends ExperimentRunner {
 
     @Override
     protected void loadData() {
-        this.graphData = DataLoadUtils.loadTinkerPopGraph();
+        this.graphData = DataLoadUtils.loadTinkerPopGraphSf10();
     }
 
     @Override

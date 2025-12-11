@@ -1,5 +1,6 @@
 package com.getl.experiment.RuntimeOfModelConversion;
 
+import com.getl.constant.CommonConstant;
 import com.getl.converter.ConverterUtils;
 import com.getl.experiment.DataLoadUtils;
 import com.getl.experiment.ExperimentRunner;
@@ -28,7 +29,7 @@ public class RM extends ExperimentRunner {
 
     @Override
     protected void loadData() {
-        this.rmGraph = DataLoadUtils.loadRMGraph();
+        this.rmGraph = DataLoadUtils.loadRMGraph(CommonConstant.EXTEND_RM);
         this.schemaMap = rmGraph.getSchemas();
     }
 

@@ -19,5 +19,10 @@ rdf:
       target: /home/yaof/lib629/RDF/target_en.ttl
     ldbc: /home/yaof/lib629/RDF/LDBC_RDF.ttl
 
+extend:
+  ldbc: /home/yaof/GETL/data_20251210/sf10/social_network-csv_basic-longdateformatter-sf10/
+  rdf: /home/yaof/GETL/data_20251210/100M_limit_links_graph.ttl
+  rm: rm_data_5x
+
 log:
   filePath: /home/yaof/logs/

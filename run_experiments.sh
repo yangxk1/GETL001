@@ -2,7 +2,7 @@
 
 # 配置参数
 JAR_FILE="target/GETL-1.00.jar"
-JVM_MEMORY="-Xms9g -Xmx9g -Xss64m"
+JVM_MEMORY="-Xms650g -Xmx650g -Xss64m"
 SLEEP_TIME=5
 FILE_SUFFIX="$(date '+%Y%m%d_%H%M%S')"
 LOG_DIR=".logs_${FILE_SUFFIX}"
@@ -17,7 +17,7 @@ if [ -z "${CONFIG_PATH}" ]; then
 fi
 
 # 查询列表
-QUERIES=("q1" "q2" "q3" "q4" "q5" "q6" "q7")
+QUERIES=("q1" "q5")
 # 模型转换任务
 CONVERSIONS=("lpg" "rdf" "rm" "RDF2LPG" "RM2LPG")
 # 模型类型

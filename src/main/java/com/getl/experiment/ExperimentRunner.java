@@ -23,8 +23,7 @@ public abstract class ExperimentRunner extends Runnable {
             run(name);
         } catch (Exception e) {
             logger.info("ERROR RUNNING EXPERIMENT: " + e.getMessage());
-            PrintWriter printWriter = new PrintWriter(logger);
-            e.printStackTrace(printWriter);
+            throw new RuntimeException(e);
         }
         logger.close();
     }

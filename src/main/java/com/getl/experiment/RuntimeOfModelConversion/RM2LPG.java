@@ -25,7 +25,7 @@ public class RM2LPG extends ExperimentRunner {
 
     @Override
     protected void loadData() {
-        this.graphData = DataLoadUtils.loadRMGraph();
+        this.graphData = DataLoadUtils.loadRMGraph(CommonConstant.EXTEND_RM);
     }
 
     @Override
@@ -38,6 +38,8 @@ public class RM2LPG extends ExperimentRunner {
         begin = System.currentTimeMillis();
         Graph graph = ConverterUtils.buildTinkerPopGraphFromUG(unifiedGraph);
         logger.debugInfo("UG2LPG", System.currentTimeMillis() - begin);
+        unifiedGraph = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         try {
             DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RM_TO_LPG_RESULT_BASE_URL + "ug.csv");
@@ -58,6 +60,8 @@ public class RM2LPG extends ExperimentRunner {
         begin = System.currentTimeMillis();
         Graph graph = ConverterUtils.buildTinkerPopGraphFromMG(mGraph);
         logger.debugInfo("MG2LPG", System.currentTimeMillis() - begin);
+        mGraph = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         try {
             DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RM_TO_LPG_RESULT_BASE_URL + "mg.csv");
@@ -77,6 +81,8 @@ public class RM2LPG extends ExperimentRunner {
         begin = System.currentTimeMillis();
         Graph graph = ConverterUtils.buildTinkerPopGraphFromSG(ogDataset);
         logger.debugInfo("SG2LPG", System.currentTimeMillis() - begin);
+        ogDataset = null;
+        super.forceGC();
         begin = System.currentTimeMillis();
         try {
             DataWriteUtils.writeLPGToCSV(graph, CommonConstant.RM_TO_LPG_RESULT_BASE_URL + "sg.csv");
@@ -88,6 +94,6 @@ public class RM2LPG extends ExperimentRunner {
 
     @Override
     protected String loggerName() {
-        return "FIG13-RDF2LPG";
+        return "FIG13-RM2LPG";
     }
 }

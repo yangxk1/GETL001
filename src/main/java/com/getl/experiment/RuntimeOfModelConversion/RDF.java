@@ -28,7 +28,7 @@ public class RDF extends ExperimentRunner {
 
     @Override
     protected void loadData() {
-        this.graphData = DataLoadUtils.loadRDFModel();
+        this.graphData = DataLoadUtils.loadRDFModel(CommonConstant.EXTEND_RDF);
     }
 
     @Override

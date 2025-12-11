@@ -52,6 +52,9 @@ public class GetlExperimentMain {
         CommonConstant.RDF_FILES_BASE_RESULT_URL = yamlGet(obj, "rdf.url.base.target");
         CommonConstant.LDBC_RDF_FILES_URL = yamlGet(obj, "rdf.url.ldbc");
         log_file_path = yamlGet(obj, "log.filePath");
+        CommonConstant.EXTEND_RDF = yamlGet(obj, "extend.rdf");
+        CommonConstant.EXTEND_LDBC = yamlGet(obj, "extend.ldbc");
+        CommonConstant.EXTEND_RM = CommonConstant.JDBC_BASE_URL + yamlGet(obj, "extend.rm");
 
         classMap = new HashMap<>();
         classMap.put("q1", "com.getl.experiment.query.Q1");

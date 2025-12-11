@@ -69,13 +69,19 @@ public class Q7 extends QueryRunner {
     @Override
     protected void loadData() {
         Thread t1 = new Thread(() -> {
-            tinkerPopGraph = DataLoadUtils.loadTinkerPopGraph();
+            long begin = System.currentTimeMillis();
+            tinkerPopGraph = DataLoadUtils.loadTinkerPopGraphQ7();
+            logger.debugInfo("Load LPG end ", System.currentTimeMillis() - begin);
         });
         Thread t2 = new Thread(() -> {
-            rdfModel = DataLoadUtils.loadRDFModel();
+            long begin = System.currentTimeMillis();
+            rdfModel = DataLoadUtils.loadRDFModel(CommonConstant.LDBC_RDF_FILES_URL);
+            logger.debugInfo("Load RDF end ", System.currentTimeMillis() - begin);
         });
         Thread t3 = new Thread(() -> {
-            rmGraph = DataLoadUtils.loadRMGraph();
+            long begin = System.currentTimeMillis();
+            rmGraph = DataLoadUtils.loadRMGraph(CommonConstant.LDBC_JDBC_URL);
+            logger.debugInfo("Load RM end ", System.currentTimeMillis() - begin);
         });
 
         t1.start();
